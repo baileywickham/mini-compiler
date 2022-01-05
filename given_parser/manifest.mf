@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Created-By: Alex MacLean
+Class-Path: antlr-4.8-complete.jar javax.json-1.0.4.jar
+Main-Class: MiniCompiler
