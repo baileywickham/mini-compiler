@@ -16,7 +16,7 @@ GENERATED=MiniBaseVisitor.java MiniLexer.java MiniLexer.tokens Mini.tokens MiniV
 all : MiniCompiler.jar
 
 MiniCompiler.jar : MiniCompiler.class
-	$(JAR) -cvfm MiniCompiler.jar manifest.mf -C ./build/ . $(ANTLRJAR) $(JSONJAR)
+	$(JAR) -cfm MiniCompiler.jar manifest.mf -C ./build/ . $(ANTLRJAR) $(JSONJAR)
 
 MiniCompiler.class : antlr.generated ${FILES}
 	mkdir -p build
@@ -27,4 +27,4 @@ antlr.generated : Mini.g4
 	touch antlr.generated
 
 clean:
-	\rm -rf *generated* ${GENERATED} *.class ast/*.class MiniCompiler.jar
+	\rm -rf *generated* ${GENERATED} build/*.class build/ast/*.class MiniCompiler.jar
