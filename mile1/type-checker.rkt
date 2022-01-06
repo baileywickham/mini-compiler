@@ -5,13 +5,15 @@
 (struct type (id fields) #:transparent)
 (struct func (id params ret-type decs body) #:transparent)
 
+;; Statements
 (struct block (exprs) #:transparent)
 (struct assign (src target) #:transparent)
-(struct if (gaurd then else) #:transparent)
+(struct if (guard then else) #:transparent)
 (struct print (exp endl) #:transparent)
 (struct while (guard body) #:transparent)
 (struct inv (id args) #:transparent)
 (struct return (exp) #:transparent)
+
 
 
 (define (main)
@@ -38,13 +40,15 @@
 
 (define (parse-stmt stmt)
   (match stmt
-    [(hash-table ('stmt "block") ('list l)) (block (map parse-stmt l))] 
+    [(hash-table ('stmt "block") ('list l)) (block (map parse-stmt l))]
     [(hash-table ('stmt "assign") ('source src) ('target target)) (assign src target)]
-    [(hash-table ('stmt "if") ('guard grd) ('then thn) ('else els)) (if grd (parse-stmt thn) (parse-stmt els))]
-    [(hash-table ('stmt "if") ('guard grd) ('then thn)) (if grd (parse-stmt thn) '())]
+    [(hash-table ('stmt "if") ('guard guard) ('then then) ('else else))
+     (if guard (parse-stmt then) (parse-stmt else))]
+    [(hash-table ('stmt "if") ('guard guard) ('then then)) (if guard (parse-stmt then) '())]
     [(hash-table ('stmt "print") ('exp exp) ('endl endl)) (print exp endl)]
     [(hash-table ('stmt "while") ('guard guard) ('body body)) (while guard (parse-stmt body))]
     [(hash-table ('stmt "invocation") ('id id) ('args args)) (inv id args)]
     [(hash-table ('stmt "return") ('exp exp)) (return exp)]))
+
 
 (main)
