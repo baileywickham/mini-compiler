@@ -16,7 +16,12 @@ GENERATED=MiniBaseVisitor.java MiniLexer.java MiniLexer.tokens Mini.tokens MiniV
 all : MiniCompiler.jar
 
 MiniCompiler.jar : MiniCompiler.class
-	$(JAR) -cfm MiniCompiler.jar manifest.mf -C ./build/ . $(ANTLRJAR) $(JSONJAR)
+	mkdir -p build
+    $(JAR) xf $(ANTLRJAR) org
+	$(JAR) xf $(JSONJAR) org javax
+	mv org build/
+	mv javax build/
+	$(JAR) -cfm MiniCompiler.jar manifest.mf -C ./build/ .
 
 MiniCompiler.class : antlr.generated ${FILES}
 	mkdir -p build

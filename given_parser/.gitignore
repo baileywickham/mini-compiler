@@ -22,5 +22,6 @@ MiniVisitor.java
 MiniParser.java
 MiniBaseListener.java
 MiniListener.java
+build
 
 MiniCompiler.jar
