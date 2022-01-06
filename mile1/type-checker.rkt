@@ -14,6 +14,12 @@
 (struct inv (id args) #:transparent)
 (struct return (exp) #:transparent)
 
+;; Expressions
+(struct dot (left id) #:transparent)
+(struct binop (op left right) #:transparent)
+(struct null () #:transparent)
+(struct new (id) #:transparent)
+
 
 
 (define (main)
@@ -41,14 +47,28 @@
 (define (parse-stmt stmt)
   (match stmt
     [(hash-table ('stmt "block") ('list l)) (block (map parse-stmt l))]
-    [(hash-table ('stmt "assign") ('source src) ('target target)) (assign src target)]
+    [(hash-table ('stmt "assign") ('source src) ('target target)) (assign (parse-exp src) (parse-exp target))]
     [(hash-table ('stmt "if") ('guard guard) ('then then) ('else else))
-     (if guard (parse-stmt then) (parse-stmt else))]
-    [(hash-table ('stmt "if") ('guard guard) ('then then)) (if guard (parse-stmt then) '())]
-    [(hash-table ('stmt "print") ('exp exp) ('endl endl)) (print exp endl)]
-    [(hash-table ('stmt "while") ('guard guard) ('body body)) (while guard (parse-stmt body))]
-    [(hash-table ('stmt "invocation") ('id id) ('args args)) (inv id args)]
-    [(hash-table ('stmt "return") ('exp exp)) (return exp)]))
+     (if (parse-exp guard) (parse-stmt then) (parse-stmt else))]
+    [(hash-table ('stmt "if") ('guard guard) ('then then)) (if (parse-exp guard) (parse-stmt then) '())]
+    [(hash-table ('stmt "print") ('exp exp) ('endl endl)) (print (parse-exp exp) endl)]
+    [(hash-table ('stmt "while") ('guard guard) ('body body)) (while (parse-exp guard) (parse-stmt body))]
+    [(hash-table ('stmt "invocation") ('id id) ('args args)) (inv id (map parse-exp args))]
+    [(hash-table ('stmt "return") ('exp exp)) (return (parse-exp exp))]))
+
+(define (parse-exp exp)
+  (match exp
+    [(hash-table ('exp "num") ('value v)) (string->number v)]
+    [(hash-table ('exp "true")) #t]
+    [(hash-table ('exp "false")) #f]
+    [(hash-table ('exp "null")) (null)]
+    [(hash-table ('exp "id") ('id id)) id]
+    [(hash-table ('exp "invocation") ('id id) ('args args)) (inv id (map parse-exp args))]
+    [(hash-table ('exp "binary") ('operator op) ('lft lft) ('rht rht)) (binop op (parse-exp lft) (parse-exp rht))]
+    [(hash-table ('exp "dot") ('left left) ('id id)) (dot (parse-exp left) id)]
+    [(hash-table ('exp "new") ('id id)) (new id)]
+    [o o]))
+    
 
 
 (main)
