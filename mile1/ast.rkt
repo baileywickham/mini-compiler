@@ -14,6 +14,7 @@
 (struct while (guard body) #:transparent)
 (struct inv (id args) #:transparent)
 (struct return (exp) #:transparent)
+(struct return-void () #:transparent)
 
 ;; Expressions
 (struct dot (left id) #:transparent)
@@ -21,3 +22,4 @@
 (struct null () #:transparent)
 (struct new (id) #:transparent)
 (struct unary (op exp) #:transparent)
+(struct read () #:transparent)

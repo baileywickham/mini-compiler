@@ -36,7 +36,8 @@
      (while (parse-exp guard) (parse-stmt body))]
     [(hash-table ('stmt "invocation") ('id id) ('args args))
      (inv (string->symbol id) (map parse-exp args))]
-    [(hash-table ('stmt "return") ('exp exp)) (return (parse-exp exp))]))
+    [(hash-table ('stmt "return") ('exp exp)) (return (parse-exp exp))]
+    [(hash-table ('stmt "return")) (return-void)]))
 
 (define (parse-exp exp)
   (match exp
@@ -52,10 +53,10 @@
     [(hash-table ('exp "dot") ('left left) ('id id)) (dot (parse-exp left) (string->symbol id))]
     [(hash-table ('exp "new") ('id id)) (new (string->symbol id))]
     [(hash-table ('exp "unary") ('operator op) ('operand exp))
-     (unary (string->symbol op) (parse-exp exp))]))
+     (unary (string->symbol op) (parse-exp exp))]
+    [(hash-table ('exp "read")) (read)]))
 
 (define (parse-target target)
   (match target
     [(hash-table ('id id)) (string->symbol id)]
     [(hash-table ('left left) ('id id)) (dot (parse-target left) (string->symbol id))]))
-
