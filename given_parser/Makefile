@@ -17,7 +17,7 @@ all : MiniCompiler.jar
 
 MiniCompiler.jar : MiniCompiler.class
 	mkdir -p build
-    $(JAR) xf $(ANTLRJAR) org
+	$(JAR) xf $(ANTLRJAR) org
 	$(JAR) xf $(JSONJAR) org javax
 	mv org build/
 	mv javax build/
