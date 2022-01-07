@@ -58,5 +58,5 @@
 
 (define (parse-target target)
   (match target
-    [(hash-table ('id id)) (string->symbol id)]
-    [(hash-table ('left left) ('id id)) (dot (parse-target left) (string->symbol id))]))
+    [(hash-table ('left left) ('id id)) (dot (parse-target left) (string->symbol id))]
+    [(hash-table ('id id)) (string->symbol id)]))
