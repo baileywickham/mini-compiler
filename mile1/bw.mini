@@ -4,7 +4,6 @@ struct A
    int j1;
    bool b;
    struct A a;
-   float b;
 };
 struct B
 {

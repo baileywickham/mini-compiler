@@ -7,7 +7,7 @@
 (struct Fun (id params ret-type decs body) #:transparent)
 
 ;; Statements
-(struct Block (exprs) #:transparent)
+(struct Block (stmts) #:transparent)
 (struct Assign (target source) #:transparent)
 (struct If (guard then else) #:transparent)
 (struct Print (exp endl) #:transparent)

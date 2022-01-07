@@ -6,7 +6,6 @@
 
 
 (define (parse jsn)
-  (displayln jsn)
   (Mini (map parse-type (hash-ref jsn 'types))
         (map parse-dec (hash-ref jsn 'declarations))
         (map parse-func (hash-ref jsn 'functions))))
