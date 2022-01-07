@@ -12,7 +12,7 @@
               (* . (int . int))
               (/ . (int . int))
               (&& . (bool . bool))
-              (|| . (bool . bool))
+              (\|\| . (bool . bool))
               (<= . (int . bool))
               (== . (int . bool))
               (>= . (int . bool))
@@ -21,7 +21,7 @@
 
 (define unary-types #hash((- . int)
                           (! . bool)))
-                        
+
 
 (define (type-check mini)
   (define type-set (list->set (append (hash-keys base-types) (map Struct-id (Mini-types mini)))))
@@ -64,11 +64,11 @@
                                       (cdr type-sig)
                                       (error 'type-check "~e: invaid types ~e ~e" op left right))))]
     ))
-                         
-                               
-                         
-    
-  
+
+
+
+
+
 
 (define (build-tenv defs tenv ts)
   (match defs
@@ -80,5 +80,5 @@
                                    (build-tenv rest (hash-set tenv val type) ts))]))
 
 (define (type-error message value)
-  (error 'type-check message value)) 
+  (error 'type-check message value))
 

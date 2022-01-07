@@ -14,7 +14,8 @@
                    [current-output-port out]
                    [current-error-port err])
       (system (string-append "java -jar MiniCompiler.jar " path))))
-  (unless parse-ok (error (get-output-string err)))
+  (define error-message (get-output-string err))
+  (unless (and parse-ok (zero? (string-length error-message))) (error error-message))
   (read-json in))
 
 (type-check (parse (java-parse "bw.mini")))
