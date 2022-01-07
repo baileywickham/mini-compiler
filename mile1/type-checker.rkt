@@ -1,19 +1,26 @@
 #lang racket
-(require json)
 
-(require "parse-json.rkt")
+(require "ast.rkt"
+         racket/hash)
+(provide type-check)
 
 
-;; Calls the Java MiniCompiler parser and reads the generated JSON into hash tables
-(define (java-parse path)
-  (define-values (in out) (make-pipe))
-  (define err (open-output-string))
-  (define parse-ok
-    (parameterize ([current-input-port (open-input-string "")]
-                   [current-output-port out]
-                   [current-error-port err])
-      (system (string-append "java -jar MiniCompiler.jar " path))))
-  (unless parse-ok (error (get-output-string err)))
-  (read-json in))
+(define base-types #hash((int . #hash())
+                         (bool . #hash())))
+                        
 
-(parse (java-parse "1.mini"))
+(define (type-check mini)
+  (displayln mini)
+  (define type-set (list->set (append (hash-keys base-types) (map Struct-id (Mini-types mini)))))
+  (define types (hash-union base-types
+                            (make-hash (map (lambda (s) (cons (Struct-id s) (build-tenv (Struct-fields s) #hash() type-set))) (Mini-types mini)))))
+  types)
+
+(define (build-tenv defs tenv ts)
+  (match defs
+    ['() tenv]
+    [`((,val . ,type) . ,rest) (unless (set-member? ts type)
+                                 (error 'type-check "undefined type ~e" type))
+                               (if (hash-has-key? tenv val)
+                                   (error 'type-check "conflicting types: ~e" val)
+                                   (build-tenv rest (hash-set tenv val type) ts))]))
