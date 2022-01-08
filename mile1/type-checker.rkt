@@ -9,6 +9,7 @@
 (struct Type-info (type-names structs fun-types) #:transparent)
 
 (define base-types (set 'int 'bool))
+(define main-type (Fun-type '() 'int))
 
 (define binary-types #hash((+ . (int . int))
                            (- . (int . int))
@@ -40,7 +41,13 @@
                               #:combine (λ (loc glob) loc))]
             [ret-type (Fun-ret-type fun)])
         (for ([stmt (Fun-body fun)])
-          (type-check-stmt stmt structs fun-sigs tenv ret-type))))))
+          (type-check-stmt stmt structs fun-sigs tenv ret-type)))
+      (unless (or (equal? (Fun-ret-type fun) 'void)
+                  (stmts-always-return? (Fun-body fun)))
+        (type-error "function ~e does not return in all cases" (Fun-id fun))))
+    (let ([main (hash-ref fun-sigs 'main (lambda () (type-error "could not find function main")))])
+      (unless (equal? main main-type)
+        (type-error "main expects no arguments and returns an int")))))
 
 ;;
 (define (type-check-stmt stmt structs fun-sigs tenv ret-type)
@@ -120,6 +127,8 @@
       (type-error "unrecognized return type: ~e" ret-type))
     (Fun-type param-types ret-type)))
 
+
+
 (define (type-equal? expected actual structs)
   (or (and (equal? actual 'null) (hash-has-key? structs expected)) (equal? expected actual)))
 
@@ -144,4 +153,14 @@
 (define (type-error message . values)
   (apply error 'type-error message values))
 
+(define (stmts-always-return? stmts)
+  (ormap stmt-always-returns? stmts))
+
+(define (stmt-always-returns? stmt)
+  (match stmt
+    [(Return _) #t]
+    [(Block stmts) (stmts-always-return? stmts)]
+    [(If _ then else) (and (stmt-always-returns? then) (stmt-always-returns? else))]
+    [_ #f]))
+                
 
