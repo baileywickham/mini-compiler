@@ -8,20 +8,20 @@
 (define (parse jsn)
   (Mini (map parse-type (hash-ref jsn 'types))
         (map parse-dec (hash-ref jsn 'declarations))
-        (map parse-func (hash-ref jsn 'functions))))
+        (map parse-fun (hash-ref jsn 'functions))))
 
-(define (parse-type typ)
-  (Struct (string->symbol (hash-ref typ 'id)) (map parse-dec (hash-ref typ 'fields))))
+(define (parse-type type)
+  (Struct (string->symbol (hash-ref type 'id)) (map parse-dec (hash-ref type 'fields))))
 
 (define (parse-dec dec)
   (cons (string->symbol (hash-ref dec 'id)) (string->symbol (hash-ref dec 'type))))
 
-(define (parse-func fn)
-  (Fun (string->symbol (hash-ref fn 'id))
-        (map parse-dec (hash-ref fn 'parameters))
-        (string->symbol (hash-ref fn 'return_type))
-        (map parse-dec (hash-ref fn 'declarations))
-        (map parse-stmt (hash-ref fn 'body))))
+(define (parse-fun fun)
+  (Fun (string->symbol (hash-ref fun 'id))
+        (map parse-dec (hash-ref fun 'parameters))
+        (string->symbol (hash-ref fun 'return_type))
+        (map parse-dec (hash-ref fun 'declarations))
+        (map parse-stmt (hash-ref fun 'body))))
 
 (define (parse-stmt stmt)
   (match stmt
