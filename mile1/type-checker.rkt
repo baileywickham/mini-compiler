@@ -4,6 +4,8 @@
          racket/hash)
 (provide type-check)
 
+(struct Fun-type (params ret) #:transparent)
+(struct Type-info (type-names structs fun-types) #:transparent)
 
 (define base-types #hash((int . #hash())
                          (bool . #hash())))
@@ -26,6 +28,7 @@
 
 (define (type-check mini)
   (define type-set (list->set (append (hash-keys base-types) (map Struct-id (Mini-types mini)))))
+  (define fun-sigs (gather-fun-types type-set (Mini-funs mini) #hash()))
   (define types (hash-union base-types
                             (make-hash (map (λ (s)
                                               (cons (Struct-id s)
@@ -70,7 +73,26 @@
                                   (if (and (equal? left right) (equal? (car type-sig) left))
                                       (cdr type-sig)
                                       (error 'type-check "~e: invaid types ~e ~e" op left right))))]
+    [(
     ))
+
+(define (gather-fun-types type-set funs fun-types)
+  (match funs
+    ['() fun-types]
+    [`(,fun . ,rst) (hash-union fun-types (make-hash `((,(Fun-id fun) . ,(extract-Fun-type fun type-set))) #:combine (lambda (a b) (error 'type-check "duplicate function name: ~e" b)))
+         
+
+(define (extract-Fun-type fun types)
+  (let* [(param-types (map cdr (Fun-params fun)))
+         (ret-type (Fun-ret-type fun))]
+    (for ([ty param-types])
+              (unless (set-member? types ty)
+                (error 'type-check "unrecognized parameter type: ~e" ty)))
+    (unless (or (equal? 'void ret-type) (set-member? types ret-type))
+      (error 'type-check "unrecognized return type: ~e" ret-type))
+    (Fun-type param-types ret-type)))
+
+;(define (check-inv inv types tenv))
 
 
 
