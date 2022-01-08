@@ -27,20 +27,19 @@
 
 ;;
 (define (type-check mini)
-  (define types (set-union base-types (apply set (map Struct-id (Mini-types mini)))))
-  (define fun-sigs (gather-fun-types (Mini-funs mini) types))
-  (define structs (make-hash (map (λ (s) (cons (Struct-id s) (build-tenv (Struct-fields s) types)))
-                                  (Mini-types mini))))
-  (define global-tenv (build-tenv (Mini-decs mini) types))
-  (for ([fun (Mini-funs mini)])
-    (type-check-fun fun types structs fun-sigs global-tenv)))
-
-;;
-(define (type-check-fun fun types structs fun-sigs global-tenv)
-  (let ([tenv (hash-union (build-tenv (append (Fun-params fun) (Fun-decs fun)) types) global-tenv
-                          #:combine (λ (a b) a))])
-    (for ([stmt (Fun-body)])
-      (type-check-stmt stmt structs fun-sigs tenv))))
+  (let* ([types (set-union base-types (apply set (map Struct-id (Mini-types mini))))]
+         ;; Hash table of the function ids and their parameter and return types 
+         [fun-sigs (gather-fun-types (Mini-funs mini) types)]
+         ;; Hash table of hash tables representing the structs and the member variables
+         [structs (make-hash (map (λ (s) (cons (Struct-id s) (build-tenv (Struct-fields s) types)))
+                                  (Mini-types mini)))]
+         ;; Hash table of global declarations and their types
+         [global-tenv (build-tenv (Mini-decs mini) types)])
+    (for ([fun (Mini-funs mini)])
+      (let ([tenv (hash-union (build-tenv (append (Fun-params fun) (Fun-decs fun)) types) global-tenv
+                              #:combine (λ (loc glob) loc))])
+        (for ([stmt (Fun-body fun)])
+          (type-check-stmt stmt structs fun-sigs tenv))))))
 
 ;;
 (define (type-check-stmt stmt structs fun-sigs tenv)
@@ -82,7 +81,7 @@
 
 ;;
 (define (extract-Fun-type fun types)
-  (let* [(param-types (map cdr (Fun-params fun))) (ret-type (Fun-ret-type fun))]
+  (let [(param-types (map cdr (Fun-params fun))) (ret-type (Fun-ret-type fun))]
     (for ([ty param-types])
       (unless (set-member? types ty)
         (type-error "unrecognized parameter type: ~e" ty)))
@@ -94,16 +93,16 @@
 
 ;;
 (define (gather-fun-types funs types)
-  (make-hash-unique (map (λ (fun) (cons (Fun-id fun) (extract-Fun-type fun types))))))
+  (make-hash-unique (map (λ (fun) (cons (Fun-id fun) (extract-Fun-type fun types))) funs)))
 
 ;;
 (define (build-tenv decs types)
-  (make-hash-unique (map (λ (dec) (unless (set-member? types (car dec))
-                                    (type-error "invalid type ~e" (car dec))) dec) decs)))
+  (make-hash-unique (map (λ (dec) (unless (set-member? types (cdr dec))
+                                    (type-error "invalid type ~e" (cdr dec))) dec) decs)))
 
 ;;
 (define (make-hash-unique assocs)
-  (let ([h (make-hash assocs)])
+  (let ([h (make-immutable-hash assocs)])
     (if (= (hash-count h) (length assocs)) h
         (type-error "duplicate in ~e" assocs))))
 
