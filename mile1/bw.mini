@@ -16,13 +16,13 @@ bool bob;
 
 fun f(int i, struct B j) struct A
 {
-   int f, l, k;
-   return b.a.a.a.a;
+   int l, k;
+   return b.a.a.a.a;              # remove i
 }
 
 fun foo(int n) int
 {
-   if (n <= 0)
+   if (n > 0)                       # change operator
    {
       return 1;
    }
@@ -35,7 +35,7 @@ fun foo(int n) int
 fun g(int i, struct B j) int
 {
    int g, m, k;
-   return 3;
+   return 1;                          # add an integer return value
 }
 
 fun main() int
@@ -59,12 +59,13 @@ fun main() int
       {
          print 3 endl;
       }
-      while (true)
+      while (true || false)          # remove comparison
       {
          print 7;
       }
-      f(g(1,new B),new B);
-      print f(g(1,new B),new B).i endl;
+      f(g(1,new B),new B);        # f(g(1,new B),new B);
+      print f(2,new B).i endl;    # change .bob to .i
+      print foo(2) endl;          # remove .a
    }
    return 0;
 }
