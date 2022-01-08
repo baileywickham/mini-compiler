@@ -2,7 +2,7 @@
 
 (provide (all-defined-out))
 
-(struct Mini (types decs funcs) #:transparent)
+(struct Mini (types decs funs) #:transparent)
 (struct Struct (id fields) #:transparent)
 (struct Fun (id params ret-type decs body) #:transparent)
 

@@ -1,6 +1,6 @@
 #lang racket
-(require json)
 
+(require json)
 (require "parse-json.rkt"
          "type-checker.rkt")
 
