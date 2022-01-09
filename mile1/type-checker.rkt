@@ -28,7 +28,7 @@
 ;;
 (define (type-check mini)
   (let* ([types (set-union base-types (apply set (map Struct-id (Mini-types mini))))]
-         ;; Hash table of the function ids and their parameter and return types 
+         ;; Hash table of the function ids and their parameter and return types
          [fun-sigs (gather-fun-types (Mini-funs mini) types)]
          ;; Hash table of hash tables representing the structs and the member variables
          [structs (make-hash (map (λ (s) (cons (Struct-id s) (build-tenv (Struct-fields s) types)))
@@ -163,9 +163,9 @@
 ;;
 (define (stmt-always-returns? stmt)
   (match stmt
-    [(Return _) #t]
+    [(? Return?) #t]
     [(Block stmts) (stmts-always-return? stmts)]
     [(If _ then else) (and (stmt-always-returns? then) (stmt-always-returns? else))]
     [_ #f]))
-                
+
 
