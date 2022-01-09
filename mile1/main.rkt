@@ -2,7 +2,7 @@
 
 (require json)
 (require "parse-json.rkt"
-         "type-checker.rkt")
+         "type-check.rkt")
 
 
 ;; Calls the Java MiniCompiler parser and reads the generated JSON into hash tables
