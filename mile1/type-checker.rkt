@@ -138,18 +138,19 @@
 
 ;;
 (define (gather-fun-types funs types)
-  (make-hash-unique (map (λ (fun) (cons (Fun-id fun) (extract-Fun-type fun types))) funs)))
+  (make-hash-unique (map (λ (fun) (cons (Fun-id fun) (extract-Fun-type fun types))) funs)
+                    (λ (id) (type-error "duplicate function id ~e" id))))
 
 ;;
 (define (build-tenv decs types)
   (make-hash-unique (map (λ (dec) (unless (set-member? types (cdr dec))
-                                    (type-error "invalid type ~e" (cdr dec))) dec) decs)))
+                                    (type-error "invalid type ~e" (cdr dec))) dec) decs)
+                    (λ (id) (type-error "redefinition of variable ~e" id))))
 
 ;;
-(define (make-hash-unique assocs)
-  (let ([h (make-immutable-hash assocs)])
-    (if (= (hash-count h) (length assocs)) h
-        (type-error "duplicate in ~e" assocs))))
+(define (make-hash-unique assocs err)
+  (let ([duplicate (check-duplicates (map car assocs))])
+    (if duplicate (err duplicate) (make-immutable-hash assocs))))
 
 ;;
 (define (type-error message . values)
