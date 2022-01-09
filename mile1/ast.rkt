@@ -15,6 +15,7 @@
 (struct Inv (id args) #:transparent)
 (struct Return (exp) #:transparent)
 (struct Return-void () #:transparent)
+(struct Delete (id) #:transparent)
 
 ;; Expressions
 (struct Dot (left id) #:transparent)
@@ -23,3 +24,17 @@
 (struct New (id) #:transparent)
 (struct Unary (op exp) #:transparent)
 (struct Read () #:transparent)
+
+;; --------------------------------------------
+;; LLVM
+(struct LLVM (types decs funs) #:transparent)
+(struct StructLL (id types) #:transparent)
+(struct FunLL (id params ret-type body) #:transparent)
+(struct BlockLL (id stmts) #:transparent)
+(struct BinaryLL (result op ty op1 op2) #:transparent)
+(struct PtrLL (to) #:transparent)
+
+(struct BrLL (dest) #:transparent)
+(struct BrCondLL (cond iftrue iffalse) #:transparent)
+(struct AllocLL (result ty) #:transparent) 
+

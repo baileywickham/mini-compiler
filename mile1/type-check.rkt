@@ -84,7 +84,13 @@
                 (andmap (λ (actual expected) (type-equal? expected actual structs))
                         arg-types param-types))
            (Fun-type-ret fun-type)
-           (type-error "cound not call ~e with arguments ~e" id arg-types)))]))
+           (type-error "cound not call ~e with arguments ~e" id arg-types)))]
+    [(Delete exp) (let ([exp-type (type-check-exp exp structs fun-sigs tenv)])
+       (unless (hash-has-key? structs exp-type)
+         (type-error "could not delete non struct: ~e" exp-type)))]
+ 
+
+    ))
 
 ;;
 (define (type-check-exp exp structs fun-sigs tenv)

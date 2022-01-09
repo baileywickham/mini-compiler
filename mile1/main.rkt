@@ -18,4 +18,4 @@
   (unless (and parse-ok (zero? (string-length error-message))) (error error-message))
   (read-json in))
 
-(type-check (parse (java-parse "ret.mini")))
+(type-check (parse (java-parse "bw.mini")))
