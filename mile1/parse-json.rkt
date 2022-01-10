@@ -53,9 +53,9 @@
     [(hash-table ('exp "invocation") ('id id) ('args args))
      (Inv (string->symbol id) (map parse-exp args))]
     [(hash-table ('exp "binary") ('operator op) ('lft lft) ('rht rht))
-     (Binary (string->symbol op) (parse-exp lft) (parse-exp rht))]
+     (Prim (string->symbol op) (list (parse-exp lft) (parse-exp rht)))]
     [(hash-table ('exp "unary") ('operator op) ('operand exp))
-     (Unary (string->symbol op) (parse-exp exp))]
+     (Prim (string->symbol op) (list (parse-exp exp)))]
     [(hash-table ('exp "dot") ('left left) ('id id)) (Dot (parse-exp left) (string->symbol id))]
     [(hash-table ('exp "new") ('id id)) (New (string->symbol id))]
     [(hash-table ('exp "read")) (Read)]))

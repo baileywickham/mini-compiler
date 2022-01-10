@@ -10,20 +10,19 @@
 (define base-types (set 'int 'bool))
 (define main-type (Fun-type '() 'int))
 
-(define binary-types #hash((+ . (int . int))
-                           (- . (int . int))
-                           (* . (int . int))
-                           (/ . (int . int))
-                           (&& . (bool . bool))
-                           (\|\| . (bool . bool))
-                           (<= . (int . bool))
-                           (== . (int . bool))
-                           (>= . (int . bool))
-                           (< . (int . bool))
-                           (> . (int . bool))))
+(define prim-types #hash((+ .    (int  . int))
+                         (- .    (int  . int))
+                         (* .    (int  . int))
+                         (/ .    (int  . int))
+                         (&& .   (bool . bool))
+                         (\|\| . (bool . bool))
+                         (<= .   (int  . bool))
+                         (== .   (int  . bool))
+                         (>= .   (int  . bool))
+                         (< .    (int  . bool))
+                         (> .    (int  . bool))
+                         (! .    (bool . bool))))
 
-(define unary-types #hash((- . int)
-                          (! . bool)))
 
 ;;
 (define (type-check mini)
@@ -86,8 +85,8 @@
            (Fun-type-ret fun-type)
            (type-error "cound not call ~e with arguments ~e" id arg-types)))]
     [(Delete exp) (let ([exp-type (type-check-exp exp structs fun-sigs tenv)])
-       (unless (hash-has-key? structs exp-type)
-         (type-error "could not delete non struct: ~e" exp-type)))]))
+                    (unless (hash-has-key? structs exp-type)
+                      (type-error "could not delete non struct: ~e" exp-type)))]))
 
 ;;
 (define (type-check-exp exp structs fun-sigs tenv)
@@ -102,19 +101,12 @@
      (hash-ref (hash-ref structs (type-check-exp left structs fun-sigs tenv)
                          (λ () (type-error "~e is not of struct type" left)))
                id (λ () (type-error "struct does not have member ~e" id)))]
-    [(Binary op left right)
-     (let ([type-sig (hash-ref binary-types op)]
-           [left (type-check-exp left structs fun-sigs tenv)]
-           [right (type-check-exp right structs fun-sigs tenv)])
-       (if (and (equal? left right) (equal? (car type-sig) left))
+    [(Prim op exps)
+     (let ([type-sig (hash-ref prim-types op)]
+           [exp-types (map (λ (e) (type-check-exp e structs fun-sigs tenv)) exps)])
+       (if (andmap (λ (t) (equal? (car type-sig) t)) exp-types)
            (cdr type-sig)
-           (type-error "~e: invaid types ~e ~e" op left right)))]
-    [(Unary op exp)
-     (let ([type-sig (hash-ref unary-types op)]
-           [exp-type (type-check-exp exp structs fun-sigs tenv)])
-       (if (equal? type-sig exp-type)
-           exp-type
-           (type-error "could not invoke ~e on ~e" op exp-type)))]
+           (type-error "~e: invalid types ~e" op exp-types)))]
     [(Inv id args)
      (let* ([fun-type (hash-ref fun-sigs id (λ () (type-error "undefined function ~e" id)))]
             [arg-types (map (λ (a) (type-check-exp a structs fun-sigs tenv)) args)]
@@ -123,7 +115,7 @@
                 (andmap (λ (actual expected) (type-equal? expected actual structs))
                         arg-types param-types))
            (Fun-type-ret fun-type)
-           (type-error "cound not call ~e with arguments ~e" id arg-types)))]))
+           (type-error "could not call ~e with arguments ~e" id arg-types)))]))
 
 ;;
 (define (extract-Fun-type fun types)

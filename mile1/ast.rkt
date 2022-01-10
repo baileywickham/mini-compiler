@@ -22,10 +22,9 @@
 
 ;; Expressions
 (struct Dot (left id) #:transparent)
-(struct Binary (op left right) #:transparent)
+(struct Prim (op exps) #:transparent)
 (struct Null () #:transparent)
 (struct New (id) #:transparent)
-(struct Unary (op exp) #:transparent)
 (struct Read () #:transparent)
 
 ;; --------------------------------------------
