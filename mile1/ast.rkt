@@ -2,6 +2,10 @@
 
 (provide (all-defined-out))
 
+;; --------------------------------------------
+;; Mini
+;; --------------------------------------------
+
 (struct Mini (types decs funs) #:transparent)
 (struct Struct (id fields) #:transparent)
 (struct Fun (id params ret-type decs body) #:transparent)
@@ -25,13 +29,18 @@
 (struct Unary (op exp) #:transparent)
 (struct Read () #:transparent)
 
-;;
+;; --------------------------------------------
+;; Mini*
+;; --------------------------------------------
+
 (struct Goto* (label) #:transparent)
 (struct GotoCond* (cond iffalse iftrue) #:transparent)
 (struct Fun* (id params ret-type decs cfg start) #:transparent)
 
 ;; --------------------------------------------
 ;; LLVM
+;; --------------------------------------------
+
 (struct LLVM (types decs funs) #:transparent)
 (struct StructLL (id types) #:transparent)
 (struct FunLL (id params ret-type body) #:transparent)
@@ -41,5 +50,5 @@
 
 (struct BrLL (dest) #:transparent)
 (struct BrCondLL (cond iftrue iffalse) #:transparent)
-(struct AllocLL (result ty) #:transparent) 
+(struct AllocLL (result ty) #:transparent)
 
