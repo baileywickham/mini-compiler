@@ -47,7 +47,8 @@
   (match s
     [(BinaryLL result (? icmp-op? op) ty op1 op2)
      (format "~a = icmp ~a ~a ~a, ~a" result op (format-type ty) op1 op2)]
-    [(BinaryLL result op ty op1 op2) (format "~a = ~a ~a ~a, ~a" result op (format-type ty) op1 op2)]
+    [(BinaryLL result op ty op1 op2)
+     (format "~a = ~a ~a ~a, ~a" result op (format-type ty) op1 op2)]
     [(BrLL label) (format "br label ~a" label)]
     [(BrCondLL cond iftrue iffalse) (format "br i1 ~a, label ~a, label ~a" cond iftrue iffalse)]
     [(AllocLL result ty) (format "~a = alloca ~a" result (format-type ty))]))
@@ -59,7 +60,7 @@
 
 (module+ test
   (require rackunit)
-  
+
   (display (format-llvm (LLVM (list (StructLL '%hi (list (PtrLL 'i32) 'i32)))
                              '()
                              (list (FunLL '@add '((%x . i32) (%y . i32)) 'i32
