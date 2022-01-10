@@ -38,7 +38,7 @@
     [(hash-table ('stmt "invocation") ('id id) ('args args))
      (Inv (string->symbol id) (map parse-exp args))]
     [(hash-table ('stmt "return") ('exp exp)) (Return (parse-exp exp))]
-    [(hash-table ('stmt "return")) (Return-void)]
+    [(hash-table ('stmt "return")) (Return (void))]
     [(hash-table ('stmt "delete") ('exp exp)) (Delete (parse-exp exp))]))
 
 (define (parse-exp exp)

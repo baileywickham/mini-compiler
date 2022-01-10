@@ -70,12 +70,12 @@
     [(Print exp _)
      (let ([exp (type-check-exp exp structs fun-sigs tenv)])
        (unless (equal? 'int exp) (type-error "print expected int, got ~e" exp)))]
+    [(Return (? void?))
+     (unless (equal? ret-type 'void) (type-error "expected return type ~e got void" ret-type))]
     [(Return exp)
      (let ([exp-type (type-check-exp exp structs fun-sigs tenv)])
        (unless (equal? exp-type ret-type)
          (type-error "expected return type ~e got ~e" ret-type exp-type)))]
-    [(Return-void)
-     (unless (equal? ret-type 'void) (type-error "expected return type ~e got void" ret-type))]
     [(Inv id args)
      (let* ([fun-type (hash-ref fun-sigs id (λ () (type-error "undefined function ~e" id)))]
             [arg-types (map (λ (a) (type-check-exp a structs fun-sigs tenv)) args)]
@@ -87,10 +87,7 @@
            (type-error "cound not call ~e with arguments ~e" id arg-types)))]
     [(Delete exp) (let ([exp-type (type-check-exp exp structs fun-sigs tenv)])
        (unless (hash-has-key? structs exp-type)
-         (type-error "could not delete non struct: ~e" exp-type)))]
- 
-
-    ))
+         (type-error "could not delete non struct: ~e" exp-type)))]))
 
 ;;
 (define (type-check-exp exp structs fun-sigs tenv)

@@ -18,8 +18,7 @@
 (struct While (guard body) #:transparent)
 (struct Inv (id args) #:transparent)
 (struct Return (exp) #:transparent)
-(struct Return-void () #:transparent)
-(struct Delete (id) #:transparent)
+(struct Delete (exp) #:transparent)
 
 ;; Expressions
 (struct Dot (left id) #:transparent)
