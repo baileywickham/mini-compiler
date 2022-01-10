@@ -25,6 +25,11 @@
 (struct Unary (op exp) #:transparent)
 (struct Read () #:transparent)
 
+;;
+(struct Goto* (label) #:transparent)
+(struct GotoCond* (cond iffalse iftrue) #:transparent)
+(struct Fun* (id params ret-type decs cfg start) #:transparent)
+
 ;; --------------------------------------------
 ;; LLVM
 (struct LLVM (types decs funs) #:transparent)
