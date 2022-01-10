@@ -12,7 +12,7 @@
 
 (define (parse-type type)
   (Struct (string->symbol (hash-ref type 'id))
-          (map parse-dec (hash-ref type 'fields))))
+          (map parse-dec  (hash-ref type 'fields))))
 
 (define (parse-dec dec)
   (cons (string->symbol (hash-ref dec 'id))
