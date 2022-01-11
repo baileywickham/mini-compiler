@@ -24,8 +24,7 @@
 ;;
 (define (stmt-cfg body add-block! next)
   (match body
-    [(Block body) (stmt-cfg body add-block! next)]
-    [(cons (Block body) rest) (stmt-cfg (append body rest) add-block! next)]
+    [(cons (? list? body) rest) (stmt-cfg (append body rest) add-block! next)]
     [(cons (If guard then '()) rest)
      (let ([after-id (make-label)]
            [then-id (make-label)])

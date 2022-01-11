@@ -27,7 +27,7 @@
 
 (define (parse-stmt stmt)
   (match stmt
-    [(hash-table ('stmt "block") ('list l)) (Block (map parse-stmt l))]
+    [(hash-table ('stmt "block") ('list l)) (map parse-stmt l)]
     [(hash-table ('stmt "assign") ('target target) ('source src))
      (Assign (parse-target target) (parse-exp src))]
     [(hash-table ('stmt "if") ('guard guard) ('then then) ('else else))

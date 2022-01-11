@@ -9,7 +9,9 @@
 (define (main path)
   (define mini (parse (java-parse path)))
   (type-check mini)
-  (pretty-display (control-flow mini)))
+  (pretty-display mini)
+  (pretty-display (control-flow mini))
+  )
 
 ;; Calls the Java MiniCompiler parser and reads the generated JSON into hash tables
 (define (java-parse path)

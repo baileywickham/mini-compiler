@@ -41,7 +41,7 @@
         (for ([stmt (Fun-body fun)])
           (type-check-stmt stmt structs fun-sigs tenv ret-type)))
       (unless (or (equal? (Fun-ret-type fun) 'void)
-                  (stmts-always-return? (Fun-body fun)))
+                  (always-returns? (Fun-body fun)))
         (type-error "function ~e does not return in all cases" (Fun-id fun))))
     (let ([main (hash-ref fun-sigs 'main (λ () (type-error "could not find function main")))])
       (unless (equal? main main-type)
@@ -50,7 +50,7 @@
 ;;
 (define (type-check-stmt stmt structs fun-sigs tenv ret-type)
   (match stmt
-    [(Block stmts)
+    [(? list? stmts)
      (for ([stmt stmts]) (type-check-stmt stmt structs fun-sigs tenv ret-type))]
     [(Assign target src)
      (let ([target (type-check-exp target structs fun-sigs tenv)]
@@ -61,7 +61,7 @@
      (let ([guard (type-check-exp guard structs fun-sigs tenv)])
        (unless (equal? 'bool guard) (type-error "if guard expected bool, got ~e" guard))
        (type-check-stmt then structs fun-sigs tenv ret-type)
-       (unless (null? else) (type-check-stmt else structs fun-sigs tenv ret-type)))]
+       (type-check-stmt else structs fun-sigs tenv ret-type))]
     [(While guard body)
      (let ([guard (type-check-exp guard structs fun-sigs tenv)])
        (unless (equal? 'bool guard) (type-error "while guard expected bool, got ~e" guard))
@@ -152,15 +152,11 @@
   (apply error 'type-error message values))
 
 ;;
-(define (stmts-always-return? stmts)
-  (ormap stmt-always-returns? stmts))
-
-;;
-(define (stmt-always-returns? stmt)
+(define (always-returns? stmt)
   (match stmt
     [(? Return?) #t]
-    [(Block stmts) (stmts-always-return? stmts)]
-    [(If _ then else) (and (stmt-always-returns? then) (stmt-always-returns? else))]
+    [(? list? stmts) (ormap always-returns? stmts)]
+    [(If _ then else) (and (always-returns? then) (always-returns? else))]
     [_ #f]))
 
 
