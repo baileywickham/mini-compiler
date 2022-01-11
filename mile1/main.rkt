@@ -2,13 +2,14 @@
 
 (require json)
 (require "parse-json.rkt"
-         "type-check.rkt")
+         "type-check.rkt"
+         "control-flow.rkt")
 
 ;; Main
 (define (main path)
-  (define mini (parse (java-parse "1.mini")))
+  (define mini (parse (java-parse path)))
   (type-check mini)
-  (pretty-display mini))
+  (pretty-display (control-flow mini)))
 
 ;; Calls the Java MiniCompiler parser and reads the generated JSON into hash tables
 (define (java-parse path)

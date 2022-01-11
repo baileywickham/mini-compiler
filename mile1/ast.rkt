@@ -34,6 +34,7 @@
 (struct Goto* (label) #:transparent)
 (struct GotoCond* (cond iffalse iftrue) #:transparent)
 (struct Fun* (id params ret-type decs cfg start) #:transparent)
+(struct Block* (id stmts) #:transparent)
 
 ;; --------------------------------------------
 ;; LLVM
