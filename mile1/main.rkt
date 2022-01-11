@@ -26,4 +26,4 @@
   (unless (and parse-ok (zero? (string-length error-message))) (error error-message))
   (read-json in))
 
-(main "1.mini")
+(main "compat.mini")

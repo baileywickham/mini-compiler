@@ -13,8 +13,8 @@
 ;; Statements
 (struct Assign (target source) #:transparent)
 (struct If (guard then else) #:transparent)
-(struct Print (exp endl) #:transparent)
 (struct While (guard body) #:transparent)
+(struct Print (exp endl) #:transparent)
 (struct Inv (id args) #:transparent)
 (struct Return (exp) #:transparent)
 (struct Delete (exp) #:transparent)

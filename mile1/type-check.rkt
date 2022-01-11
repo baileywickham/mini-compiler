@@ -17,7 +17,6 @@
                          (&& .   (bool . bool))
                          (\|\| . (bool . bool))
                          (<= .   (int  . bool))
-                         (== .   (int  . bool))
                          (>= .   (int  . bool))
                          (< .    (int  . bool))
                          (> .    (int  . bool))
@@ -55,7 +54,7 @@
     [(Assign target src)
      (let ([target (type-check-exp target structs fun-sigs tenv)]
            [src (type-check-exp src structs fun-sigs tenv)])
-       (unless (type-equal? target src structs)
+       (unless (type=? target src structs)
          (type-error "mismatched assignment types: ~e ~e" target src)))]
     [(If guard then else)
      (let ([guard (type-check-exp guard structs fun-sigs tenv)])
@@ -73,14 +72,14 @@
      (unless (equal? ret-type 'void) (type-error "expected return type ~e got void" ret-type))]
     [(Return exp)
      (let ([exp-type (type-check-exp exp structs fun-sigs tenv)])
-       (unless (type-equal? exp-type ret-type structs)
+       (unless (type=? exp-type ret-type structs)
          (type-error "expected return type ~e got ~e" ret-type exp-type)))]
     [(Inv id args)
      (let* ([fun-type (hash-ref fun-sigs id (λ () (type-error "undefined function ~e" id)))]
             [arg-types (map (λ (a) (type-check-exp a structs fun-sigs tenv)) args)]
             [param-types (Fun-type-params fun-type)])
        (if (and (equal? (length arg-types) (length param-types))
-                (andmap (λ (actual expected) (type-equal? expected actual structs))
+                (andmap (λ (actual expected) (type=? expected actual structs))
                         arg-types param-types))
            (Fun-type-ret fun-type)
            (type-error "cound not call ~e with arguments ~e" id arg-types)))]
@@ -101,10 +100,14 @@
      (hash-ref (hash-ref structs (type-check-exp left structs fun-sigs tenv)
                          (λ () (type-error "~e is not of struct type" left)))
                id (λ () (type-error "struct does not have member ~e" id)))]
+    [(Prim (? equality-op? op) exps)
+     (let ([exp-types (map (λ (e) (type-check-exp e structs fun-sigs tenv)) exps)])
+       (if (type=? (first exp-types) (second exp-types) structs) 'bool
+           (type-error "~e: invalid types ~e" op exp-types)))]
     [(Prim op exps)
      (let ([type-sig (hash-ref prim-types op)]
            [exp-types (map (λ (e) (type-check-exp e structs fun-sigs tenv)) exps)])
-       (if (andmap (λ (t) (type-equal? (car type-sig) t structs)) exp-types)
+       (if (andmap (λ (t) (type=? (car type-sig) t structs)) exp-types)
            (cdr type-sig)
            (type-error "~e: invalid types ~e" op exp-types)))]
     [(Inv id args)
@@ -112,7 +115,7 @@
             [arg-types (map (λ (a) (type-check-exp a structs fun-sigs tenv)) args)]
             [param-types (Fun-type-params fun-type)])
        (if (and (equal? (length arg-types) (length param-types))
-                (andmap (λ (actual expected) (type-equal? expected actual structs))
+                (andmap (λ (actual expected) (type=? expected actual structs))
                         arg-types param-types))
            (Fun-type-ret fun-type)
            (type-error "could not call ~e with arguments ~e" id arg-types)))]))
@@ -128,8 +131,10 @@
     (Fun-type param-types ret-type)))
 
 ;;
-(define (type-equal? expected actual structs)
-  (or (and (equal? actual 'null) (hash-has-key? structs expected)) (equal? expected actual)))
+(define (type=? a b structs)
+  (or (equal? a b)
+      (and (equal? b 'null) (hash-has-key? structs a))
+      (and (equal? a 'null) (hash-has-key? structs b))))
 
 ;;
 (define (gather-fun-types funs types)
@@ -146,6 +151,10 @@
 (define (make-hash-unique assocs err)
   (let ([duplicate (check-duplicates (map car assocs))])
     (if duplicate (err duplicate) (make-immutable-hash assocs))))
+
+;;
+(define (equality-op? op)
+  (if (member op '(== !=)) #t #f))
 
 ;;
 (define (type-error message . values)
