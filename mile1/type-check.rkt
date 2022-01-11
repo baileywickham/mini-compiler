@@ -79,8 +79,7 @@
             [arg-types (map (λ (a) (type-check-exp a structs fun-sigs tenv)) args)]
             [param-types (Fun-type-params fun-type)])
        (if (and (equal? (length arg-types) (length param-types))
-                (andmap (λ (actual expected) (type=? expected actual structs))
-                        arg-types param-types))
+                (andmap (λ (actual expected) (type=? expected actual structs)) arg-types param-types))
            (Fun-type-ret fun-type)
            (type-error "cound not call ~e with arguments ~e" id arg-types)))]
     [(Delete exp) (let ([exp-type (type-check-exp exp structs fun-sigs tenv)])
@@ -102,8 +101,8 @@
                id (λ () (type-error "struct does not have member ~e" id)))]
     [(Prim (? equality-op? op) exps)
      (let ([exp-types (map (λ (e) (type-check-exp e structs fun-sigs tenv)) exps)])
-       (if (type=? (first exp-types) (second exp-types) structs) 'bool
-           (type-error "~e: invalid types ~e" op exp-types)))]
+       (if (and (type=? (first exp-types) (second exp-types) structs) (not (member 'bool exp-types)))
+           'bool (type-error "~e: invalid types ~e" op exp-types)))]
     [(Prim op exps)
      (let ([type-sig (hash-ref prim-types op)]
            [exp-types (map (λ (e) (type-check-exp e structs fun-sigs tenv)) exps)])
@@ -115,8 +114,7 @@
             [arg-types (map (λ (a) (type-check-exp a structs fun-sigs tenv)) args)]
             [param-types (Fun-type-params fun-type)])
        (if (and (equal? (length arg-types) (length param-types))
-                (andmap (λ (actual expected) (type=? expected actual structs))
-                        arg-types param-types))
+                (andmap (λ (actual expected) (type=? expected actual structs)) arg-types param-types))
            (Fun-type-ret fun-type)
            (type-error "could not call ~e with arguments ~e" id arg-types)))]))
 
