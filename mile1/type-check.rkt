@@ -73,7 +73,7 @@
      (unless (equal? ret-type 'void) (type-error "expected return type ~e got void" ret-type))]
     [(Return exp)
      (let ([exp-type (type-check-exp exp structs fun-sigs tenv)])
-       (unless (equal? exp-type ret-type)
+       (unless (type-equal? exp-type ret-type structs)
          (type-error "expected return type ~e got ~e" ret-type exp-type)))]
     [(Inv id args)
      (let* ([fun-type (hash-ref fun-sigs id (λ () (type-error "undefined function ~e" id)))]
@@ -104,7 +104,7 @@
     [(Prim op exps)
      (let ([type-sig (hash-ref prim-types op)]
            [exp-types (map (λ (e) (type-check-exp e structs fun-sigs tenv)) exps)])
-       (if (andmap (λ (t) (equal? (car type-sig) t)) exp-types)
+       (if (andmap (λ (t) (type-equal? (car type-sig) t structs)) exp-types)
            (cdr type-sig)
            (type-error "~e: invalid types ~e" op exp-types)))]
     [(Inv id args)
