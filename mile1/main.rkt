@@ -3,12 +3,15 @@
 (require json)
 (require "parse-json.rkt"
          "type-check.rkt"
-         "control-flow.rkt")
+         "control-flow.rkt"
+         "translate-llvm.rkt"
+         "format-llvm.rkt")
 
 ;; Main
 (define (compile path)
   (define mini (parse (java-parse path)))
-  (type-check mini))
+  (type-check mini)
+  (pretty-display (format-llvm (translate-llvm (control-flow mini)))))
 
 ;; Calls the Java MiniCompiler parser and reads the generated JSON into hash tables
 (define (java-parse path)
@@ -23,7 +26,10 @@
   (unless (and parse-ok (zero? (string-length error-message))) (error error-message))
   (read-json in))
 
-(module* main #f
+(compile "1.mini")
+
+
+#;(module* main #f
   (define verbose-mode (make-parameter #f))
   (define profiling-on (make-parameter #f))
   (define optimize-level (make-parameter 0))
