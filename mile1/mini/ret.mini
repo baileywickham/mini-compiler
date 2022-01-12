@@ -24,4 +24,5 @@ fun bar(int i) int      # control flow case
 
 fun main() int
 {
+   return 0;
 }
