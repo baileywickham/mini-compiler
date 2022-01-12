@@ -20,6 +20,7 @@
 ;;
 (define (format-type t)
   (match t
+    [(? string?) t]
     [(? symbol?) (~a t)]
     [(PtrLL to) (format "~a*" (format-type to))]))
 
