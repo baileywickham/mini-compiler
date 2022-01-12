@@ -26,7 +26,7 @@
   (unless (and parse-ok (zero? (string-length error-message))) (error error-message))
   (read-json in))
 
-(compile "1.mini")
+(compile "mini/mixed.mini")
 
 
 #;(module* main #f

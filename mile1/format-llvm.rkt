@@ -4,6 +4,7 @@
 
 (require "ast.rkt")
 
+;;
 (define comp-ops (set 'sle 'sgt 'sge 'slt 'eq))
 
 ;;
@@ -42,7 +43,7 @@
 (define (format-block b)
   (string-append
    (format "~a:\n" (BlockLL-id b))
-   (string-join (map (λ (stmt) (format "\t~a\n" (format-stmt stmt))) (BlockLL-stmts b)))))
+   (string-join (map (λ (stmt) (format "\t~a" (format-stmt stmt))) (BlockLL-stmts b)) "\n")))
 
 ;;
 (define (format-stmt s)
