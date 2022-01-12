@@ -5,6 +5,8 @@
 (require racket/hash)
 (require "ast.rkt")
 
+(struct	exn:fail:type-error exn:fail () #:transparent)
+
 (struct Fun-type (params ret) #:transparent)
 
 (define base-types (set 'int 'bool))
@@ -156,7 +158,7 @@
 
 ;;
 (define (type-error message . values)
-  (apply error 'type-error message values))
+  (raise (exn:fail:type-error (apply format message values) (continuation-marks #f))))
 
 ;;
 (define (always-returns? stmt)
