@@ -53,7 +53,8 @@
      (format "~a = ~a ~a ~a, ~a" result op (format-type ty) op1 op2)]
     [(BrLL label) (format "br label ~a" label)]
     [(BrCondLL cond iftrue iffalse) (format "br i1 ~a, label ~a, label ~a" cond iftrue iffalse)]
-    [(AllocLL result ty) (format "~a = alloca ~a" result (format-type ty))]))
+    [(AllocLL result ty) (format "~a = alloca ~a" result (format-type ty))]
+    [o (~a o)]))
 
 ;;
 (define (icmp-op? op)

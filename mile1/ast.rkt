@@ -42,9 +42,9 @@
 (struct StructLL (id types) #:transparent)
 (struct FunLL (id params ret-type body) #:transparent)
 (struct BlockLL (id stmts) #:transparent)
+
 (struct BinaryLL (result op ty op1 op2) #:transparent)
 (struct PtrLL (to) #:transparent)
-
 (struct BrLL (dest) #:transparent)
 (struct BrCondLL (cond iftrue iffalse) #:transparent)
 (struct AllocLL (result ty) #:transparent)

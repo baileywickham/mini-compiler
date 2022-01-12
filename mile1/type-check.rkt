@@ -24,7 +24,6 @@
                          (> .    (int  . bool))
                          (! .    (bool . bool))))
 
-
 ;;
 (define (type-check mini)
   (let* ([types (set-union base-types (apply set (map Struct-id (Mini-types mini))))]
