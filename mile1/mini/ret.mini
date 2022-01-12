@@ -3,7 +3,7 @@ fun foo(int i) int      # standard case
    return i;
 }
 
-fun main() int      # control flow case
+fun bar(int i) int      # control flow case
 {
    if (i > 0)
    {
@@ -17,8 +17,11 @@ fun main() int      # control flow case
       }
       else
       {
+         return 0;
       }
    }
-   return 1;
 }
 
+fun main() int
+{
+}
