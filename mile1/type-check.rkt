@@ -34,15 +34,21 @@
                                   (Mini-types mini)))]
          ;; Hash table of global declarations and their types
          [global-tenv (build-tenv (Mini-decs mini) types)])
+    
     (for ([fun (Mini-funs mini)])
-      (let ([tenv (hash-union (build-tenv (append (Fun-params fun) (Fun-decs fun)) types) global-tenv
-                              #:combine (λ (loc glob) loc))]
-            [ret-type (Fun-ret-type fun)])
-        (for ([stmt (Fun-body fun)])
-          (type-check-stmt stmt structs fun-sigs tenv ret-type)))
-      (unless (or (equal? (Fun-ret-type fun) 'void)
-                  (always-returns? (Fun-body fun)))
-        (type-error "function ~e does not return in all cases" (Fun-id fun))))
+      (match fun
+        [(Fun id params ret-type decs body)
+
+         (let ([tenv (hash-union (build-tenv (append params decs) types) global-tenv
+                                 #:combine (λ (loc glob) loc))])
+           (for ([stmt (Fun-body fun)])
+             (type-check-stmt stmt structs fun-sigs tenv ret-type)))
+         (unless (or (equal? (Fun-ret-type fun) 'void) (always-returns? (Fun-body fun)))
+           (type-error "function ~e does not return in all cases" (Fun-id fun)))
+
+         ])
+      )
+    
     (let ([main (hash-ref fun-sigs 'main (λ () (type-error "could not find function main")))])
       (unless (equal? main main-type)
         (type-error "main expects no arguments and returns an int")))))
@@ -93,7 +99,7 @@
     [(? integer?) 'int]
     [(? boolean?) 'bool]
     [(? symbol? s) (hash-ref tenv s (λ () (type-error "unbound identifier: ~e" s)))]
-    [(New id) (if (hash-has-key? structs id) id (type-error "undefined struct type: ~e" id))]
+    [(New id) (hash-ref-key structs id (λ () (type-error "undefined struct type: ~e" id)))]
     [(Read) 'int]
     [(Null) 'null]
     [(Dot left id)

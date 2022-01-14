@@ -31,7 +31,7 @@
 ;; --------------------------------------------
 
 (struct Goto* (label) #:transparent)
-(struct GotoCond* (cond iffalse iftrue) #:transparent)
+(struct GotoCond* (cond iftrue iffalse) #:transparent)
 (struct Block* (id stmts) #:transparent)
 
 ;; --------------------------------------------
@@ -40,6 +40,7 @@
 
 (struct LLVM (types decs funs) #:transparent)
 (struct StructLL (id types) #:transparent)
+(struct GlobalLL (id ty val) #:transparent)
 (struct FunLL (id params ret-type body) #:transparent)
 (struct BlockLL (id stmts) #:transparent)
 
@@ -48,11 +49,10 @@
 (struct BrLL (dest) #:transparent)
 (struct BrCondLL (cond iftrue iffalse) #:transparent)
 (struct AllocLL (result ty) #:transparent)
-(struct StoreLL (ty val ptr) #:transparent) 
+(struct StoreLL (ty val ptr) #:transparent)
+(struct LoadLL (result ty ptr) #:transparent)
 
 ;; Expressions (sorta)
 (struct PtrLL (to) #:transparent)
 (struct IdLL (id global?) #:transparent)
-(struct GlobalLL (id ty val) #:transparent)
-(struct LoadLL (result ty ptr) #:transparent)
 
