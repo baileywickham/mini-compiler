@@ -2,48 +2,40 @@
 
 (provide format-llvm)
 
-(require "ast.rkt")
+(require "ast.rkt" "util.rkt")
 
 ;;
 (define comp-ops (set 'sle 'sgt 'sge 'slt 'eq))
 
 ;;
-(define (format-llvm llvm)
-  (string-join (append (map format-struct (LLVM-types llvm))
-                       (map format-dec (LLVM-decs llvm))
-                       (map format-fun (LLVM-funs llvm))) "\n"))
+(define+ (format-llvm (LLVM types decs funs))
+  (string-join (append (map format-struct types)
+                       (map format-dec decs)
+                       (map format-fun funs)) "\n"))
 
 ;;
-(define (format-struct s)
+(define+ (format-struct (StructLL id tys))
   (format "~a = type {~a}"
-          (format-id (StructLL-id s))
-          (string-join (map format-ty (StructLL-types s)) ", ")))
+          (format-id id) (string-join (map format-ty tys) ", ")))
 
 ;;
-(define (format-dec d)
+(define+ (format-dec (GlobalLL id ty val))
   (format "~a = common global ~a ~a, align 4"
-          (format-id (GlobalLL-id d))
-          (format-ty (GlobalLL-ty d))
-          (GlobalLL-val d)))
+          (format-id id) (format-ty ty) val))
 
 ;;
-(define (format-fun f)
-  (string-append
-   (format "define ~a ~a(~a)"
-           (format-ty (FunLL-ret-type f))
-           (format-id (FunLL-id f))
-           (string-join
-            (map (λ (p) (format "~a ~a" (format-ty (cdr p)) (format-id (car p))))
-                 (FunLL-params f)) ", "))
-   "\n{\n"
-   (string-join (map format-block (FunLL-body f)) "\n")
-   "\n}\n"))
+(define+ (format-fun (FunLL id params ret-ty body))
+  (format "define ~a ~a(~a)\n{\n~a\n}\n"
+          (format-ty ret-ty)
+          (format-id id)
+          (string-join
+           (map (λ+ ((cons id ty)) (format "~a ~a" (format-ty ty) (format-id id))) params) ", ")
+          (string-join (map format-block body) "\n")))
 
 ;;
-(define (format-block b)
-  (string-append
-   (format "~a:\n" (BlockLL-id b))
-   (string-join (map (λ (stmt) (format "\t~a" (format-stmt stmt))) (BlockLL-stmts b)) "\n")))
+(define+ (format-block (BlockLL id stmts))
+  (format "~a:\n~a"
+          id (string-join (map (λ (stmt) (format "\t~a" (format-stmt stmt))) stmts) "\n")))
 
 ;;
 (define (format-stmt s)
@@ -77,13 +69,15 @@
     [(? IdLL?) (format-id t)]
     [(? string?) t]
     [(? symbol?) (~a t)]
-    [(PtrLL to) (format "~a*" (format-ty to))]))
+    [(PtrLL to) (format "~a*" (format-ty to))]
+    [o (~a o)]))
 
 ;;
 (define (format-arg arg)
   (match arg
     [(? integer?) arg]
-    [(? IdLL?) (format-id arg)]))
+    [(? IdLL?) (format-id arg)]
+    [o (~a o)]))
 
 ;;
 (define (format-id id)

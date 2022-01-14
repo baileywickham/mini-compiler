@@ -2,57 +2,52 @@
 
 (provide translate-llvm)
 
-(require "ast.rkt"
+(require "ast.rkt" "util.rkt"
          racket/hash)
 
-(define ops #hash((+ . add)
-                  (* . mul)
-                  (- . sub)
-                  (/ . sdiv)
-                  (&& . and)
+(define ops #hash((+    . add)
+                  (*    . mul)
+                  (-    . sub)
+                  (/    . sdiv)
+                  (&&   . and)
                   (\|\| . or)
-                  (== . eq)
-                  (<= . sle)
-                  (>= . sge)
-                  (> . sgt)
-                  (< . slt)
-                  (!= . ne)))
-              
+                  (==   . eq)
+                  (<=   . sle)
+                  (>=   . sge)
+                  (>    . sgt)
+                  (<    . slt)
+                  (!=   . ne)))
 
 ;;
-(define (translate-llvm mini*)
-  (match mini*
-    [(Mini types decs funs)
-     (define locs (make-immutable-hash (map (λ (dec) (cons (car dec) (@ (car dec)))) decs)))
-     (LLVM (map translate-struct types)
-           (map translate-global decs)
-           (map (λ (f) (translate-fun f locs)) funs))]))
+(define+ (translate-llvm (Mini types decs funs))
+  (define globs (translate-decs @ decs))
+  (define locs (make-immutable-hash (map (λ (dec glob) (cons (car dec) glob)) decs globs)))
+  (displayln locs)
+  (LLVM (map translate-struct types)
+        (map translate-global globs)
+        (map (λ (f) (translate-fun f locs)) funs)))
 
 ;;
-(define (translate-struct s)
-  (StructLL (translate-struct-id (Struct-id s))
-            (map (compose translate-type cdr) (Struct-fields s))))
+(define+ (translate-struct (Struct id fields))
+  (StructLL (translate-struct-id id)
+            (map (compose translate-type cdr) fields)))
 
 ;;
-(define (translate-global dec)
-  (GlobalLL (@ (car dec)) (translate-type (cdr dec)) (get-default-val (cdr dec))))
+(define+ (translate-global (cons id ty))
+  (GlobalLL id ty (if (equal? ty 'i32) 0 'null)))
 
 ;;
-(define (translate-fun f locs)
-  (match f
-    [(Fun id params ret-type decs body)
-     (let* ([all-locs (hash-union locs (get-locs params decs) #:combine (λ (a b) b))]
-            [blocks (map (λ (b) (translate-block b all-locs)) body)])
-       (FunLL (@ id) (map translate-param params) (translate-type ret-type)
-              (cons
-               (extend-block (first blocks) (fun-header params decs))
-               (rest blocks))))]))
+(define+ (translate-fun (Fun id params ret-type decs body) locs)
+  (let* ([all-locs (hash-union locs (get-locs params decs) #:combine (λ (a b) b))]
+         [blocks (map (λ (b) (translate-block b all-locs)) body)])
+    (FunLL (@ id) (translate-decs % params) (translate-type ret-type)
+           (cons
+            (extend-block (first blocks) (fun-header params decs))
+            (rest blocks)))))
 
 ;;
-(define (translate-block b locs)
-  (BlockLL (Block*-id b)
-           (append-map (λ (s) (translate-stmt s locs)) (Block*-stmts b))))
-
+(define+ (translate-block (Block* id stmts) locs)
+  (BlockLL id (append-map (λ (s) (translate-stmt s locs)) stmts)))
 
 ;;
 (define (translate-stmt s locs)
@@ -95,9 +90,10 @@
 
 
 (define (get-locs params decs)
-  (make-immutable-hash (append
-                        (map (λ (d) (cons (car d) (% (car d)))) decs)
-                        (map (λ (d) (cons (car d) (% (param-loc (car d))))) params))))
+  (make-immutable-hash
+   (append
+    (map (λ (d) (cons (car d) (% (car d)))) decs)
+    (map (λ (d) (cons (car d) (% (param-loc (car d))))) params))))
 
 (define (param-loc p)
   (format "_P_~a" p))
@@ -114,21 +110,16 @@
                           (% (format "_P_~a" (car dec)))))
         params)))
 
-(define (get-default-val ty)
-  (if (member ty '(int bool))
-      0
-      'null))
-
-
-(define (extend-block b stmts)
-  (BlockLL (BlockLL-id b) (append stmts (BlockLL-stmts b))))
+(define+ (extend-block (BlockLL id stmts) new-stmts)
+  (BlockLL id (append new-stmts stmts)))
 
 (define (@ id) (IdLL id #t))
 (define (% id) (IdLL id #f))
 
-(define (translate-param param)
-  (cons (% (car param)) (translate-type (cdr param))))
+(define (translate-decs @/% decs)
+  (map (λ (dec) (translate-dec @/% dec)) decs))
 
-;   (map (λ (dec) (
-                
+(define+ (translate-dec @/% (cons id type))
+  (cons (@/% id) (translate-type type)))
+
 

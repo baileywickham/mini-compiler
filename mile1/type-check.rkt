@@ -3,7 +3,7 @@
 (provide type-check)
 
 (require racket/hash)
-(require "ast.rkt")
+(require "ast.rkt" "util.rkt")
 
 (struct	exn:fail:type-error exn:fail () #:transparent)
 
@@ -12,43 +12,35 @@
 (define base-types (set 'int 'bool))
 (define main-type (Fun-type '() 'int))
 
-(define prim-types #hash((+ .    (int  . int))
-                         (- .    (int  . int))
-                         (* .    (int  . int))
-                         (/ .    (int  . int))
-                         (&& .   (bool . bool))
+(define prim-types #hash((+    . (int  . int))
+                         (-    . (int  . int))
+                         (*    . (int  . int))
+                         (/    . (int  . int))
+                         (&&   . (bool . bool))
                          (\|\| . (bool . bool))
-                         (<= .   (int  . bool))
-                         (>= .   (int  . bool))
-                         (< .    (int  . bool))
-                         (> .    (int  . bool))
-                         (! .    (bool . bool))))
+                         (<=   . (int  . bool))
+                         (>=   . (int  . bool))
+                         (<    . (int  . bool))
+                         (>    . (int  . bool))
+                         (!    . (bool . bool))))
 
 ;;
-(define (type-check mini)
-  (let* ([types (set-union base-types (apply set (map Struct-id (Mini-types mini))))]
-         ;; Hash table of the function ids and their parameter and return types
-         [fun-sigs (gather-fun-types (Mini-funs mini) types)]
-         ;; Hash table of hash tables representing the structs and the member variables
-         [structs (make-hash (map (λ (s) (cons (Struct-id s) (build-tenv (Struct-fields s) types)))
-                                  (Mini-types mini)))]
-         ;; Hash table of global declarations and their types
-         [global-tenv (build-tenv (Mini-decs mini) types)])
-    
-    (for ([fun (Mini-funs mini)])
-      (match fun
-        [(Fun id params ret-type decs body)
+(define+ (type-check (Mini types decs funs))
+  (let*
+      ([type-set (set-union base-types (list->set (map Struct-id types)))]
+       [fun-sigs (gather-fun-types funs type-set)]
+       [structs (make-hash (map (λ+ ((Struct id flds)) (cons id (build-tenv flds type-set))) types))]
+       [global-tenv (build-tenv decs type-set)])
 
-         (let ([tenv (hash-union (build-tenv (append params decs) types) global-tenv
-                                 #:combine (λ (loc glob) loc))])
-           (for ([stmt (Fun-body fun)])
-             (type-check-stmt stmt structs fun-sigs tenv ret-type)))
-         (unless (or (equal? (Fun-ret-type fun) 'void) (always-returns? (Fun-body fun)))
-           (type-error "function ~e does not return in all cases" (Fun-id fun)))
+    (for ([fun funs])
+      (match-let ([(Fun id params ret-type decs body) fun])
+        (let ([tenv (hash-union (build-tenv (append params decs) type-set) global-tenv
+                                #:combine (λ (loc glob) loc))])
+          (for ([stmt body]) (type-check-stmt stmt structs fun-sigs tenv ret-type)))
 
-         ])
-      )
-    
+        (unless (or (equal? ret-type 'void) (always-returns? body))
+          (type-error "function ~e does not return in all cases" id))))
+
     (let ([main (hash-ref fun-sigs 'main (λ () (type-error "could not find function main")))])
       (unless (equal? main main-type)
         (type-error "main expects no arguments and returns an int")))))
@@ -75,8 +67,6 @@
     [(Print exp _)
      (let ([exp (type-check-exp exp structs fun-sigs tenv)])
        (unless (equal? 'int exp) (type-error "print expected int, got ~e" exp)))]
-    [(Return (? void?))
-     (unless (equal? ret-type 'void) (type-error "expected return type ~e got void" ret-type))]
     [(Return exp)
      (let ([exp-type (type-check-exp exp structs fun-sigs tenv)])
        (unless (type=? exp-type ret-type structs)
@@ -96,12 +86,13 @@
 ;;
 (define (type-check-exp exp structs fun-sigs tenv)
   (match exp
+    [(Read) 'int]
+    [(Null) 'null]
+    [(? void?) 'void]   ;; void isn't really an exp, this will only happen in (Return void)
     [(? integer?) 'int]
     [(? boolean?) 'bool]
     [(? symbol? s) (hash-ref tenv s (λ () (type-error "unbound identifier: ~e" s)))]
     [(New id) (hash-ref-key structs id (λ () (type-error "undefined struct type: ~e" id)))]
-    [(Read) 'int]
-    [(Null) 'null]
     [(Dot left id)
      (hash-ref (hash-ref structs (type-check-exp left structs fun-sigs tenv)
                          (λ () (type-error "~e is not of struct type" left)))
@@ -172,5 +163,3 @@
     [(? list? stmts) (ormap always-returns? stmts)]
     [(If _ then else) (and (always-returns? then) (always-returns? else))]
     [_ #f]))
-
-

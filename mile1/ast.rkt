@@ -38,10 +38,10 @@
 ;; LLVM
 ;; --------------------------------------------
 
-(struct LLVM (types decs funs) #:transparent)
+(struct LLVM (tys decs funs) #:transparent)
 (struct StructLL (id types) #:transparent)
 (struct GlobalLL (id ty val) #:transparent)
-(struct FunLL (id params ret-type body) #:transparent)
+(struct FunLL (id params ret-ty body) #:transparent)
 (struct BlockLL (id stmts) #:transparent)
 
 ;; Statements
