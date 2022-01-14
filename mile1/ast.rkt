@@ -48,7 +48,11 @@
 (struct BrLL (dest) #:transparent)
 (struct BrCondLL (cond iftrue iffalse) #:transparent)
 (struct AllocLL (result ty) #:transparent)
+(struct StoreLL (ty val ptr) #:transparent) 
 
 ;; Expressions (sorta)
 (struct PtrLL (to) #:transparent)
+(struct IdLL (id global?) #:transparent)
+(struct GlobalLL (id ty val) #:transparent)
+(struct LoadLL (result ty ptr) #:transparent)
 
