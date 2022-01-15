@@ -9,82 +9,68 @@
 
 (struct Fun-type (params ret) #:transparent)
 
-(define base-types (set 'int 'bool))
-(define main-type (Fun-type '() 'int))
+(define base-types
+  (set 'int
+       'bool))
 
-(define prim-types #hash((+    . (int  . int))
-                         (-    . (int  . int))
-                         (*    . (int  . int))
-                         (/    . (int  . int))
-                         (&&   . (bool . bool))
-                         (\|\| . (bool . bool))
-                         (<=   . (int  . bool))
-                         (>=   . (int  . bool))
-                         (<    . (int  . bool))
-                         (>    . (int  . bool))
-                         (!    . (bool . bool))))
+(define prim-types
+  (hash '(+    . 2) (Fun-type '(int  int)  'int)
+        '(-    . 2) (Fun-type '(int  int)  'int)
+        '(*    . 2) (Fun-type '(int  int)  'int)
+        '(/    . 2) (Fun-type '(int  int)  'int)
+        '(&&   . 2) (Fun-type '(bool bool) 'bool)
+        '(\|\| . 2) (Fun-type '(bool bool) 'bool)
+        '(<=   . 2) (Fun-type '(int  int)  'bool)
+        '(>=   . 2) (Fun-type '(int  int)  'bool)
+        '(<    . 2) (Fun-type '(int  int)  'bool)
+        '(>    . 2) (Fun-type '(int  int)  'bool)
+        
+        '(!    . 1) (Fun-type '(bool) 'bool)
+        '(-    . 1) (Fun-type '(int)  'int)))
+
+(define main-type (Fun-type '() 'int))
 
 ;;
 (define+ (type-check (Mini types decs funs))
-  (let*
-      ([type-set (set-union base-types (list->set (map Struct-id types)))]
-       [fun-sigs (gather-fun-types funs type-set)]
-       [structs (make-hash (map (λ+ ((Struct id flds)) (cons id (build-tenv flds type-set))) types))]
-       [global-tenv (build-tenv decs type-set)])
+  (let* ([check-type (make-check-type types)]
+         [get-sig (gather-fun-types funs check-type)]
+         [structs (make-hash (map (λ+ ((Struct id fs)) (cons id (build-tenv fs check-type))) types))]
+         [global-tenv (build-tenv decs check-type)])
 
     (for ([fun funs])
       (match-let ([(Fun id params ret-type decs body) fun])
-        (let ([tenv (hash-union (build-tenv (append params decs) type-set) global-tenv
-                                #:combine (λ (loc glob) loc))])
-          (for ([stmt body]) (type-check-stmt stmt structs fun-sigs tenv ret-type)))
-
+        (let* ([tenv (extend-env global-tenv (build-tenv (append params decs) check-type))]
+               [context (list structs get-sig tenv ret-type)])
+          (for ([stmt body]) (check-stmt stmt context)))
         (unless (or (equal? ret-type 'void) (always-returns? body))
           (type-error "function ~e does not return in all cases" id))))
 
-    (let ([main (hash-ref fun-sigs 'main (λ () (type-error "could not find function main")))])
-      (unless (equal? main main-type)
-        (type-error "main expects no arguments and returns an int")))))
+    (unless (equal? (get-sig 'main) main-type)
+      (type-error "main expects no arguments and returns an int"))))
 
 ;;
-(define (type-check-stmt stmt structs fun-sigs tenv ret-type)
+(define+ (check-stmt stmt (and context (list structs get-sig _ ret-type)))
   (match stmt
-    [(? list? stmts)
-     (for ([stmt stmts]) (type-check-stmt stmt structs fun-sigs tenv ret-type))]
+    [(? list? stmts) (for ([stmt stmts]) (check-stmt stmt context))]
     [(Assign target src)
-     (let ([target (type-check-exp target structs fun-sigs tenv)]
-           [src (type-check-exp src structs fun-sigs tenv)])
-       (unless (type=? target src structs)
-         (type-error "mismatched assignment types: ~e ~e" target src)))]
+     (ensure-type-match (check-exp target context) (check-exp src context) 'assignment)]
     [(If guard then else)
-     (let ([guard (type-check-exp guard structs fun-sigs tenv)])
-       (unless (equal? 'bool guard) (type-error "if guard expected bool, got ~e" guard))
-       (type-check-stmt then structs fun-sigs tenv ret-type)
-       (type-check-stmt else structs fun-sigs tenv ret-type))]
+     (ensure-type-match 'bool (check-exp guard context) 'if)
+     (check-stmt then context)
+     (check-stmt else context)]
     [(While guard body)
-     (let ([guard (type-check-exp guard structs fun-sigs tenv)])
-       (unless (equal? 'bool guard) (type-error "while guard expected bool, got ~e" guard))
-       (type-check-stmt body structs fun-sigs tenv ret-type))]
-    [(Print exp _)
-     (let ([exp (type-check-exp exp structs fun-sigs tenv)])
-       (unless (equal? 'int exp) (type-error "print expected int, got ~e" exp)))]
-    [(Return exp)
-     (let ([exp-type (type-check-exp exp structs fun-sigs tenv)])
-       (unless (type=? exp-type ret-type structs)
-         (type-error "expected return type ~e got ~e" ret-type exp-type)))]
-    [(Inv id args)
-     (let* ([fun-type (hash-ref fun-sigs id (λ () (type-error "undefined function ~e" id)))]
-            [arg-types (map (λ (a) (type-check-exp a structs fun-sigs tenv)) args)]
-            [param-types (Fun-type-params fun-type)])
-       (if (and (equal? (length arg-types) (length param-types))
-                (andmap (λ (actual expected) (type=? expected actual structs)) arg-types param-types))
-           (Fun-type-ret fun-type)
-           (type-error "cound not call ~e with arguments ~e" id arg-types)))]
-    [(Delete exp) (let ([exp-type (type-check-exp exp structs fun-sigs tenv)])
-                    (unless (hash-has-key? structs exp-type)
-                      (type-error "could not delete non struct: ~e" exp-type)))]))
+     (ensure-type-match 'bool (check-exp guard context) 'while)
+     (check-stmt body context)]
+    [(Print exp _) (ensure-type-match 'int (check-exp exp context) 'print)]
+    [(Return exp) (ensure-type-match ret-type (check-exp exp context) 'return)]
+    [(Inv id args) (check-fun (get-sig id) (check-exps args context) id)]
+    [(Delete exp)
+     (let ([exp-type (check-exp exp context)])
+       (unless (hash-has-key? structs exp-type)
+         (type-error "could not delete non struct: ~e" exp-type)))]))
 
 ;;
-(define (type-check-exp exp structs fun-sigs tenv)
+(define+ (check-exp exp (and context (list structs get-sig tenv _)))
   (match exp
     [(Read) 'int]
     [(Null) 'null]
@@ -94,54 +80,68 @@
     [(? symbol? s) (hash-ref tenv s (λ () (type-error "unbound identifier: ~e" s)))]
     [(New id) (hash-ref-key structs id (λ () (type-error "undefined struct type: ~e" id)))]
     [(Dot left id)
-     (hash-ref (hash-ref structs (type-check-exp left structs fun-sigs tenv)
+     (hash-ref (hash-ref structs (check-exp left context)
                          (λ () (type-error "~e is not of struct type" left)))
                id (λ () (type-error "struct does not have member ~e" id)))]
     [(Prim (? equality-op? op) exps)
-     (let ([exp-types (map (λ (e) (type-check-exp e structs fun-sigs tenv)) exps)])
-       (if (and (type=? (first exp-types) (second exp-types) structs) (not (member 'bool exp-types)))
+     (let ([exp-types (check-exps exps context)])
+       (if (and (type=? (first exp-types) (second exp-types)) (not (member 'bool exp-types)))
            'bool (type-error "~e: invalid types ~e" op exp-types)))]
     [(Prim op exps)
-     (let ([type-sig (hash-ref prim-types op)]
-           [exp-types (map (λ (e) (type-check-exp e structs fun-sigs tenv)) exps)])
-       (if (andmap (λ (t) (type=? (car type-sig) t structs)) exp-types)
-           (cdr type-sig)
-           (type-error "~e: invalid types ~e" op exp-types)))]
+     (check-fun (hash-ref prim-types (cons op (length exps))) (check-exps exps context) op)]
     [(Inv id args)
-     (let* ([fun-type (hash-ref fun-sigs id (λ () (type-error "undefined function ~e" id)))]
-            [arg-types (map (λ (a) (type-check-exp a structs fun-sigs tenv)) args)]
-            [param-types (Fun-type-params fun-type)])
-       (if (and (equal? (length arg-types) (length param-types))
-                (andmap (λ (actual expected) (type=? expected actual structs)) arg-types param-types))
-           (Fun-type-ret fun-type)
-           (type-error "could not call ~e with arguments ~e" id arg-types)))]))
+     (check-fun (get-sig id) (check-exps args context) id)]))
 
 ;;
-(define (extract-Fun-type fun types)
-  (let [(param-types (map cdr (Fun-params fun))) (ret-type (Fun-ret-type fun))]
-    (for ([ty param-types])
-      (unless (set-member? types ty)
-        (type-error "unrecognized parameter type: ~e" ty)))
-    (unless (or (equal? 'void ret-type) (set-member? types ret-type))
-      (type-error "unrecognized return type: ~e" ret-type))
+(define (check-exps exps context)
+  (map (curryr check-exp context) exps))
+
+;;
+(define (ensure-type-match expected-type true-type loc)
+  (unless (type=? expected-type true-type)
+    (type-error "~a expected ~e, got ~e" loc expected-type true-type)))
+
+;;
+(define (type=? ty1 ty2)
+  (or (equal? ty1 ty2)
+      (and (equal? ty2 'null) (struct? ty1))
+      (and (equal? ty1 'null) (struct? ty2))))
+
+;;
+(define (struct? type)
+  (nor (equal? type 'void) (set-member? base-types type)))
+
+;;
+(define+ (check-fun (Fun-type param-types ret-type) arg-types id)
+  (unless (and (equal? (length arg-types) (length param-types)) (andmap type=? arg-types param-types))
+    (type-error "cound not call ~e with arguments ~e" id arg-types))
+  ret-type)
+
+;;
+(define (make-check-type structs)
+  (let ([all-types (set-union base-types (list->set (map Struct-id structs)))])
+    (λ (possible-type)
+      (unless (set-member? all-types possible-type)
+        (type-error "invalid type ~e" possible-type)))))
+
+;;
+(define (gather-fun-types funs check-type)
+  (let ([fun-sigs (make-hash-unique
+                   (map (λ (fun) (cons (Fun-id fun) (extract-Fun-type fun check-type))) funs)
+                   (λ (id) (type-error "duplicate function id ~e" id)))])
+    (λ (id) (hash-ref fun-sigs id (λ () (type-error "undefined function ~e" id))))))
+
+;;
+(define+ (extract-Fun-type (Fun _ params ret-type _ _) check-type)
+  (let ([param-types (map cdr params)])
+    (for ([ty param-types]) (check-type ty))
+    (unless (equal? 'void ret-type) (check-type ret-type))
     (Fun-type param-types ret-type)))
 
 ;;
-(define (type=? a b structs)
-  (or (equal? a b)
-      (and (equal? b 'null) (hash-has-key? structs a))
-      (and (equal? a 'null) (hash-has-key? structs b))))
-
-;;
-(define (gather-fun-types funs types)
-  (make-hash-unique (map (λ (fun) (cons (Fun-id fun) (extract-Fun-type fun types))) funs)
-                    (λ (id) (type-error "duplicate function id ~e" id))))
-
-;;
-(define (build-tenv decs types)
-  (make-hash-unique (map (λ (dec) (unless (set-member? types (cdr dec))
-                                    (type-error "invalid type ~e" (cdr dec))) dec) decs)
-                    (λ (id) (type-error "redefinition of variable ~e" id))))
+(define (build-tenv decs check-type)
+  (map (compose check-type cdr) decs)
+  (make-hash-unique decs (λ (id) (type-error "redefinition of variable ~e" id))))
 
 ;;
 (define (make-hash-unique assocs err)
@@ -155,6 +155,10 @@
 ;;
 (define (type-error message . values)
   (raise (exn:fail:type-error (apply format message values) (continuation-marks #f))))
+
+;;
+(define (extend-env global-env local-env)
+  (hash-union global-env local-env #:combine (λ (glob loc) loc)))
 
 ;;
 (define (always-returns? stmt)
