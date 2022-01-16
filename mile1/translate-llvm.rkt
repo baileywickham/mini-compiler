@@ -18,7 +18,10 @@
                   (<    . slt)
                   (!=   . ne)))
 
+(struct AssignDot** (left id) #:transparent)
+
 (define tmp-prefix 'u)
+(define int-size 32)
 
 ;;
 (define+ (translate-llvm (Mini types decs funs))
@@ -37,7 +40,7 @@
 
 ;;
 (define+ (translate-global (cons id ty))
-  (GlobalLL id ty (if (equal? ty 'i32) 0 'null)))
+  (GlobalLL id ty (if (IntLL? ty) 0 'null)))
 
 ;;
 (define+ (translate-fun (Fun id params ret-type decs body) locs structs funs)
@@ -68,12 +71,16 @@
     [(Return id)
      (let ([new-ret (translate-arg id context)])
        (list (ReturnLL (cdr new-ret)  (car new-ret))))]
+    [(Assign (? symbol? target) (Read))
+     (let [(loc (hash-ref locs target))]
+       (list (ReadLL (PtrLL (cdr loc)) (car loc))))]
     [(Assign (? symbol? target) src)
      (let ([src-arg (translate-arg src context)])
        (list (StoreLL (cdr src-arg) (car src-arg) (car (hash-ref locs target)))))]
+    ;; Assign Dot
     [(Assign (? Dot? target) src)
      (let ([src-arg (translate-arg src context)]
-           [target-arg (translate-arg target context)])
+           [target-arg (translate-arg-dot target context)])
        (list (StoreLL (cdr src-arg) (car src-arg) (car target-arg))))]
     [(Inv id args)
      (let ([new-args (map (λ (arg) (translate-arg arg context)) args)]
@@ -82,14 +89,24 @@
     [(Delete exp)
      (let ([new-exp (translate-arg exp context)]
            [i (make-i)])
-       (list (AssignLL i (BitcastLL (cdr new-exp) (car new-exp) (PtrLL 'i8)))
-             (CallLL 'void (@ 'free) (list (cons i (PtrLL 'i8))))))]
+       (list (AssignLL i (BitcastLL (cdr new-exp) (car new-exp) (PtrLL (IntLL 8))))
+             (CallLL 'void (@ 'free) (list (cons i (PtrLL (IntLL 8)))))))]
+    [(Print arg endl?)
+     (let ([new-arg (translate-arg arg context)])
+       (list (PrintLL (cdr new-arg) (car new-arg) endl?)))]
     [o (list o)]))
+
+(define+ (translate-arg-dot (Dot left id) (and context (list locs structs funs add-stmt!)))
+  (let* ([left-arg (translate-arg left context)]
+         [i (make-i)]
+         [s (hash-ref structs (cdr left-arg))])
+    (add-stmt! (AssignLL i (GetEltLL (PtrLL-to (cdr left-arg)) (car left-arg) (index-of (map car s) id))))
+    (cons i (cdr (findf (λ (a) (equal? (car a) id)) s)))))
 
 ;;
 (define+ (translate-arg arg (and context (list locs structs funs add-stmt!)))
   (match arg
-    [(? integer?) (cons arg 'i32)]
+    [(? integer?) (cons arg (IntLL int-size))]
     [(? symbol?)
      (let ([i (make-i)]
            [dec (hash-ref locs arg)])
@@ -99,14 +116,17 @@
      (let ([arg1 (car (translate-arg op1 context))]
            [arg2 (car (translate-arg op2 context))]
            [i (make-i)])
-       (add-stmt! (AssignLL i (BinaryLL (hash-ref ops op) 'i32 arg1 arg2)))
-       (cons i 'i32))]
+       (add-stmt! (AssignLL i (BinaryLL (hash-ref ops op) (IntLL int-size) arg1 arg2)))
+       (cons i (IntLL int-size)))]
     [(Dot left id)
      (let* ([left-arg (translate-arg left context)]
             [i (make-i)]
-            [s (hash-ref structs (cdr left-arg))])
-       (add-stmt! (AssignLL i (GetEltLL (cdr left-arg) (car left-arg) (index-of (map car s) id))))
-       (cons i (cdr (findf (λ (a) (equal? (car a) id)) s))))]
+            [i2 (make-i)]
+            [s (hash-ref structs (cdr left-arg))]
+            [mem-ty (cdr (findf (λ (a) (equal? (car a) id)) s))])
+       (add-stmt! (AssignLL i (GetEltLL (PtrLL-to (cdr left-arg)) (car left-arg) (index-of (map car s) id))))
+       (add-stmt! (AssignLL i2 (LoadLL mem-ty i)))
+       (cons i2 mem-ty))]
     [(Inv id args)
      (let ([new-args (map (λ (arg) (translate-arg arg context)) args)]
            [i (make-i)]
@@ -117,9 +137,9 @@
      (let ([i (make-i)]
            [i2 (make-i)]
            [ty (translate-type id)])
-       (add-stmt! (AssignLL i (CallLL (PtrLL 'i8) (@ 'malloc)
-                                      (list (cons (length (hash-ref structs ty)) 'i32)))))
-       (add-stmt! (AssignLL i2 (BitcastLL (PtrLL 'i8) i ty)))
+       (add-stmt! (AssignLL i (CallLL (PtrLL (IntLL 8)) (@ 'malloc)
+                                      (list (cons (* 4 (length (hash-ref structs ty))) (IntLL int-size))))))
+       (add-stmt! (AssignLL i2 (BitcastLL (PtrLL (IntLL 8)) i ty)))
        (cons i2 ty))]
     [o (cons o 'bad)]))
 
@@ -127,7 +147,7 @@
 (define (translate-type t)
   (match t
     ['void t]
-    [(or 'int 'bool) 'i32]
+    [(or 'int 'bool) (IntLL int-size)]
     [o (PtrLL (translate-struct-id o))]))
 
 ;;

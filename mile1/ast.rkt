@@ -34,6 +34,7 @@
 (struct GotoCond* (cond iftrue iffalse) #:transparent)
 (struct Block* (id stmts) #:transparent)
 
+
 ;; --------------------------------------------
 ;; LLVM
 ;; --------------------------------------------
@@ -58,8 +59,11 @@
 
 (struct BrLL (dest) #:transparent)
 (struct BrCondLL (cond iftrue iffalse) #:transparent)
+(struct PrintLL (ty arg endl?) #:transparent)
+(struct ReadLL (ty arg) #:transparent)
 
 ;; Arguments
 (struct PtrLL (to) #:transparent)
 (struct IdLL (id global?) #:transparent)
+(struct IntLL (size) #:transparent) 
 
