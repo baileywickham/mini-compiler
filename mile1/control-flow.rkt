@@ -5,10 +5,7 @@
 (require "ast.rkt" "util.rkt" "symbol.rkt")
 
 (define return-var '_retval_)
-(define label-prefix 'LU) 
-
-;;
-
+(define label-prefix 'LU)
 
 ;;
 (define+ (control-flow (Mini types decs funs))
