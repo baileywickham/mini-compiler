@@ -26,9 +26,7 @@
 ;;
 (define+ (format-fun (FunLL id params ret-ty body))
   (format "define ~a ~a(~a)\n{\n~a\n}\n"
-          (format-ty ret-ty)
-          (format-id id)
-          (format-args params)
+          (format-ty ret-ty) (format-id id) (format-args params)
           (string-join (map format-block body) "\n")))
 
 ;;
@@ -39,44 +37,39 @@
 ;;
 (define (format-stmt s)
   (match s
-    [(BinaryLL result (? icmp-op? op) ty op1 op2)
-     (format "~a = icmp ~a ~a ~a, ~a"
-             (format-id result) op (format-ty ty) (format-arg op1) (format-arg op2))]
-    [(BinaryLL result op ty op1 op2)
-     (format "~a = ~a ~a ~a, ~a"
-             (format-id result) op (format-ty ty) (format-arg op1) (format-arg op2))]
+    [(AssignLL result src)
+     (format "~a = ~a" (format-id result) (format-stmt src))]
+    [(BinaryLL (? icmp-op? op) ty op1 op2)
+     (format "icmp ~a ~a ~a, ~a" op (format-ty ty) (format-arg op1) (format-arg op2))]
+    [(BinaryLL op ty op1 op2)
+     (format "~a ~a ~a, ~a" op (format-ty ty) (format-arg op1) (format-arg op2))]
     [(BrLL label)
-     (format "br label ~a"
-             (format-id label))]
+     (format "br label ~a" (format-id label))]
     [(BrCondLL cond iftrue iffalse)
-     (format "br i1 ~a, label ~a, label ~a"
-             (format-id cond) (format-id iftrue) (format-id iffalse))]
-    [(AllocLL result ty)
-     (format "~a = alloca ~a"
-             (format-id result) (format-ty ty))]
+     (format "br i1 ~a, label ~a, label ~a" (format-arg cond) (format-id iftrue) (format-id iffalse))]
+    [(AllocLL ty)
+     (format "alloca ~a" (format-ty ty))]
     [(StoreLL ty val ptr)
      (format "store ~a ~a, ~a ~a"
-             (format-ty ty) (format-id val) (format-ty (PtrLL ty)) (format-id ptr))]
-    [(LoadLL result ty ptr)
-     (format "~a = load ~a, ~a ~a"
-             (format-id result) (format-ty ty) (format-ty (PtrLL ty)) (format-id ptr))]
+             (format-ty ty) (format-arg val) (format-ty (PtrLL ty)) (format-id ptr))]
+    [(LoadLL ty ptr)
+     (format "load ~a, ~a ~a" (format-ty ty) (format-ty (PtrLL ty)) (format-id ptr))]
     [(ReturnLL _ (? void?)) "ret void"]
     [(ReturnLL ty arg)
      (format "ret ~a ~a" (format-ty ty) (format-arg arg))]
-    [(GetEltLL result ty ptr index)
-     (format "~a = getelementptr ~a, ~a ~a, i1 0, i32 ~a"
-             (format-id result) (format-ty ty) (format-ty (PtrLL ty)) (format-arg ptr) index)]
-    [(AssignLL result src)
-     (format "~a = ~a" (format-id result) (format-stmt src))]
+    [(GetEltLL ty ptr index)
+     (format "getelementptr ~a, ~a ~a, i1 0, i32 ~a"
+             (format-ty ty) (format-ty (PtrLL ty)) (format-arg ptr) index)]
     [(CallLL ty fn args)
      (format "call ~a ~a(~a)" (format-ty ty) (format-id fn) (format-args args))]
     [(BitcastLL ty value ty2)
      (format "bitcast ~a ~a to ~a" (format-ty ty) (format-id value) (format-ty ty2))]
     [o (~a o)]))
 
+;;
 (define (format-args args)
   (string-join
-           (map (λ+ ((cons id ty)) (format "~a ~a" (format-ty ty) (format-id id))) args) ", "))
+   (map (λ+ ((cons arg ty)) (format "~a ~a" (format-ty ty) (format-arg arg))) args) ", "))
 
 ;;
 (define (format-ty t)
@@ -84,22 +77,18 @@
     [(? IdLL?) (format-id t)]
     [(? string?) t]
     [(? symbol?) (~a t)]
-    [(PtrLL to) (format "~a*" (format-ty to))]
-    [o (~a o)]))
+    [(PtrLL to) (format "~a*" (format-ty to))]))
 
 ;;
 (define (format-arg arg)
   (match arg
     [(? integer?) arg]
     [(? IdLL?) (format-id arg)]
-    [o (~a o)]))
+    [o o]))
 
 ;;
-(define (format-id id)
-  (match id
-    [(IdLL id #t) (format "@~a" id)]
-    [(IdLL id #f) (format "%~a" id)]
-    [o o]))
+(define+ (format-id (IdLL id global?))
+  (format "~a~a" (if global? "@" "%") id))
 
 ;;
 (define (icmp-op? op)
@@ -117,4 +106,4 @@
                        (list
                         (BlockLL 'LU1
                                  (list
-                                  (BinaryLL '%u1 'add 'i32 '%u2 '%u3))))))))))
+                                  (BinaryLL 'add 'i32 '%u2 '%u3))))))))))

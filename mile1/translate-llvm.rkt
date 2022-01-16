@@ -44,24 +44,19 @@
   (let* ([all-locs (hash-union locs (get-locs params decs) #:combine (λ (a b) b))]
          [blocks (map (λ (b) (translate-block b all-locs structs funs)) body)])
     (FunLL (@ id) (translate-decs % params) (translate-type ret-type)
-           (cons
-            (extend-block (first blocks) (fun-header params decs))
-            (rest blocks)))))
+           (list-update blocks 0 (λ (block) (extend-block block (fun-header params decs)))))))
 
 ;;
 (define+ (translate-block (Block* id stmts) locs structs funs)
   (BlockLL id (append-map (λ (s) (translate-stmt s locs structs funs)) stmts)))
-
 
 ;;
 (define (translate-stmt s locs structs funs)
   (define stmts (box '()))
   (define add-stmt! (λ (s) (set-box! stmts (cons s (unbox stmts)))))
   (define last-stmts (translate-stmt* s (list locs structs funs add-stmt!)))
-  (append (reverse (unbox stmts))
-          last-stmts))
-    
-
+  (append (reverse (unbox stmts)) last-stmts))
+ 
 ;;
 (define+ (translate-stmt* s (and context (list locs _ funs _)))
   (match s
@@ -91,27 +86,27 @@
              (CallLL 'void (@ 'free) (list (cons i (PtrLL 'i8))))))]
     [o (list o)]))
 
-
+;;
 (define+ (translate-arg arg (and context (list locs structs funs add-stmt!)))
   (match arg
     [(? integer?) (cons arg 'i32)]
     [(? symbol?)
      (let ([i (make-i)]
            [dec (hash-ref locs arg)])
-       (add-stmt! (LoadLL i (cdr dec) (car dec)))
+       (add-stmt! (AssignLL i (LoadLL (cdr dec) (car dec))))
        (cons i  (cdr dec)))]
     [(Prim op (list op1 op2))
      (let ([arg1 (car (translate-arg op1 context))]
            [arg2 (car (translate-arg op2 context))]
            [i (make-i)])
-       (add-stmt! (BinaryLL i (hash-ref ops op) 'i32 arg1 arg2))
+       (add-stmt! (AssignLL i (BinaryLL (hash-ref ops op) 'i32 arg1 arg2)))
        (cons i 'i32))]
     [(Dot left id)
      (let* ([left-arg (translate-arg left context)]
             [i (make-i)]
             [s (hash-ref structs (cdr left-arg))])
-       (add-stmt! (GetEltLL i (cdr left-arg) (car left-arg) (index-of (map car s) id)))
-       (cons i (cdr (findf (lambda (a) (equal? (car a) id)) s))))]
+       (add-stmt! (AssignLL i (GetEltLL (cdr left-arg) (car left-arg) (index-of (map car s) id))))
+       (cons i (cdr (findf (λ (a) (equal? (car a) id)) s))))]
     [(Inv id args)
      (let ([new-args (map (λ (arg) (translate-arg arg context)) args)]
            [i (make-i)]
@@ -122,7 +117,8 @@
      (let ([i (make-i)]
            [i2 (make-i)]
            [ty (translate-type id)])
-       (add-stmt! (AssignLL i (CallLL (PtrLL 'i8) (@ 'malloc) (list (cons (length (hash-ref structs ty)) 'i32)))))
+       (add-stmt! (AssignLL i (CallLL (PtrLL 'i8) (@ 'malloc)
+                                      (list (cons (length (hash-ref structs ty)) 'i32)))))
        (add-stmt! (AssignLL i2 (BitcastLL (PtrLL 'i8) i ty)))
        (cons i2 ty))]
     [o (cons o 'bad)]))
@@ -138,26 +134,31 @@
 (define (translate-struct-id id)
   (% (format "struct.~a" id)))
 
+;;
 (define (make-i)
   (% (make-label tmp-prefix)))
 
-
+;;
 (define (get-locs params decs)
   (make-immutable-hash
-   (append
-    (map cons (map car decs) (translate-decs % decs))
-    (map cons (map car params) (translate-decs % (map (λ+ ((cons id ty)) (cons (param-loc id) ty)) params)))))) 
-   
+   (append (map cons (map car decs)
+                (translate-decs % decs))
+           (map cons (map car params)
+                (translate-decs % (map (λ+ ((cons id ty)) (cons (param-loc id) ty)) params)))))) 
+
+;;
 (define (param-loc p)
   (format "_P_~a" p))
 
+;;
 (define (fun-header params decs)
   (append
-   (map (λ (dec) (AllocLL (% (car dec)) (translate-type (cdr dec))))
-        (append
-         (map (λ (dec) (cons (format "_P_~a" (car dec)) (cdr dec)))
-              params)
-         decs))
+   (map (λ+ ((cons id ty)) (AssignLL id (AllocLL ty)))
+        (translate-decs %
+                        (append
+                         (map (λ (dec) (cons (format "_P_~a" (car dec)) (cdr dec)))
+                              params)
+                         decs)))
    (map (λ (dec) (StoreLL (translate-type (cdr dec))
                           (% (car dec))
                           (% (format "_P_~a" (car dec)))))

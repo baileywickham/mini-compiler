@@ -45,19 +45,21 @@
 (struct BlockLL (id stmts) #:transparent)
 
 ;; Statements
-(struct BinaryLL (result op ty op1 op2) #:transparent)
-(struct BrLL (dest) #:transparent)
-(struct BrCondLL (cond iftrue iffalse) #:transparent)
-(struct AllocLL (result ty) #:transparent)
-(struct StoreLL (ty val ptr) #:transparent)
-(struct LoadLL (result ty ptr) #:transparent)
-(struct ReturnLL (ty arg) #:transparent)
-(struct GetEltLL (result ty ptr index) #:transparent)
 (struct AssignLL (result src) #:transparent)
+
+(struct BinaryLL (op ty op1 op2) #:transparent)
+(struct AllocLL (ty) #:transparent)
+(struct StoreLL (ty val ptr) #:transparent)
+(struct LoadLL (ty ptr) #:transparent)
+(struct ReturnLL (ty arg) #:transparent)
+(struct GetEltLL (ty ptr index) #:transparent)
 (struct CallLL (ty fn args) #:transparent)
 (struct BitcastLL (ty value ty2) #:transparent)
 
-;; Expressions (sorta)
+(struct BrLL (dest) #:transparent)
+(struct BrCondLL (cond iftrue iffalse) #:transparent)
+
+;; Arguments
 (struct PtrLL (to) #:transparent)
 (struct IdLL (id global?) #:transparent)
 
