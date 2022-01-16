@@ -17,7 +17,9 @@ bool bob;
 fun f(int i, struct B j) struct A
 {
    int l, k;
-   delete i;
+   if (b.a.j1 > 0) {
+        return b.a;
+    }
    return b.a.a.a.a;              # remove i
 }
 

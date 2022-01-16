@@ -28,8 +28,7 @@
   (format "define ~a ~a(~a)\n{\n~a\n}\n"
           (format-ty ret-ty)
           (format-id id)
-          (string-join
-           (map (λ+ ((cons id ty)) (format "~a ~a" (format-ty ty) (format-id id))) params) ", ")
+          (format-args params)
           (string-join (map format-block body) "\n")))
 
 ;;
@@ -60,8 +59,24 @@
              (format-ty ty) (format-id val) (format-ty (PtrLL ty)) (format-id ptr))]
     [(LoadLL result ty ptr)
      (format "~a = load ~a, ~a ~a"
-             (format-id result) (format-ty ty) (format-ty (PtrLL ptr)) (format-id ptr))]
+             (format-id result) (format-ty ty) (format-ty (PtrLL ty)) (format-id ptr))]
+    [(ReturnLL _ (? void?)) "ret void"]
+    [(ReturnLL ty arg)
+     (format "ret ~a ~a" (format-ty ty) (format-arg arg))]
+    [(GetEltLL result ty ptr index)
+     (format "~a = getelementptr ~a, ~a ~a, i1 0, i32 ~a"
+             (format-id result) (format-ty ty) (format-ty (PtrLL ty)) (format-arg ptr) index)]
+    [(AssignLL result src)
+     (format "~a = ~a" (format-id result) (format-stmt src))]
+    [(CallLL ty fn args)
+     (format "call ~a ~a(~a)" (format-ty ty) (format-id fn) (format-args args))]
+    [(BitcastLL ty value ty2)
+     (format "bitcast ~a ~a to ~a" (format-ty ty) (format-id value) (format-ty ty2))]
     [o (~a o)]))
+
+(define (format-args args)
+  (string-join
+           (map (λ+ ((cons id ty)) (format "~a ~a" (format-ty ty) (format-id id))) args) ", "))
 
 ;;
 (define (format-ty t)

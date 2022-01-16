@@ -51,6 +51,11 @@
 (struct AllocLL (result ty) #:transparent)
 (struct StoreLL (ty val ptr) #:transparent)
 (struct LoadLL (result ty ptr) #:transparent)
+(struct ReturnLL (ty arg) #:transparent)
+(struct GetEltLL (result ty ptr index) #:transparent)
+(struct AssignLL (result src) #:transparent)
+(struct CallLL (ty fn args) #:transparent)
+(struct BitcastLL (ty value ty2) #:transparent)
 
 ;; Expressions (sorta)
 (struct PtrLL (to) #:transparent)

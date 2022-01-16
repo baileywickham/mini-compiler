@@ -2,16 +2,17 @@
 
 (provide control-flow)
 
-(require "ast.rkt" "util.rkt")
+(require "ast.rkt" "util.rkt" "symbol.rkt")
 
 (define return-var '_retval_)
+(define label-prefix 'LU) 
 
 ;;
-(define label-counter (box 0))
+
 
 ;;
 (define+ (control-flow (Mini types decs funs))
-  (reset-labels)
+  (reset-labels label-prefix)
   (Mini types decs (map control-flow-fun funs)))
 
 ;;
@@ -50,18 +51,10 @@
     [(cons stmt rest) (cons stmt (stmt-cfg rest add-block! next ret-id))]
     ['() (list next)]))
 
-;;
-(define (reset-labels)
-  (set-box! label-counter 0))
 
-;;
-(define (make-label)
-  (let ([id (unbox label-counter)])
-    (set-box! label-counter (add1 id))
-    (string->symbol (format "LU~a" id))))
 
 ;; Macro that given a set of IDs that labels are needed for binds the labels to freshly
 ;; generated labels
 (define-syntax (with-labels syntax-object)
   (syntax-case syntax-object ()
-    [(_ (label ...) body ...) #'(let ([label (make-label)] ...) body ...)]))
+    [(_ (label ...) body ...) #'(let ([label (make-label label-prefix)] ...) body ...)]))

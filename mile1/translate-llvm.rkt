@@ -2,7 +2,7 @@
 
 (provide translate-llvm)
 
-(require "ast.rkt" "util.rkt"
+(require "ast.rkt" "util.rkt" "symbol.rkt"
          racket/hash)
 
 (define ops #hash((+    . add)
@@ -18,14 +18,17 @@
                   (<    . slt)
                   (!=   . ne)))
 
+(define tmp-prefix 'u)
+
 ;;
 (define+ (translate-llvm (Mini types decs funs))
   (define globs (translate-decs @ decs))
   (define locs (make-immutable-hash (map (λ (dec glob) (cons (car dec) glob)) decs globs)))
-  (displayln locs)
+  (define structs (make-immutable-hash (map get-struct-info types)))
+  (define fun-info (make-immutable-hash (map get-fun-info funs)))
   (LLVM (map translate-struct types)
         (map translate-global globs)
-        (map (λ (f) (translate-fun f locs)) funs)))
+        (map (λ (f) (translate-fun f locs structs fun-info)) funs)))
 
 ;;
 (define+ (translate-struct (Struct id fields))
@@ -37,42 +40,92 @@
   (GlobalLL id ty (if (equal? ty 'i32) 0 'null)))
 
 ;;
-(define+ (translate-fun (Fun id params ret-type decs body) locs)
+(define+ (translate-fun (Fun id params ret-type decs body) locs structs funs)
   (let* ([all-locs (hash-union locs (get-locs params decs) #:combine (λ (a b) b))]
-         [blocks (map (λ (b) (translate-block b all-locs)) body)])
+         [blocks (map (λ (b) (translate-block b all-locs structs funs)) body)])
     (FunLL (@ id) (translate-decs % params) (translate-type ret-type)
            (cons
             (extend-block (first blocks) (fun-header params decs))
             (rest blocks)))))
 
 ;;
-(define+ (translate-block (Block* id stmts) locs)
-  (BlockLL id (append-map (λ (s) (translate-stmt s locs)) stmts)))
+(define+ (translate-block (Block* id stmts) locs structs funs)
+  (BlockLL id (append-map (λ (s) (translate-stmt s locs structs funs)) stmts)))
+
 
 ;;
-(define (translate-stmt s locs)
+(define (translate-stmt s locs structs funs)
   (define stmts (box '()))
   (define add-stmt! (λ (s) (set-box! stmts (cons s (unbox stmts)))))
+  (define last-stmts (translate-stmt* s (list locs structs funs add-stmt!)))
+  (append (reverse (unbox stmts))
+          last-stmts))
+    
+
+;;
+(define+ (translate-stmt* s (and context (list locs _ funs _)))
   (match s
     [(Goto* label) (list (BrLL (% label)))]
     [(GotoCond* cond iftrue iffalse)
-     (let ([new-cond (translate-arg cond locs add-stmt!)])
-       (append (unbox stmts)
-               (list (BrCondLL new-cond (% iftrue) (% iffalse)))))]
+     (let ([new-cond (car (translate-arg cond context))])
+       (list (BrCondLL new-cond (% iftrue) (% iffalse))))]
+    [(Return (? void?)) (list (ReturnLL 'void (void)))]
+    [(Return id)
+     (let ([new-ret (translate-arg id context)])
+       (list (ReturnLL (cdr new-ret)  (car new-ret))))]
+    [(Assign (? symbol? target) src)
+     (let ([src-arg (translate-arg src context)])
+       (list (StoreLL (cdr src-arg) (car src-arg) (car (hash-ref locs target)))))]
+    [(Assign (? Dot? target) src)
+     (let ([src-arg (translate-arg src context)]
+           [target-arg (translate-arg target context)])
+       (list (StoreLL (cdr src-arg) (car src-arg) (car target-arg))))]
+    [(Inv id args)
+     (let ([new-args (map (λ (arg) (translate-arg arg context)) args)]
+           [ret-type (hash-ref funs id)])
+       (list (CallLL ret-type (@ id) new-args)))]
+    [(Delete exp)
+     (let ([new-exp (translate-arg exp context)]
+           [i (make-i)])
+       (list (AssignLL i (BitcastLL (cdr new-exp) (car new-exp) (PtrLL 'i8)))
+             (CallLL 'void (@ 'free) (list (cons i (PtrLL 'i8))))))]
     [o (list o)]))
 
-(define (translate-arg arg locs add-stmt!)
+
+(define+ (translate-arg arg (and context (list locs structs funs add-stmt!)))
   (match arg
-    [(? integer?) arg]
+    [(? integer?) (cons arg 'i32)]
     [(? symbol?)
-     (let ([i (make-i)])
-       (add-stmt! (LoadLL i 'bad (hash-ref locs arg))) i)]
+     (let ([i (make-i)]
+           [dec (hash-ref locs arg)])
+       (add-stmt! (LoadLL i (cdr dec) (car dec)))
+       (cons i  (cdr dec)))]
     [(Prim op (list op1 op2))
-     (let ([i (make-i)])
-       (add-stmt! (BinaryLL i (hash-ref ops op) 'bad (translate-arg op1 locs add-stmt!)
-                            (translate-arg op2 locs add-stmt!)))
-       i)]
-    [o o]))
+     (let ([arg1 (car (translate-arg op1 context))]
+           [arg2 (car (translate-arg op2 context))]
+           [i (make-i)])
+       (add-stmt! (BinaryLL i (hash-ref ops op) 'i32 arg1 arg2))
+       (cons i 'i32))]
+    [(Dot left id)
+     (let* ([left-arg (translate-arg left context)]
+            [i (make-i)]
+            [s (hash-ref structs (cdr left-arg))])
+       (add-stmt! (GetEltLL i (cdr left-arg) (car left-arg) (index-of (map car s) id)))
+       (cons i (cdr (findf (lambda (a) (equal? (car a) id)) s))))]
+    [(Inv id args)
+     (let ([new-args (map (λ (arg) (translate-arg arg context)) args)]
+           [i (make-i)]
+           [ret-type (hash-ref funs id)])
+       (add-stmt! (AssignLL i (CallLL ret-type (@ id) new-args)))
+       (cons i ret-type))]
+    [(New id)
+     (let ([i (make-i)]
+           [i2 (make-i)]
+           [ty (translate-type id)])
+       (add-stmt! (AssignLL i (CallLL (PtrLL 'i8) (@ 'malloc) (list (cons (length (hash-ref structs ty)) 'i32)))))
+       (add-stmt! (AssignLL i2 (BitcastLL (PtrLL 'i8) i ty)))
+       (cons i2 ty))]
+    [o (cons o 'bad)]))
 
 ;;
 (define (translate-type t)
@@ -86,15 +139,15 @@
   (% (format "struct.~a" id)))
 
 (define (make-i)
-  (% (gensym 'i)))
+  (% (make-label tmp-prefix)))
 
 
 (define (get-locs params decs)
   (make-immutable-hash
    (append
-    (map (λ (d) (cons (car d) (% (car d)))) decs)
-    (map (λ (d) (cons (car d) (% (param-loc (car d))))) params))))
-
+    (map cons (map car decs) (translate-decs % decs))
+    (map cons (map car params) (translate-decs % (map (λ+ ((cons id ty)) (cons (param-loc id) ty)) params)))))) 
+   
 (define (param-loc p)
   (format "_P_~a" p))
 
@@ -116,6 +169,12 @@
 (define (@ id) (IdLL id #t))
 (define (% id) (IdLL id #f))
 
+(define+ (get-struct-info (Struct id fields))
+  (cons (translate-type id) (map (λ+ ((cons id ty)) (cons id (translate-type ty))) fields)))
+
+(define+ (get-fun-info (Fun id _ ret-type _ _))
+  (cons id (translate-type ret-type)))
+  
 (define (translate-decs @/% decs)
   (map (λ (dec) (translate-dec @/% dec)) decs))
 
