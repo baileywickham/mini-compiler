@@ -93,8 +93,7 @@
              (CallLL 'void (@ 'free) (list (cons i (PtrLL (IntLL 8)))))))]
     [(Print arg endl?)
      (let ([new-arg (translate-arg arg context)])
-       (list (PrintLL (cdr new-arg) (car new-arg) endl?)))]
-    [o (list o)]))
+       (list (PrintLL (cdr new-arg) (car new-arg) endl?)))]))
 
 (define+ (translate-arg-dot (Dot left id) (and context (list locs structs funs add-stmt!)))
   (let* ([left-arg (translate-arg left context)]
@@ -106,6 +105,7 @@
 ;;
 (define+ (translate-arg arg (and context (list locs structs funs add-stmt!)))
   (match arg
+    [(? boolean?) (cons arg (IntLL 1))]
     [(? integer?) (cons arg (IntLL int-size))]
     [(? symbol?)
      (let ([i (make-i)]
@@ -118,6 +118,20 @@
            [i (make-i)])
        (add-stmt! (AssignLL i (BinaryLL (hash-ref ops op) (IntLL int-size) arg1 arg2)))
        (cons i (IntLL int-size)))]
+    [(Prim '- (list exp))
+     (let ([arg (car (translate-arg exp context))]
+           [i (make-i)])
+       (add-stmt! (AssignLL i (BinaryLL 'sub (IntLL int-size) 0 arg)))
+       (cons i (IntLL int-size)))]
+    [(Prim '! (list exp))
+     (let* ([arg (translate-arg exp context)]
+            [cast? (not (equal? (cdr arg) (IntLL 1)))]
+            [tmp (make-i)]
+            [i (make-i)])
+       (when cast?
+         (add-stmt! (AssignLL tmp (CastLL 'trunc (cdr arg) arg (IntLL 1)))))
+       (add-stmt! (AssignLL i (BinaryLL 'xor (IntLL 1) 1 (if cast? tmp arg))))
+       (cons i (IntLL 1)))]
     [(Dot left id)
      (let* ([left-arg (translate-arg left context)]
             [i (make-i)]
@@ -140,8 +154,7 @@
        (add-stmt! (AssignLL i (CallLL (PtrLL (IntLL 8)) (@ 'malloc)
                                       (list (cons (* 4 (length (hash-ref structs ty))) (IntLL int-size))))))
        (add-stmt! (AssignLL i2 (BitcastLL (PtrLL (IntLL 8)) i ty)))
-       (cons i2 ty))]
-    [o (cons o 'bad)]))
+       (cons i2 ty))]))
 
 ;;
 (define (translate-type t)

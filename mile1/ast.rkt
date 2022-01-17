@@ -61,6 +61,7 @@
 (struct BrCondLL (cond iftrue iffalse) #:transparent)
 (struct PrintLL (ty arg endl?) #:transparent)
 (struct ReadLL (ty arg) #:transparent)
+(struct CastLL (op ty val ty2) #:transparent)
 
 ;; Arguments
 (struct PtrLL (to) #:transparent)

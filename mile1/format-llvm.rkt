@@ -2,6 +2,7 @@
 
 (provide format-llvm)
 
+
 (require "ast.rkt" "util.rkt")
 
 ;;
@@ -94,15 +95,14 @@ declare i32 @scanf(i8*, ...)
     [(? IdLL?) (format-id t)]
     ['void "void"]
     [(IntLL size) (format "i~a" size)]
-    [(PtrLL to) (format "~a*" (format-ty to))]
-    [o o]))
+    [(PtrLL to) (format "~a*" (format-ty to))]))
 
 ;;
 (define (format-arg arg)
   (match arg
+    [(? boolean?) (if arg "true" "false")]
     [(? integer?) arg]
-    [(? IdLL?) (format-id arg)]
-    [o o]))
+    [(? IdLL?) (format-id arg)]))
 
 ;;
 (define+ (format-id (IdLL id global?))
@@ -113,17 +113,19 @@ declare i32 @scanf(i8*, ...)
   (set-member? comp-ops op))
 
 ;;
+(define-for-syntax p #rx"\\${(([^{}:]*)(:([^{}:]*))?)}")
+(define-syntax ($ stx)
+  (define form-stx (cadr (syntax->list stx)))
+  ;(define form-pos (syntax-srcloc form-stx))
+  (define form (syntax-e form-stx))
+  
+  (define matches (regexp-match* p form #:match-select cddr))
+  (define exps (map car matches))
+  (define formats (map caddr matches))
 
-
-(module+ test
-  (require rackunit)
-
-  (display
-   (format-llvm
-    (LLVM (list (StructLL '%hi (list (PtrLL 'i32) 'i32)))
-          '()
-          (list (FunLL '@add '((%x . i32) (%y . i32)) 'i32
-                       (list
-                        (BlockLL 'LU1
-                                 (list
-                                  (BinaryLL 'add 'i32 '%u2 '%u3))))))))))
+  (define new-form (regexp-replace* p form "~a"))
+  (define vs (map (λ (vstr) (datum->syntax stx (read (open-input-string vstr)))) exps))
+  
+  (quasisyntax
+   (format (unsyntax new-form)
+           (unsyntax-splicing vs))))

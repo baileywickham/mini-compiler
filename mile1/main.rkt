@@ -26,7 +26,7 @@
   (unless (and parse-ok (zero? (string-length error-message))) (error error-message))
   (read-json in))
 
-(compile "mini/test.mini")
+(compile "mini/compat.mini")
 
 
 #;(module* main #f
@@ -34,7 +34,7 @@
     (define profiling-on (make-parameter #f))
     (define optimize-level (make-parameter 0))
     (define link-flags (make-parameter null))
- 
+
     (define file-to-compile
       (command-line
        #:program "compiler"
