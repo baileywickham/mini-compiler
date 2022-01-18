@@ -112,20 +112,3 @@ declare i32 @scanf(i8*, ...)
 (define (icmp-op? op)
   (set-member? comp-ops op))
 
-;;
-(define-for-syntax p #rx"\\${(([^{}:]*)(:([^{}:]*))?)}")
-(define-syntax ($ stx)
-  (define form-stx (cadr (syntax->list stx)))
-  ;(define form-pos (syntax-srcloc form-stx))
-  (define form (syntax-e form-stx))
-  
-  (define matches (regexp-match* p form #:match-select cddr))
-  (define exps (map car matches))
-  (define formats (map caddr matches))
-
-  (define new-form (regexp-replace* p form "~a"))
-  (define vs (map (λ (vstr) (datum->syntax stx (read (open-input-string vstr)))) exps))
-  
-  (quasisyntax
-   (format (unsyntax new-form)
-           (unsyntax-splicing vs))))
