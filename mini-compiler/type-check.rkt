@@ -1,0 +1,169 @@
+#lang racket
+
+(provide type-check)
+
+(require racket/hash)
+(require "ast.rkt" "util.rkt")
+
+(struct	exn:fail:type-error exn:fail () #:transparent)
+
+(struct Fun-type (params ret) #:transparent)
+
+(define base-types
+  (set 'int
+       'bool))
+
+(define prim-types
+  (hash '(+    . 2) (Fun-type '(int  int)  'int)
+        '(-    . 2) (Fun-type '(int  int)  'int)
+        '(*    . 2) (Fun-type '(int  int)  'int)
+        '(/    . 2) (Fun-type '(int  int)  'int)
+        '(&&   . 2) (Fun-type '(bool bool) 'bool)
+        '(\|\| . 2) (Fun-type '(bool bool) 'bool)
+        '(<=   . 2) (Fun-type '(int  int)  'bool)
+        '(>=   . 2) (Fun-type '(int  int)  'bool)
+        '(<    . 2) (Fun-type '(int  int)  'bool)
+        '(>    . 2) (Fun-type '(int  int)  'bool)
+        
+        '(!    . 1) (Fun-type '(bool) 'bool)
+        '(-    . 1) (Fun-type '(int)  'int)))
+
+(define main-type (Fun-type '() 'int))
+
+;;
+(define+ (type-check (Mini types decs funs))
+  (let* ([check-type (make-check-type types)]
+         [get-sig (gather-fun-types funs check-type)]
+         [structs (make-hash (map (λ+ ((Struct id fs)) (cons id (build-tenv fs check-type))) types))]
+         [global-tenv (build-tenv decs check-type)])
+
+    (for ([fun funs])
+      (match-let ([(Fun id params ret-type decs body) fun])
+        (let* ([tenv (extend-env global-tenv (build-tenv (append params decs) check-type))]
+               [context (list structs get-sig tenv ret-type)])
+          (for ([stmt body]) (check-stmt stmt context)))
+        (unless (or (equal? ret-type 'void) (always-returns? body))
+          (type-error "function ~e does not return in all cases" id))))
+
+    (unless (equal? (get-sig 'main) main-type)
+      (type-error "main expects no arguments and returns an int"))))
+
+;;
+(define+ (check-stmt stmt (and context (list structs get-sig _ ret-type)))
+  (match stmt
+    [(? list? stmts) (for ([stmt stmts]) (check-stmt stmt context))]
+    [(Assign target src)
+     (ensure-type-match (check-exp target context) (check-exp src context) 'assignment)]
+    [(If guard then else)
+     (ensure-type-match 'bool (check-exp guard context) 'if)
+     (check-stmt then context)
+     (check-stmt else context)]
+    [(While guard body)
+     (ensure-type-match 'bool (check-exp guard context) 'while)
+     (check-stmt body context)]
+    [(Print exp _) (ensure-type-match 'int (check-exp exp context) 'print)]
+    [(Return exp) (ensure-type-match ret-type (check-exp exp context) 'return)]
+    [(Inv id args) (check-fun (get-sig id) (check-exps args context) id)]
+    [(Delete exp)
+     (let ([exp-type (check-exp exp context)])
+       (unless (hash-has-key? structs exp-type)
+         (type-error "could not delete non struct: ~e" exp-type)))]))
+
+;;
+(define+ (check-exp exp (and context (list structs get-sig tenv _)))
+  (match exp
+    [(Read) 'int]
+    [(Null) 'null]
+    [(? void?) 'void]   ;; void isn't really an exp, this will only happen in (Return void)
+    [(? integer?) 'int]
+    [(? boolean?) 'bool]
+    [(? symbol? s) (hash-ref tenv s (λ () (type-error "unbound identifier: ~e" s)))]
+    [(New id) (hash-ref-key structs id (λ () (type-error "undefined struct type: ~e" id)))]
+    [(Dot left id)
+     (hash-ref (hash-ref structs (check-exp left context)
+                         (λ () (type-error "~e is not of struct type" left)))
+               id (λ () (type-error "struct does not have member ~e" id)))]
+    [(Prim (? equality-op? op) exps)
+     (let ([exp-types (check-exps exps context)])
+       (if (and (type=? (first exp-types) (second exp-types)) (not (member 'bool exp-types)))
+           'bool (type-error "~e: invalid types ~e" op exp-types)))]
+    [(Prim op exps)
+     (check-fun (hash-ref prim-types (cons op (length exps))) (check-exps exps context) op)]
+    [(Inv id args)
+     (check-fun (get-sig id) (check-exps args context) id)]))
+
+;;
+(define (check-exps exps context)
+  (map (curryr check-exp context) exps))
+
+;;
+(define (ensure-type-match expected-type true-type loc)
+  (unless (type=? expected-type true-type)
+    (type-error "~a expected ~e, got ~e" loc expected-type true-type)))
+
+;;
+(define (type=? ty1 ty2)
+  (or (equal? ty1 ty2)
+      (and (equal? ty2 'null) (struct? ty1))
+      (and (equal? ty1 'null) (struct? ty2))))
+
+;;
+(define (struct? type)
+  (nor (equal? type 'void) (set-member? base-types type)))
+
+;;
+(define+ (check-fun (Fun-type param-types ret-type) arg-types id)
+  (unless (and (equal? (length arg-types) (length param-types)) (andmap type=? arg-types param-types))
+    (type-error "cound not call ~e with arguments ~e" id arg-types))
+  ret-type)
+
+;;
+(define (make-check-type structs)
+  (let ([all-types (set-union base-types (list->set (map Struct-id structs)))])
+    (λ (possible-type)
+      (unless (set-member? all-types possible-type)
+        (type-error "invalid type ~e" possible-type)))))
+
+;;
+(define (gather-fun-types funs check-type)
+  (let ([fun-sigs (make-hash-unique
+                   (map (λ (fun) (cons (Fun-id fun) (extract-Fun-type fun check-type))) funs)
+                   (λ (id) (type-error "duplicate function id ~e" id)))])
+    (λ (id) (hash-ref fun-sigs id (λ () (type-error "undefined function ~e" id))))))
+
+;;
+(define+ (extract-Fun-type (Fun _ params ret-type _ _) check-type)
+  (let ([param-types (map cdr params)])
+    (for ([ty param-types]) (check-type ty))
+    (unless (equal? 'void ret-type) (check-type ret-type))
+    (Fun-type param-types ret-type)))
+
+;;
+(define (build-tenv decs check-type)
+  (map (compose check-type cdr) decs)
+  (make-hash-unique decs (λ (id) (type-error "redefinition of variable ~e" id))))
+
+;;
+(define (make-hash-unique assocs err)
+  (let ([duplicate (check-duplicates (map car assocs))])
+    (if duplicate (err duplicate) (make-immutable-hash assocs))))
+
+;;
+(define (equality-op? op)
+  (if (member op '(== !=)) #t #f))
+
+;;
+(define (type-error message . values)
+  (raise (exn:fail:type-error (apply format message values) (continuation-marks #f))))
+
+;;
+(define (extend-env global-env local-env)
+  (hash-union global-env local-env #:combine (λ (glob loc) loc)))
+
+;;
+(define (always-returns? stmt)
+  (match stmt
+    [(? Return?) #t]
+    [(? list? stmts) (ormap always-returns? stmts)]
+    [(If _ then else) (and (always-returns? then) (always-returns? else))]
+    [_ #f]))
