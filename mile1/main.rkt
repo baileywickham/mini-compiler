@@ -8,10 +8,18 @@
          "format-llvm.rkt")
 
 ;; Main
-(define (compile path)
+(define (compile path stack? llvm? debug?)
   (define mini (parse (java-parse path)))
   (type-check mini)
-  (pretty-display (format-llvm (translate-llvm (control-flow mini)))))
+  (define llvm-ir
+    (if stack?
+        (translate-llvm (control-flow mini))
+        (error "non-stack unimplemented")))
+  (when debug? (display (format-llvm llvm-ir)))
+  (with-output-to-file
+      (path-replace-extension path ".ll")
+    (λ () (display (format-llvm llvm-ir)))
+    #:exists 'replace))
 
 ;; Calls the Java MiniCompiler parser and reads the generated JSON into hash tables
 (define (java-parse path)
@@ -21,42 +29,24 @@
     (parameterize ([current-input-port (open-input-string "")]
                    [current-output-port out]
                    [current-error-port err])
-      (system (string-append "java -jar MiniCompiler.jar " path))))
+      (system (format "java -jar MiniCompiler.jar ~a" path))))
   (define error-message (get-output-string err))
   (unless (and parse-ok (zero? (string-length error-message))) (error error-message))
   (read-json in))
 
-(compile "mini/compat.mini")
+(module* main #f
+  (define stack? (make-parameter #f))
+  (define llvm? (make-parameter #f))
+  (define debug? (make-parameter #f))
 
+  (define mini-file
+    (command-line
+     #:program "mini-compiler"
+     #:once-each
+     [("--stack") "Compile with stack allocation" (stack? #t)]
+     [("--llvm") "Compile with LLVM output" (llvm? #t)]
+     [("--debug") "Compile with debugging on" (debug? #t)]
+     #:args (filename) filename))
 
-#;(module* main #f
-    (define verbose-mode (make-parameter #f))
-    (define profiling-on (make-parameter #f))
-    (define optimize-level (make-parameter 0))
-    (define link-flags (make-parameter null))
-
-    (define file-to-compile
-      (command-line
-       #:program "compiler"
-       #:once-each
-       [("-v" "--verbose") "Compile with verbose messages"
-                           (verbose-mode #t)]
-       [("-p" "--profile") "Compile with profiling"
-                           (profiling-on #t)]
-       #:once-any
-       [("-o" "--optimize-1") "Compile with optimization level 1"
-                              (optimize-level 1)]
-       ["--optimize-2"        (; show help on separate lines
-                               "Compile with optimization level 2,"
-                               "which includes all of level 1")
-                              (optimize-level 2)]
-       #:multi
-       [("-l" "--link-flags") lf ; flag takes one argument
-                              "Add a flag <lf> for the linker"
-                              (link-flags (cons lf (link-flags)))]
-       #:args (filename) ; expect one command-line argument: <filename>
-       ; return the argument as a filename to compile
-       filename))
-
-    (compile file-to-compile))
+  (compile (string->path mini-file) (stack?) (llvm?) (debug?)))
 

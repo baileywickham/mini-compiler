@@ -8,21 +8,25 @@
 ;;
 (define comp-ops (set 'sle 'sgt 'sge 'slt 'eq))
 
+(define header "target triple=\"i686\"\n")
+
 (define footer "declare i8* @malloc(i32)
 declare void @free(i8*)
 declare i32 @printf(i8*, ...)
 declare i32 @scanf(i8*, ...)
-@.println = private unnamed_addr constant [5 x i8] c\"%ld\\0A\\00\\00\", align 1
-@.print = private unnamed_addr constant [5 x i8] c\"%ld \\00\\00\", align 1
-@.read = private unnamed_addr constant [4 x i8] c\"%ld\\00\\00\", align 1
+@.println = private unnamed_addr constant [6 x i8] c\"%ld\\0A\\00\\00\", align 1
+@.print = private unnamed_addr constant [6 x i8] c\"%ld \\00\\00\", align 1
+@.read = private unnamed_addr constant [5 x i8] c\"%ld\\00\\00\", align 1
 @.read_scratch = common global i32 0, align 4\n")
 
 ;;
 (define+ (format-llvm (LLVM types decs funs))
-  (string-join (append (map format-struct types)
-                       (map format-dec decs)
-                       (map format-fun funs)
-                       (list footer)) "\n"))
+  (string-append
+   header
+   (string-join (list (string-join (map format-struct types) "\n")
+                      (string-join (map format-dec decs) "\n")
+                      (string-join (map format-fun funs) "\n")) "\n\n")
+   footer))
 
 ;;
 (define+ (format-struct (StructLL id tys))
@@ -76,13 +80,11 @@ declare i32 @scanf(i8*, ...)
     [(CastLL op ty value ty2)
      (format "~a ~a ~a to ~a" op (format-ty ty) (format-arg value) (format-ty ty2))]
     [(PrintLL ty arg endl?)
-     (format "call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.println, i32 0, i32 0), ~a ~a)"
+     (format "call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.println, i32 0, i32 0), ~a ~a)"
              (format-ty ty) (format-arg arg))]
     [(ReadLL ty arg)
-     (format "call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.read, i32 0, i32 0), ~a ~a)"
-             (format-ty ty) (format-arg arg))]
-
-    [o (~a o)]))
+     (format "call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.read, i32 0, i32 0), ~a ~a)"
+             (format-ty ty) (format-arg arg))]))
 
 ;;
 (define (format-args args)
