@@ -176,10 +176,6 @@
   (% (format "struct.~a" id)))
 
 ;;
-(define (param-loc p)
-  (format "_P_~a" p))
-
-;;
 (define (translate-fun-vars params decs)
   (let* ([new-param (translate-decs % params)]
          [param-locs (translate-decs % (map (λ+ ((cons id ty)) (cons (param-loc id) ty)) params))]
@@ -190,6 +186,10 @@
      (append
       (map (λ+ ((cons id ty)) (AssignLL id (AllocLL ty))) locs)
       (map (λ+ ((cons id ty) (cons loc-id _)) (StoreLL ty id loc-id)) new-param param-locs)))))
+
+;;
+(define (param-loc p)
+  (format "_P_~a" p))
 
 ;;
 (define+ (extend-block (BlockLL id stmts) new-stmts)

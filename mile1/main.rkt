@@ -16,10 +16,11 @@
         (translate-llvm (control-flow mini))
         (error "non-stack unimplemented")))
   (when debug? (display (format-llvm llvm-ir)))
-  (with-output-to-file
-      (path-replace-extension path ".ll")
-    (λ () (display (format-llvm llvm-ir)))
-    #:exists 'replace))
+  (define llvm-path (path-replace-extension path ".ll"))
+  (with-output-to-file llvm-path
+    (λ () (display (format-llvm llvm-ir))) #:exists 'replace)
+  (unless llvm? (clang llvm-path))
+  (void))
 
 ;; Calls the Java MiniCompiler parser and reads the generated JSON into hash tables
 (define (java-parse path)
@@ -34,6 +35,12 @@
   (unless (and parse-ok (zero? (string-length error-message))) (error error-message))
   (read-json in))
 
+;; Calls clang on a path
+(define (clang path)
+  (system (format "clang ~a -o ~a" path
+                  (path-replace-extension path ""))))
+
+;; Command line argument parser
 (module* main #f
   (define stack? (make-parameter #f))
   (define llvm? (make-parameter #f))
