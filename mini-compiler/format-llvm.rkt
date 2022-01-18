@@ -6,7 +6,7 @@
 (require "ast.rkt" "util.rkt")
 
 ;;
-(define comp-ops (set 'sle 'sgt 'sge 'slt 'eq))
+(define comp-ops (set 'sle 'sgt 'sge 'slt 'eq 'ne))
 
 (define header "target triple=\"i686\"\n")
 
@@ -102,6 +102,7 @@ declare i32 @scanf(i8*, ...)
 ;;
 (define (format-arg arg)
   (match arg
+    ['null "null"]
     [(? boolean?) (if arg "true" "false")]
     [(? integer?) arg]
     [(? IdLL?) (format-id arg)]))

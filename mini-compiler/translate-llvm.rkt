@@ -79,9 +79,9 @@
      (match-let ([(cons loc-id loc-ty) (translate-assign-target target context)])
        (list (ReadLL (PtrLL loc-ty) loc-id)))]
     [(Assign target src)
-     (match-let ([(cons src-id src-ty) (ensure-size (translate-arg src context) isize context)]
-                 [(cons target-id _) (translate-assign-target target context)])
-       (list (StoreLL src-ty src-id target-id)))]
+     (match-let ([(cons src-id _) (ensure-size (translate-arg src context) isize context)]
+                 [(cons target-id target-ty) (translate-assign-target target context)])
+       (list (StoreLL target-ty src-id target-id)))]
     [(Inv id args)
      (let ([new-args (map (λ (arg) (translate-arg arg context)) args)]
            [ret-type (hash-ref funs id)])
@@ -104,6 +104,7 @@
   (match arg
     [(? boolean?) (cons arg i1)]
     [(? integer?) (cons arg isize)]
+    [(Null) (cons 'null isize)]
     [(? symbol?)
      (match-let ([(cons id ty) (hash-ref locs arg)])
        (with-tmp (tmp)

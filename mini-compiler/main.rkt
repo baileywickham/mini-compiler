@@ -1,5 +1,7 @@
 #lang racket
 
+(provide compile)
+
 (require json)
 (require "parse-json.rkt"
          "type-check.rkt"
