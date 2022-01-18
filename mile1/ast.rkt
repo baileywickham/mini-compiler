@@ -55,7 +55,6 @@
 (struct ReturnLL (ty arg) #:transparent)
 (struct GetEltLL (ty ptr index) #:transparent)
 (struct CallLL (ty fn args) #:transparent)
-(struct BitcastLL (ty value ty2) #:transparent)
 
 (struct BrLL (dest) #:transparent)
 (struct BrCondLL (cond iftrue iffalse) #:transparent)

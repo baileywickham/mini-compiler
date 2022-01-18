@@ -73,8 +73,8 @@ declare i32 @scanf(i8*, ...)
              (format-ty ty) (format-ty (PtrLL ty)) (format-arg ptr) index)]
     [(CallLL ty fn args)
      (format "call ~a ~a(~a)" (format-ty ty) (format-id fn) (format-args args))]
-    [(BitcastLL ty value ty2)
-     (format "bitcast ~a ~a to ~a" (format-ty ty) (format-id value) (format-ty ty2))]
+    [(CastLL op ty value ty2)
+     (format "~a ~a ~a to ~a" op (format-ty ty) (format-arg value) (format-ty ty2))]
     [(PrintLL ty arg endl?)
      (format "call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.println, i32 0, i32 0), ~a ~a)"
              (format-ty ty) (format-arg arg))]
