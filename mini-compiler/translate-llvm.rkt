@@ -69,7 +69,7 @@
   (match s
     [(Goto* label) (list (BrLL (% label)))]
     [(GotoCond* cond iftrue iffalse)
-     (match-let ([(cons new-cond _) (ensure-size (translate-arg cond context) i1 context)])
+     (match-let ([(cons new-cond _) (ensure-type (translate-arg cond context) i1 context)])
        (list (BrCondLL new-cond (% iftrue) (% iffalse))))]
     [(Return (? void?)) (list (ReturnLL 'void (void)))]
     [(Return id)
@@ -79,13 +79,12 @@
      (match-let ([(cons loc-id loc-ty) (translate-assign-target target context)])
        (list (ReadLL (PtrLL loc-ty) loc-id)))]
     [(Assign target src)
-     (match-let ([(cons src-id _) (ensure-size (translate-arg src context) isize context)]
+     (match-let ([(cons src-id _) (ensure-type (translate-arg src context) isize context)]
                  [(cons target-id target-ty) (translate-assign-target target context)])
        (list (StoreLL target-ty src-id target-id)))]
     [(Inv id args)
-     (let ([new-args (map (λ (arg) (translate-arg arg context)) args)]
-           [ret-type (hash-ref funs id)])
-       (list (CallLL ret-type (@ id) new-args)))]
+     (match-let ([(cons call _) (translate-inv s context)])
+       (list call))]
     [(Delete exp)
      (match-let ([(cons arg-id arg-ty) (translate-arg exp context)])
        (with-tmp (tmp)
@@ -113,8 +112,8 @@
     [(Prim op (list op1 op2))
      (match-let*
          ([(list op-name in-ty out-ty) (hash-ref ops op)]
-          [(cons arg1-id op-ty) (ensure-size (translate-arg op1 context) in-ty context)]
-          [(cons arg2-id _) (ensure-size (translate-arg op2 context) in-ty context)])
+          [(cons arg1-id op-ty) (ensure-type (translate-arg op1 context) in-ty context)]
+          [(cons arg2-id _) (ensure-type (translate-arg op2 context) in-ty context)])
        (with-tmp (tmp)
          (add-stmt! (AssignLL tmp (BinaryLL op-name op-ty arg1-id arg2-id)))
          (cons tmp out-ty)))]
@@ -124,7 +123,7 @@
          (add-stmt! (AssignLL tmp (BinaryLL 'sub isize 0 arg-id)))
          (cons tmp isize)))]
     [(Prim '! (list exp))
-     (match-let ([(cons arg-id _) (ensure-size (translate-arg exp context) i1 context)])
+     (match-let ([(cons arg-id _) (ensure-type (translate-arg exp context) i1 context)])
        (with-tmp (tmp)
          (add-stmt! (AssignLL tmp (BinaryLL 'xor i1 #t arg-id)))
          (cons tmp i1)))]
@@ -134,11 +133,10 @@
          (add-stmt! (AssignLL tmp (LoadLL dot-ty dot-id)))
          (cons tmp dot-ty)))]
     [(Inv id args)
-     (let ([new-args (map (λ (arg) (translate-arg arg context)) args)]
-           [ret-type (hash-ref funs id)])
+     (match-let ([(cons call ret-ty) (translate-inv arg context)])
        (with-tmp (tmp)
-         (add-stmt! (AssignLL tmp (CallLL ret-type (@ id) new-args)))
-         (cons tmp ret-type)))]
+         (add-stmt! (AssignLL tmp call))
+         (cons tmp ret-ty)))]
     [(New id)
      (let ([ty (translate-type id)])
        (with-tmp (tmp tmp2)
@@ -156,14 +154,15 @@
       (cons tmp (cdr (findf (λ+ ((cons mem-id _)) (equal? mem-id id)) fields))))))
 
 ;;
-(define+ (ensure-size (and dec (cons id ty)) (and i (IntLL size)) (list _ _ _ add-stmt!))
-  (match ty
-    [(IntLL s)
-     (if (equal? s size) dec
+(define+ (ensure-type (and dec (cons id ty)) new-ty (list _ _ _ add-stmt!))
+  (match* (ty new-ty)
+    [((IntLL s) (IntLL s2))
+     (if (equal? s s2) dec
          (with-tmp (tmp)
-           (add-stmt! (AssignLL tmp (CastLL (if (> s size) 'trunc 'zext) ty id i)))
-           (cons tmp i)))]
-    [_ dec]))
+           (add-stmt! (AssignLL tmp (CastLL (if (> s s2) 'trunc 'zext) ty id new-ty)))
+           (cons tmp new-ty)))]
+    [(s (? IntLL?)) dec]
+    [(_ _) (cons id new-ty)]))
 
 ;;
 (define (translate-type t)
@@ -171,6 +170,11 @@
     ['void t]
     [(or 'int 'bool) isize]
     [o (PtrLL (translate-struct-id o))]))
+
+(define+ (translate-inv (Inv id args) (and context (list _ _ funs _)))
+  (match-let* ([(cons ret-ty param-tys) (hash-ref funs id)]
+               [new-args (map (λ (arg param-ty) (ensure-type (translate-arg arg context) param-ty context)) args param-tys)])       
+    (cons (CallLL ret-ty (@ id) new-args) ret-ty)))
 
 ;;
 (define (translate-struct-id id)
@@ -202,9 +206,9 @@
 (define+ (get-struct-info (Struct id fields))
   (cons (translate-type id) (map (λ+ ((cons id ty)) (cons id (translate-type ty))) fields)))
 
-(define+ (get-fun-info (Fun id _ ret-type _ _))
-  (cons id (translate-type ret-type)))
-
+(define+ (get-fun-info (Fun id params ret-type _ _))
+  (list* id (translate-type ret-type) (map (compose translate-type cdr) params)))
+ 
 (define (translate-decs @/% decs)
   (map (λ (dec) (translate-dec @/% dec)) decs))
 
