@@ -19,5 +19,11 @@ jobs:
           version: 8.3
 
     - name: Build
-      run: raco make mini-compiler/benchmarks.rkt
+      run:  |
+        cd mini-compiler
+        raco make benchmarks.rkt
+
+    - name: Test
+      run:  |
+        racket benchmarks.rkt
 
