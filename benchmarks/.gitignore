@@ -2,6 +2,7 @@
 *.out
 
 BenchMarkishTopics/BenchMarkishTopics
+CompatibilityTest/compat
 Fibonacci/Fibonacci
 GeneralFunctAndOptimize/GeneralFunctAndOptimize
 OptimizationBenchmark/OptimizationBenchmark
