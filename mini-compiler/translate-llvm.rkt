@@ -83,7 +83,7 @@
      (match-let ([(cons src-id _) (ensure-type (translate-arg src context) isize context)]
                  [(cons target-id target-ty) (translate-assign-target target context)])
        (list (StoreLL target-ty src-id target-id)))]
-    [(Inv id args)
+    [(? Inv?)
      (match-let ([(cons call _) (translate-inv s context)])
        (list call))]
     [(Delete exp)
@@ -155,6 +155,14 @@
       (cons tmp (cdr (findf (λ+ ((cons mem-id _)) (equal? mem-id id)) fields))))))
 
 ;;
+(define+ (translate-inv (Inv id args) (and context (list _ _ funs _)))
+  (match-let*
+      ([(cons ret-ty param-tys) (hash-ref funs id)]
+       [new-args (map (λ (arg param-ty) (ensure-type (translate-arg arg context) param-ty context))
+                      args param-tys)])
+    (cons (CallLL ret-ty (@ id) new-args) ret-ty)))
+
+;;
 (define+ (ensure-type (and dec (cons id ty)) new-ty (list _ _ _ add-stmt!))
   (match* (ty new-ty)
     [((IntLL s) (IntLL s2))
@@ -164,21 +172,6 @@
            (cons tmp new-ty)))]
     [(s (? IntLL?)) dec]
     [(_ _) (cons id new-ty)]))
-
-;;
-(define (translate-type t)
-  (match t
-    ['void t]
-    [(or 'int 'bool) isize]
-    [o (PtrLL (translate-struct-id o))]))
-
-;;
-(define+ (translate-inv (Inv id args) (and context (list _ _ funs _)))
-  (match-let* ([(cons ret-ty param-tys) (hash-ref funs id)]
-               [new-args (map (λ (arg param-ty)
-                                (ensure-type (translate-arg arg context) param-ty context))
-                              args param-tys)])
-    (cons (CallLL ret-ty (@ id) new-args) ret-ty)))
 
 ;;
 (define (translate-struct-id id)
@@ -219,6 +212,12 @@
 (define+ (translate-dec @/% (cons id type))
   (cons (@/% id) (translate-type type)))
 
+;;
+(define (translate-type t)
+  (match t
+    ['void t]
+    [(or 'int 'bool) isize]
+    [o (PtrLL (translate-struct-id o))]))
 
 ;; Macro that given a set of IDs that temporaries are needed for binds the ids to freshly
 ;; generated temporaries
