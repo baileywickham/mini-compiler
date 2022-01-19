@@ -1,4 +1,4 @@
-name: Racket CI
+name: Benchmarks
 on:
   push:
     branches: [ main ]
@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -23,8 +22,11 @@ jobs:
         cd mini-compiler
         raco make benchmarks.rkt
 
-    - name: Test
-      run:  |
-        cd mini-compiler
-        racket benchmarks.rkt
-
+  test:
+      runs-on: ubuntu-latest
+      steps: 
+          - name: Test
+            run:  |
+              cd mini-compiler
+              racket benchmarks.rkt
+  
