@@ -17,13 +17,13 @@
       (define mini-file (findf (λ (file) (has-extension? file ".mini")) benchmark-content))
       (define llvm-file (path-replace-extension mini-file ".ll"))
       (define executable (path-replace-extension mini-file ""))
-    
+
       (with-handlers ([exn:fail:filesystem? (const (void))])
         (delete-file llvm-file)
         (delete-file executable))
 
       (compile mini-file #t #f #f)
-    
+
       (when (file-exists? executable)
         (for ([input  (filter (λ (file) (name-incules? file "input"))  benchmark-content)]
               [output (filter (λ (file) (name-incules? file "output")) benchmark-content)])

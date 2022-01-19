@@ -83,7 +83,7 @@ declare i32 @scanf(i8*, ...)
      (format "call i32 (i8*, ...) @printf(~a, ~a ~a)"
              (if endl? "i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.println, i32 0, i32 0)"
                  "i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.print, i32 0, i32 0)")
-             (format-ty ty) (format-arg arg))]    
+             (format-ty ty) (format-arg arg))]
     [(ReadLL ty arg)
      (format "call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.read, i32 0, i32 0), ~a ~a)"
              (format-ty ty) (format-arg arg))]))

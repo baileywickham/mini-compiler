@@ -177,7 +177,7 @@
   (match-let* ([(cons ret-ty param-tys) (hash-ref funs id)]
                [new-args (map (λ (arg param-ty)
                                 (ensure-type (translate-arg arg context) param-ty context))
-                              args param-tys)])       
+                              args param-tys)])
     (cons (CallLL ret-ty (@ id) new-args) ret-ty)))
 
 ;;
@@ -212,7 +212,7 @@
 
 (define+ (get-fun-info (Fun id params ret-type _ _))
   (list* id (translate-type ret-type) (map (compose translate-type cdr) params)))
- 
+
 (define (translate-decs @/% decs)
   (map (λ (dec) (translate-dec @/% dec)) decs))
 

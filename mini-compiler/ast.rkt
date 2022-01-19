@@ -65,5 +65,5 @@
 ;; Arguments
 (struct PtrLL (to) #:transparent)
 (struct IdLL (id global?) #:transparent)
-(struct IntLL (size) #:transparent) 
+(struct IntLL (size) #:transparent)
 

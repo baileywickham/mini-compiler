@@ -24,7 +24,7 @@
         '(>=   . 2) (Fun-type '(int  int)  'bool)
         '(<    . 2) (Fun-type '(int  int)  'bool)
         '(>    . 2) (Fun-type '(int  int)  'bool)
-        
+
         '(!    . 1) (Fun-type '(bool) 'bool)
         '(-    . 1) (Fun-type '(int)  'int)))
 
