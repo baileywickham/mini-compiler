@@ -1,5 +1,4 @@
-name: C/C++ CI
-
+name: Racket CI
 on:
   push:
     branches: [ main ]
@@ -12,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Setup Racket environment
+      uses: Bogdanp/setup-racket@v1.7
+
     - uses: actions/checkout@v2
     - name: configure
       run: ./configure
