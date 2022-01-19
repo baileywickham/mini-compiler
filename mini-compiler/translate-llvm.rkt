@@ -28,6 +28,7 @@
 
 ;;
 (define+ (translate-llvm (Mini types decs funs))
+  (reset-labels tmp-prefix)
   (define globs (translate-decs @ decs))
   (define locs (make-immutable-hash (map (λ (dec glob) (cons (car dec) glob)) decs globs)))
   (define structs (make-immutable-hash (map get-struct-info types)))
@@ -65,7 +66,7 @@
   (append (reverse (unbox stmts)) last-stmts))
 
 ;;
-(define+ (translate-stmt* s (and context (list _ _ funs _)))
+(define (translate-stmt* s context)
   (match s
     [(Goto* label) (list (BrLL (% label)))]
     [(GotoCond* cond iftrue iffalse)
@@ -99,7 +100,7 @@
   (if (Dot? target) (translate-dot target context) (hash-ref locs target)))
 
 ;;
-(define+ (translate-arg arg (and context (list locs structs funs add-stmt!)))
+(define+ (translate-arg arg (and context (list locs structs _ add-stmt!)))
   (match arg
     [(? boolean?) (cons arg i1)]
     [(? integer?) (cons arg isize)]
@@ -171,9 +172,12 @@
     [(or 'int 'bool) isize]
     [o (PtrLL (translate-struct-id o))]))
 
+;;
 (define+ (translate-inv (Inv id args) (and context (list _ _ funs _)))
   (match-let* ([(cons ret-ty param-tys) (hash-ref funs id)]
-               [new-args (map (λ (arg param-ty) (ensure-type (translate-arg arg context) param-ty context)) args param-tys)])       
+               [new-args (map (λ (arg param-ty)
+                                (ensure-type (translate-arg arg context) param-ty context))
+                              args param-tys)])       
     (cons (CallLL ret-ty (@ id) new-args) ret-ty)))
 
 ;;
