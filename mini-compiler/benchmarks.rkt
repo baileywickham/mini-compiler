@@ -23,7 +23,7 @@
         (delete-file executable))
 
       (compile mini-file #t #f #f)
-      
+
       (when (and error? (not (file-exists? executable)))
         (error "compilation failed"))
 
@@ -59,6 +59,5 @@
    [("-l" "--list") "List tests, but do not run" (list? #t)]
    [("-r" "--regexp") pat "Regexp pattern to use for test selection" (regexp-pattern (regexp pat))]
    [("-e" "--error") "Throw errors and stop on failed tests" (error? #t)])
-  
 
   (benchmark (regexp-pattern) (list?) (error?)))
