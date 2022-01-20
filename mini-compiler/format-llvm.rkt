@@ -75,18 +75,10 @@ declare i32 @scanf(i8*, ...)
     [(GetEltLL ty ptr index)
      (format "getelementptr ~a, ~a ~a, i1 0, i32 ~a"
              (format-ty ty) (format-ty (PtrLL ty)) (format-arg ptr) index)]
-    [(CallLL ty fn args)
-     (format "call ~a ~a(~a)" (format-ty ty) (format-id fn) (format-args args))]
+    [(CallLL ty fn args var-args?)
+     (format "call ~a~a ~a(~a)" (format-ty ty) (if var-args? " (i8*, ... )" "")  (format-id fn) (format-args args))]
     [(CastLL op ty value ty2)
-     (format "~a ~a ~a to ~a" op (format-ty ty) (format-arg value) (format-ty ty2))]
-    [(PrintLL ty arg endl?)
-     (format "call i32 (i8*, ...) @printf(~a, ~a ~a)"
-             (if endl? "i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.println, i32 0, i32 0)"
-                 "i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.print, i32 0, i32 0)")
-             (format-ty ty) (format-arg arg))]
-    [(ReadLL ty arg)
-     (format "call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.read, i32 0, i32 0), ~a ~a)"
-             (format-ty ty) (format-arg arg))]))
+     (format "~a ~a ~a to ~a" op (format-ty ty) (format-arg value) (format-ty ty2))]))
 
 ;;
 (define (format-args args)
@@ -105,6 +97,7 @@ declare i32 @scanf(i8*, ...)
 (define (format-arg arg)
   (match arg
     ['null "null"]
+    [(? string?) arg]
     [(? boolean?) (if arg "true" "false")]
     [(? integer?) arg]
     [(? IdLL?) (format-id arg)]))

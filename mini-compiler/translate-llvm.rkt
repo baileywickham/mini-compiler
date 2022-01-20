@@ -6,9 +6,11 @@
          racket/hash)
 
 (define int-size 64)
+(define byte-size 8)
 
 (define i1 (IntLL 1))
-(define i8 (IntLL 8))
+(define byte (IntLL byte-size))
+(define i32 (IntLL 32))
 (define isize (IntLL int-size))
 
 (define ops (hash '+    `(add  ,isize ,isize)
@@ -78,7 +80,9 @@
        (list (ReturnLL ret-ty ret-id)))]
     [(Assign target (Read))
      (match-let ([(cons loc-id loc-ty) (translate-assign-target target context)])
-       (list (ReadLL (PtrLL loc-ty) loc-id)))]
+       (list (CallLL i32 (@ 'scanf) (list (cons (PtrLL byte)
+                                                "getelementptr inbounds ([5 x i8], [5 x i8]* @.read, i32 0, i32 0)")
+                                          (cons (PtrLL loc-ty) loc-id)) #t)))]
     [(Assign target src)
      (match-let ([(cons src-id _) (ensure-type (translate-arg src context) isize context)]
                  [(cons target-id target-ty) (translate-assign-target target context)])
@@ -89,11 +93,13 @@
     [(Delete exp)
      (match-let ([(cons arg-id arg-ty) (translate-arg exp context)])
        (with-tmp (tmp)
-         (list (AssignLL tmp (CastLL 'bitcast arg-ty arg-id (PtrLL i8)))
-               (CallLL 'void (@ 'free) (list (cons tmp (PtrLL i8)))))))]
-    [(Print arg endl?)
-     (match-let ([(cons arg-id arg-ty) (translate-arg arg context)])
-       (list (PrintLL arg-ty arg-id endl?)))]))
+         (list (AssignLL tmp (CastLL 'bitcast arg-ty arg-id (PtrLL byte)))
+               (CallLL 'void (@ 'free) (list (cons tmp (PtrLL byte))) #f))))]
+    [(Print exp endl?)
+     (let ([arg (translate-arg exp context)])
+       (list (CallLL i32 (@ 'printf) (list (cons (format "getelementptr inbounds ([6 x i8], [6 x i8]* @.~a, i32 0, i32 0)"
+                                                         (if endl? 'println 'print))
+                                                 (PtrLL byte)) arg) #t)))]))
 
 ;;
 (define+ (translate-assign-target target (and context (list locs _ _ _)))
@@ -139,11 +145,12 @@
          (add-stmt! (AssignLL tmp call))
          (cons tmp ret-ty)))]
     [(New id)
-     (let ([ty (translate-type id)])
+     (let* ([ty (translate-type id)]
+            [size (* (/ int-size byte-size) (length (hash-ref structs ty)))])
        (with-tmp (tmp tmp2)
-         (add-stmt! (AssignLL tmp (CallLL (PtrLL i8) (@ 'malloc)
-                                          (list (cons (* 8 (length (hash-ref structs ty))) (IntLL 32))))))
-         (add-stmt! (AssignLL tmp2 (CastLL 'bitcast (PtrLL i8) tmp ty)))
+         (add-stmt! (AssignLL tmp (CallLL (PtrLL byte) (@ 'malloc)
+                                          (list (cons size (IntLL 32))) #f)))
+         (add-stmt! (AssignLL tmp2 (CastLL 'bitcast (PtrLL byte) tmp ty)))
          (cons tmp2 ty)))]))
 
 ;;
@@ -160,7 +167,7 @@
       ([(cons ret-ty param-tys) (hash-ref funs id)]
        [new-args (map (λ (arg param-ty) (ensure-type (translate-arg arg context) param-ty context))
                       args param-tys)])
-    (cons (CallLL ret-ty (@ id) new-args) ret-ty)))
+    (cons (CallLL ret-ty (@ id) new-args #f) ret-ty)))
 
 ;;
 (define+ (ensure-type (and dec (cons id ty)) new-ty (list _ _ _ add-stmt!))

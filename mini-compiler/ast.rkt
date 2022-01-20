@@ -54,7 +54,7 @@
 (struct LoadLL (ty ptr) #:transparent)
 (struct ReturnLL (ty arg) #:transparent)
 (struct GetEltLL (ty ptr index) #:transparent)
-(struct CallLL (ty fn args) #:transparent)
+(struct CallLL (ty fn args var-args?) #:transparent)
 (struct PrintLL (ty arg endl?) #:transparent)
 (struct ReadLL (ty arg) #:transparent)
 (struct CastLL (op ty val ty2) #:transparent)
