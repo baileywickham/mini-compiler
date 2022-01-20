@@ -5,7 +5,7 @@
 (require "ast.rkt" "util.rkt" "symbol.rkt"
          racket/hash)
 
-(define int-size 32)
+(define int-size 64)
 
 (define i1 (IntLL 1))
 (define i8 (IntLL 8))
@@ -142,7 +142,7 @@
      (let ([ty (translate-type id)])
        (with-tmp (tmp tmp2)
          (add-stmt! (AssignLL tmp (CallLL (PtrLL i8) (@ 'malloc)
-                                          (list (cons (* 4 (length (hash-ref structs ty))) isize)))))
+                                          (list (cons (* 8 (length (hash-ref structs ty))) (IntLL 32))))))
          (add-stmt! (AssignLL tmp2 (CastLL 'bitcast (PtrLL i8) tmp ty)))
          (cons tmp2 ty)))]))
 
