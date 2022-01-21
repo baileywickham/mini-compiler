@@ -82,9 +82,9 @@
      (match-let ([(cons loc-id loc-ty) (translate-assign-target target context)])
        (list
         (CallLL i32 (@ 'scanf)
-                (list (cons (PtrLL byte)
-                            "getelementptr inbounds ([5 x i8], [5 x i8]* @.read, i32 0, i32 0)")
-                      (cons (PtrLL loc-ty) loc-id)) #t)))]
+                (list (cons "getelementptr inbounds ([5 x i8], [5 x i8]* @.read, i32 0, i32 0)"
+                            (PtrLL byte))
+                      (cons loc-id (PtrLL loc-ty))) #t)))]
     [(Assign target src)
      (match-let ([(cons src-id _) (ensure-type (translate-arg src context) int context)]
                  [(cons target-id target-ty) (translate-assign-target target context)])
