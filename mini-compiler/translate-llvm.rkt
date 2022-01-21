@@ -184,10 +184,6 @@
     [(_ _) (cons id new-ty)]))
 
 ;;
-(define (translate-struct-id id)
-  (% (format "struct.~a" id)))
-
-;;
 (define (translate-fun-vars params decs)
   (let* ([new-param (translate-decs % params)]
          [param-locs (translate-decs % (map (λ+ ((cons id ty)) (cons (param-loc id) ty)) params))]
@@ -228,6 +224,10 @@
     ['void t]
     [(or 'int 'bool) int]
     [o (PtrLL (translate-struct-id o))]))
+
+;;
+(define (translate-struct-id id)
+  (% (format "struct.~a" id)))
 
 ;; Macro that given a set of IDs that temporaries are needed for binds the ids to freshly
 ;; generated temporaries
