@@ -76,7 +76,8 @@ declare i32 @scanf(i8*, ...)
      (format "getelementptr ~a, ~a ~a, i1 0, i32 ~a"
              (format-ty ty) (format-ty (PtrLL ty)) (format-arg ptr) index)]
     [(CallLL ty fn args var-args?)
-     (format "call ~a~a ~a(~a)" (format-ty ty) (if var-args? " (i8*, ... )" "")  (format-id fn) (format-args args))]
+     (format "call ~a~a ~a(~a)"
+             (format-ty ty) (if var-args? " (i8*, ... )" "")  (format-id fn) (format-args args))]
     [(CastLL op ty value ty2)
      (format "~a ~a ~a to ~a" op (format-ty ty) (format-arg value) (format-ty ty2))]))
 

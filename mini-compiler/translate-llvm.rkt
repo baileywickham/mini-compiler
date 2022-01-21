@@ -2,29 +2,29 @@
 
 (provide translate-llvm)
 
-(require "ast.rkt" "util.rkt" "symbol.rkt"
-         racket/hash)
+(require racket/hash)
+(require "ast.rkt" "util.rkt" "symbol.rkt")
 
 (define int-size 64)
 (define byte-size 8)
 
-(define i1 (IntLL 1))
+(define bit (IntLL 1))
 (define byte (IntLL byte-size))
 (define i32 (IntLL 32))
-(define isize (IntLL int-size))
+(define int (IntLL int-size))
 
-(define ops (hash '+    `(add  ,isize ,isize)
-                  '*    `(mul  ,isize ,isize)
-                  '-    `(sub  ,isize ,isize)
-                  '/    `(sdiv ,isize ,isize)
-                  '&&   `(and  ,i1    ,i1)
-                  '\|\| `(or   ,i1    ,i1)
-                  '==   `(eq   ,isize ,i1)
-                  '<=   `(sle  ,isize ,i1)
-                  '>=   `(sge  ,isize ,i1)
-                  '>    `(sgt  ,isize ,i1)
-                  '<    `(slt  ,isize ,i1)
-                  '!=   `(ne   ,isize ,i1)))
+(define ops (hash '+    `(add  ,int ,int)
+                  '*    `(mul  ,int ,int)
+                  '-    `(sub  ,int ,int)
+                  '/    `(sdiv ,int ,int)
+                  '&&   `(and  ,bit ,bit)
+                  '\|\| `(or   ,bit ,bit)
+                  '==   `(eq   ,int ,bit)
+                  '<=   `(sle  ,int ,bit)
+                  '>=   `(sge  ,int ,bit)
+                  '>    `(sgt  ,int ,bit)
+                  '<    `(slt  ,int ,bit)
+                  '!=   `(ne   ,int ,bit)))
 
 (define tmp-prefix 'u)
 
@@ -72,7 +72,7 @@
   (match s
     [(Goto* label) (list (BrLL (% label)))]
     [(GotoCond* cond iftrue iffalse)
-     (match-let ([(cons new-cond _) (ensure-type (translate-arg cond context) i1 context)])
+     (match-let ([(cons new-cond _) (ensure-type (translate-arg cond context) bit context)])
        (list (BrCondLL new-cond (% iftrue) (% iffalse))))]
     [(Return (? void?)) (list (ReturnLL 'void (void)))]
     [(Return id)
@@ -80,11 +80,13 @@
        (list (ReturnLL ret-ty ret-id)))]
     [(Assign target (Read))
      (match-let ([(cons loc-id loc-ty) (translate-assign-target target context)])
-       (list (CallLL i32 (@ 'scanf) (list (cons (PtrLL byte)
-                                                "getelementptr inbounds ([5 x i8], [5 x i8]* @.read, i32 0, i32 0)")
-                                          (cons (PtrLL loc-ty) loc-id)) #t)))]
+       (list
+        (CallLL i32 (@ 'scanf)
+                (list (cons (PtrLL byte)
+                            "getelementptr inbounds ([5 x i8], [5 x i8]* @.read, i32 0, i32 0)")
+                      (cons (PtrLL loc-ty) loc-id)) #t)))]
     [(Assign target src)
-     (match-let ([(cons src-id _) (ensure-type (translate-arg src context) isize context)]
+     (match-let ([(cons src-id _) (ensure-type (translate-arg src context) int context)]
                  [(cons target-id target-ty) (translate-assign-target target context)])
        (list (StoreLL target-ty src-id target-id)))]
     [(? Inv?)
@@ -97,9 +99,11 @@
                (CallLL 'void (@ 'free) (list (cons tmp (PtrLL byte))) #f))))]
     [(Print exp endl?)
      (let ([arg (translate-arg exp context)])
-       (list (CallLL i32 (@ 'printf) (list (cons (format "getelementptr inbounds ([6 x i8], [6 x i8]* @.~a, i32 0, i32 0)"
-                                                         (if endl? 'println 'print))
-                                                 (PtrLL byte)) arg) #t)))]))
+       (list
+        (CallLL i32 (@ 'printf)
+                (list (cons (format "getelementptr inbounds ([6 x i8], [6 x i8]* @.~a, i32 0, i32 0)"
+                                    (if endl? 'println 'print))
+                            (PtrLL byte)) arg) #t)))]))
 
 ;;
 (define+ (translate-assign-target target (and context (list locs _ _ _)))
@@ -108,9 +112,9 @@
 ;;
 (define+ (translate-arg arg (and context (list locs structs _ add-stmt!)))
   (match arg
-    [(? boolean?) (cons arg i1)]
-    [(? integer?) (cons arg isize)]
-    [(Null) (cons 'null isize)]
+    [(? boolean?) (cons arg bit)]
+    [(? integer?) (cons arg int)]
+    [(Null) (cons 'null int)]
     [(? symbol?)
      (match-let ([(cons id ty) (hash-ref locs arg)])
        (with-tmp (tmp)
@@ -120,20 +124,20 @@
      (match-let*
          ([(list op-name in-ty out-ty) (hash-ref ops op)]
           [(cons arg1-id op-ty) (ensure-type (translate-arg op1 context) in-ty context)]
-          [(cons arg2-id _) (ensure-type (translate-arg op2 context) in-ty context)])
+          [(cons arg2-id _)     (ensure-type (translate-arg op2 context) in-ty context)])
        (with-tmp (tmp)
          (add-stmt! (AssignLL tmp (BinaryLL op-name op-ty arg1-id arg2-id)))
          (cons tmp out-ty)))]
     [(Prim '- (list exp))
      (match-let ([(cons arg-id _) (translate-arg exp context)])
        (with-tmp (tmp)
-         (add-stmt! (AssignLL tmp (BinaryLL 'sub isize 0 arg-id)))
-         (cons tmp isize)))]
+         (add-stmt! (AssignLL tmp (BinaryLL 'sub int 0 arg-id)))
+         (cons tmp int)))]
     [(Prim '! (list exp))
-     (match-let ([(cons arg-id _) (ensure-type (translate-arg exp context) i1 context)])
+     (match-let ([(cons arg-id _) (ensure-type (translate-arg exp context) bit context)])
        (with-tmp (tmp)
-         (add-stmt! (AssignLL tmp (BinaryLL 'xor i1 #t arg-id)))
-         (cons tmp i1)))]
+         (add-stmt! (AssignLL tmp (BinaryLL 'xor bit #t arg-id)))
+         (cons tmp bit)))]
     [(Dot left id)
      (match-let ([(cons dot-id dot-ty) (translate-dot arg context)])
        (with-tmp (tmp)
@@ -148,8 +152,7 @@
      (let* ([ty (translate-type id)]
             [size (* (/ int-size byte-size) (length (hash-ref structs ty)))])
        (with-tmp (tmp tmp2)
-         (add-stmt! (AssignLL tmp (CallLL (PtrLL byte) (@ 'malloc)
-                                          (list (cons size (IntLL 32))) #f)))
+         (add-stmt! (AssignLL tmp (CallLL (PtrLL byte) (@ 'malloc) (list (cons size i32)) #f)))
          (add-stmt! (AssignLL tmp2 (CastLL 'bitcast (PtrLL byte) tmp ty)))
          (cons tmp2 ty)))]))
 
@@ -223,7 +226,7 @@
 (define (translate-type t)
   (match t
     ['void t]
-    [(or 'int 'bool) isize]
+    [(or 'int 'bool) int]
     [o (PtrLL (translate-struct-id o))]))
 
 ;; Macro that given a set of IDs that temporaries are needed for binds the ids to freshly
