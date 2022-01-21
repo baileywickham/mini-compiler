@@ -8,10 +8,10 @@
 (define int-size 64)
 (define byte-size 8)
 
-(define bit (IntLL 1))
+(define bit  (IntLL 1))
 (define byte (IntLL byte-size))
-(define i32 (IntLL 32))
-(define int (IntLL int-size))
+(define i32  (IntLL 32))
+(define int  (IntLL int-size))
 
 (define ops (hash '+    `(add  ,int ,int)
                   '*    `(mul  ,int ,int)
