@@ -7,7 +7,8 @@
          "type-check.rkt"
          "control-flow.rkt"
          "translate-llvm.rkt"
-         "format-llvm.rkt")
+         "format-llvm.rkt"
+         "ssa.rkt")
 
 ;; Main
 (define (compile path stack? llvm? debug?)
@@ -16,7 +17,7 @@
   (define llvm-ir
     (if stack?
         (translate-llvm (control-flow mini))
-        (error "non-stack unimplemented")))
+        (convert-ssa (control-flow mini))))
   (when debug? (display (format-llvm llvm-ir)))
   (define llvm-path (path-replace-extension path ".ll"))
   (with-output-to-file llvm-path
