@@ -17,6 +17,7 @@
   (Mini types decs (map fun-ssa funs)))
 
 (define+ (fun-ssa (Fun id params ret-type decs body))
+  (pretty-display (compute-preds body))
   (define block (first body))
   (define current-def (make-hash
                        (map (λ (p) (cons (car p)
@@ -29,6 +30,25 @@
   (displayln (map (λ (s) (stmt-ssa s (Block*-id block)
                                    (list current-def incomplete-phis sealed-blocks)))
                   (Block*-stmts block))))
+
+(define (compute-preds blocks)
+  (define cfg (make-hash))
+  (for ([block blocks])
+    (hash-ref! cfg (Block*-id block) (Block-ssa (Block*-id block) '() '() '()))
+    (define sucs (get-next block))
+    (for ([suc sucs])
+      (define b (hash-ref! cfg suc (Block-ssa suc '() '() '())))
+      (set-Block-ssa-preds! b (cons (Block*-id block) (Block-ssa-preds b)))))
+  cfg)
+      
+
+(define (get-next block)
+  (match (last (Block*-stmts block))
+    [(GotoCond* _ L1 L2) (list L1 L2)]
+    [(Goto* L1) (list L1)]
+    [_ '()]))
+    
+    
 
 (define+ (stmt-ssa stmt block-id context)
   (match stmt

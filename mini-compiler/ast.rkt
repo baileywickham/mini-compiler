@@ -34,6 +34,12 @@
 (struct GotoCond* (cond iftrue iffalse) #:transparent)
 (struct Block* (id stmts) #:transparent)
 
+;; --------------------------------------------
+;; SSA
+;; --------------------------------------------
+
+(struct Block-ssa (id [preds #:mutable] [phis #:mutable] [stmts #:mutable]) #:transparent)
+(struct Phi (id [args #:mutable]) #:transparent)
 
 ;; --------------------------------------------
 ;; LLVM
@@ -64,4 +70,6 @@
 (struct PtrLL (to) #:transparent)
 (struct IdLL (id global?) #:transparent)
 (struct IntLL (size) #:transparent)
+
+
 
