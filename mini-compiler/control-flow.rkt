@@ -14,14 +14,18 @@
 
 ;;
 (define+ (control-flow-fun (Fun id params ret-type decs body))
-  (let* ([cfg (box '())]
-         [add-block! (λ (l b) (set-box! cfg (cons (Block* l b) (unbox cfg))))])
+  (let-values ([(add-block! get-cfg) (make-cfg)])
     (with-labels (end-id start-id)
       (add-block! end-id (list (Return (if (equal? ret-type 'void) (void) return-var))))
       (add-block! start-id ((stmt-cfg add-block! end-id) body (Goto* end-id))))
     (Fun id params ret-type
-         (if (equal? ret-type 'void) decs (cons (cons return-var ret-type) decs))
-         (unbox cfg))))
+         (if (equal? ret-type 'void) decs (cons (cons return-var ret-type) decs)) (get-cfg))))
+
+;;
+(define (make-cfg)
+  (let* ([cfg (box '())])
+    (values (λ (label block) (set-box! cfg (cons (Block* label block) (unbox cfg)))) ;; add-block!
+            (thunk (unbox cfg))))) ;; get-cfg
 
 ;;
 (define (stmt-cfg add-block! ret-id)
