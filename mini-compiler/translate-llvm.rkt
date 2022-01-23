@@ -58,19 +58,13 @@
 
 ;;
 (define+ (translate-block (Block* id stmts) locs structs funs)
-  (BlockLL id (append-map (λ (s) (translate-stmt s locs structs funs)) stmts)))
+  (BlockLL id (append-map (λ (s) ((translate-stmt* locs structs funs) s)) stmts)))
 
 ;;
-(define (translate-stmt s locs structs funs)
+(define (translate-stmt* locs structs funs)
   (define stmts (box '()))
-  (define add-stmt! (λ (s) (set-box! stmts (cons s (unbox stmts)))))
-  (define last-stmts ((translate-stmt** locs structs funs add-stmt!) s))
-  (append (reverse (unbox stmts)) last-stmts))
 
-;;
-(define (translate-stmt** locs structs funs add-stmt!)
-
-  (define (translate-stmt* s)
+  (define (translate-stmt s)
     (match s
       [(Goto* label) (list (BrLL (% label)))]
       [(GotoCond* cond iftrue iffalse)
@@ -185,8 +179,13 @@
          (cons tmp new-ty))]
       [(s (? IntLL?)) dec]
       [(_ _) (cons id new-ty)]))
-  
-  translate-stmt*)
+
+  (define (add-stmt! s)
+    (set-box! stmts (cons s (unbox stmts))))
+
+  (λ (stmt)
+    (let ([last-stmts (translate-stmt stmt)])
+      (append (reverse (unbox stmts)) last-stmts))))
 
 ;;
 (define (translate-fun-vars params decs)
