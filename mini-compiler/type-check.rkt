@@ -40,8 +40,8 @@
     (for ([fun funs])
       (match-let ([(Fun id params ret-type decs body) fun])
         (let* ([tenv (extend-env global-tenv (build-tenv (append params decs) check-type))]
-               [context (list structs get-sig tenv ret-type)])
-          (for ([stmt body]) (check-stmt stmt context)))
+               [check-stmt (check-stmt* structs get-sig tenv ret-type)])
+          (for ([stmt body]) (check-stmt stmt)))
         (unless (or (equal? ret-type 'void) (always-returns? body))
           (type-error "function ~e does not return in all cases" id))))
 
@@ -49,52 +49,50 @@
       (type-error "main expects no arguments and returns an int"))))
 
 ;;
-(define+ (check-stmt stmt (and context (list structs get-sig _ ret-type)))
-  (match stmt
-    [(? list? stmts) (for ([stmt stmts]) (check-stmt stmt context))]
-    [(Assign target src)
-     (ensure-type-match (check-exp target context) (check-exp src context) 'assignment)]
-    [(If guard then else)
-     (ensure-type-match 'bool (check-exp guard context) 'if)
-     (check-stmt then context)
-     (check-stmt else context)]
-    [(While guard body)
-     (ensure-type-match 'bool (check-exp guard context) 'while)
-     (check-stmt body context)]
-    [(Print exp _) (ensure-type-match 'int (check-exp exp context) 'print)]
-    [(Return exp) (ensure-type-match ret-type (check-exp exp context) 'return)]
-    [(Inv id args) (check-fun (get-sig id) (check-exps args context) id)]
-    [(Delete exp)
-     (let ([exp-type (check-exp exp context)])
-       (unless (hash-has-key? structs exp-type)
-         (type-error "could not delete non struct: ~e" exp-type)))]))
+(define (check-stmt* structs get-sig tenv ret-type)
 
-;;
-(define+ (check-exp exp (and context (list structs get-sig tenv _)))
-  (match exp
-    [(Read) 'int]
-    [(Null) 'null]
-    [(? void?) 'void]   ;; void isn't really an exp, this will only happen in (Return void)
-    [(? integer?) 'int]
-    [(? boolean?) 'bool]
-    [(? symbol? s) (hash-ref tenv s (λ () (type-error "unbound identifier: ~e" s)))]
-    [(New id) (hash-ref-key structs id (λ () (type-error "undefined struct type: ~e" id)))]
-    [(Dot left id)
-     (hash-ref (hash-ref structs (check-exp left context)
-                         (λ () (type-error "~e is not of struct type" left)))
-               id (λ () (type-error "struct does not have member ~e" id)))]
-    [(Prim (? equality-op? op) exps)
-     (let ([exp-types (check-exps exps context)])
-       (if (and (type=? (first exp-types) (second exp-types)) (not (member 'bool exp-types)))
-           'bool (type-error "~e: invalid types ~e" op exp-types)))]
-    [(Prim op exps)
-     (check-fun (hash-ref prim-types (cons op (length exps))) (check-exps exps context) op)]
-    [(Inv id args)
-     (check-fun (get-sig id) (check-exps args context) id)]))
+  (define (check-stmt stmt)
+    (match stmt
+      [(? list? stmts) (for ([stmt stmts]) (check-stmt stmt))]
+      [(Assign target src) (ensure-type-match (check-exp target) (check-exp src) 'assignment)]
+      [(If guard then else)
+       (ensure-type-match 'bool (check-exp guard) 'if)
+       (check-stmt then)
+       (check-stmt else)]
+      [(While guard body)
+       (ensure-type-match 'bool (check-exp guard) 'while)
+       (check-stmt body)]
+      [(Print exp _) (ensure-type-match 'int (check-exp exp) 'print)]
+      [(Return exp) (ensure-type-match ret-type (check-exp exp) 'return)]
+      [(Inv id args) (check-fun (get-sig id) (map check-exp args) id)]
+      [(Delete exp)
+       (let ([exp-type (check-exp exp)])
+         (unless (hash-has-key? structs exp-type)
+           (type-error "could not delete non struct: ~e" exp-type)))]))
 
-;;
-(define (check-exps exps context)
-  (map (curryr check-exp context) exps))
+  ;;
+  (define (check-exp exp)
+    (match exp
+      [(Read)       'int]
+      [(Null)       'null]
+      [(? void?)    'void]   ;; void isn't really an exp, this will only happen in (Return void)
+      [(? integer?) 'int]
+      [(? boolean?) 'bool]
+      [(? symbol? s) (hash-ref tenv s (λ () (type-error "unbound identifier: ~e" s)))]
+      [(New id) (hash-ref-key structs id (λ () (type-error "undefined struct type: ~e" id)))]
+      [(Dot left id)
+       (hash-ref (hash-ref structs (check-exp left)
+                           (λ () (type-error "~e is not of struct type" left)))
+                 id (λ () (type-error "struct does not have member ~e" id)))]
+      [(Prim (? equality-op? op) exps)
+       (let ([exp-types (map check-exp exps)])
+         (if (and (type=? (first exp-types) (second exp-types)) (not (member 'bool exp-types)))
+             'bool (type-error "~e: invalid types ~e" op exp-types)))]
+      [(Prim op exps)
+       (check-fun (hash-ref prim-types (cons op (length exps))) (map check-exp exps) op)]
+      [(Inv id args) (check-fun (get-sig id) (map check-exp args) id)]))
+
+  check-stmt)
 
 ;;
 (define (ensure-type-match expected-type true-type loc)
@@ -114,7 +112,7 @@
 ;;
 (define+ (check-fun (Fun-type param-types ret-type) arg-types id)
   (unless (and (equal? (length arg-types) (length param-types)) (andmap type=? arg-types param-types))
-    (type-error "cound not call ~e with arguments ~e" id arg-types))
+    (type-error "could not call ~e with arguments ~e" id arg-types))
   ret-type)
 
 ;;

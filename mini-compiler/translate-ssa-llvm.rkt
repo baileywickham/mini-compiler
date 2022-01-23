@@ -26,7 +26,7 @@
                   '<    `(slt  ,int ,bit)
                   '!=   `(ne   ,int ,bit)))
 
-(define tmp-prefix 'u)
+(define tmp-prefix '_u)
 
 ;;
 (define+ (translate-ssa-llvm (Mini types decs funs))
@@ -50,19 +50,18 @@
 
 ;;
 (define+ (translate-fun (Fun id params ret-type decs body) locs structs funs)
-  (match-let* ([(list new-params fun-locs fun-header) (translate-fun-vars params decs)]
-               [all-locs (hash-union locs fun-locs #:combine (λ (a b) b))]
+  (match-let* ([new-params (translate-decs % params)]
                [cfg (compute-preds body)])
     (for ([block body])
       (define block-ssa (hash-ref cfg (Block*-id block)))
       (define (add-stmt! s) (set-Block-ssa-stmts! block-ssa (cons s (Block-ssa-stmts block-ssa))))
       (for ([stmt (Block*-stmts block)])
-        (translate-stmt* stmt (list locs structs funs add-stmt!))))
-    (FunLL (@ id) new-params (translate-type ret-type)
-           '())))
+        (translate-stmt stmt (list locs structs funs add-stmt!))))
+
+    (FunLL (@ id) new-params (translate-type ret-type) '())))
 
 ;;
-(define+ (translate-stmt* s (and context (list _ _ _ add-stmt!)))
+(define+ (translate-stmt s (and context (list _ _ _ add-stmt!)))
   (match s
     [(Goto* label) (add-stmt! (BrLL (% label)))]
     [(GotoCond* cond iftrue iffalse)
@@ -75,9 +74,9 @@
     [(Assign (? symbol? target) src)
      (match-let ([(cons src-id _) (ensure-type (translate-arg src context) int context)])
        (write-var target block src-id))]
-    [(Assign target src)
+    [(Assign (? Dot? target) src)
      (match-let ([(cons src-id _) (ensure-type (translate-arg src context) int context)]
-                 [(cons target-id target-ty) (translate-assign-target target context)])
+                 [(cons target-id target-ty) (translate-dot target context)])
        (add-stmt! (StoreLL target-ty src-id target-id)))]
     [(? Inv?)
      (match-let ([(cons call _) (translate-inv s context)])
@@ -94,10 +93,6 @@
                 (list (cons (format "getelementptr inbounds ([6 x i8], [6 x i8]* @.~a, i32 0, i32 0)"
                                     (if endl? 'println 'print))
                             (PtrLL byte)) arg) #t)))]))
-
-;;
-(define+ (translate-assign-target target (and context (list locs _ _ _)))
-  (if (Dot? target) (translate-dot target context) (hash-ref locs target)))
 
 ;;
 (define+ (translate-arg arg (and context (list locs structs _ add-stmt!)))
@@ -143,12 +138,12 @@
          (add-stmt! (AssignLL tmp2 (CastLL 'bitcast (PtrLL byte) tmp ty)))
          (cons tmp2 ty)))]
     [(Read)
-     (with-tmp (tmp) 
+     (with-tmp (tmp)
        (add-stmt! (CallLL i32 (@ 'scanf)
                 (list (cons "getelementptr inbounds ([5 x i8], [5 x i8]* @.read, i32 0, i32 0)"
                             (PtrLL byte))
                       (cons (@ '.read_scratch (PtrLL int))) #t)))
-       (add-stmt! (AssignLL tmp (LoadLL int (@ '.read_scratch)))) 
+       (add-stmt! (AssignLL tmp (LoadLL int (@ '.read_scratch))))
      (cons tmp int))]))
 
 ;;
@@ -178,25 +173,6 @@
     [(s (? IntLL?)) dec]
     [(_ _) (cons id new-ty)]))
 
-;;
-(define (translate-fun-vars params decs)
-  (let* ([new-param (translate-decs % params)]
-         [param-locs (translate-decs % (map (λ+ ((cons id ty)) (cons (param-loc id) ty)) params))]
-         [locs (append param-locs (translate-decs % decs))])
-    (list
-     new-param
-     (make-immutable-hash (map cons (map car (append params decs)) locs))
-     (append
-      (map (λ+ ((cons id ty)) (AssignLL id (AllocLL ty))) locs)
-      (map (λ+ ((cons id ty) (cons loc-id _)) (StoreLL ty id loc-id)) new-param param-locs)))))
-
-;;
-(define (param-loc p)
-  (format "_P_~a" p))
-
-;;
-(define+ (extend-block (BlockLL id stmts) new-stmts)
-  (BlockLL id (append new-stmts stmts)))
 
 (define (@ id) (IdLL id #t))
 (define (% id) (IdLL id #f))
@@ -243,37 +219,15 @@
       (define b (hash-ref! cfg suc (Block-ssa suc '() '() '())))
       (set-Block-ssa-preds! b (cons (Block*-id block) (Block-ssa-preds b)))))
   cfg)
-      
+
 
 (define (get-next block)
   (match (last (Block*-stmts block))
     [(GotoCond* _ L1 L2) (list L1 L2)]
     [(Goto* L1) (list L1)]
     [_ '()]))
-    
-    
 
-(define+ (stmt-ssa stmt block-id context)
-  (match stmt
-    [(Assign target src)
-     (let ([new-src (exp-ssa src block-id context)]
-           [new-target (make-label '_u)])
-       (write-var target block-id new-target context)
-       (Assign new-target new-src))]
-    [(Return exp) (Return (exp-ssa exp block-id context))]
-    [(Delete exp) (Delete (exp-ssa exp block-id context))]
-    [(Print exp endl?) (Print (exp-ssa exp block-id context) endl?)]
-    [(Inv id args) (Inv id (map (λ (exp) (exp-ssa exp block-id context)) args))]
-    [(GotoCond* cond iftrue iffalse) (GotoCond* (exp-ssa cond block-id context) iftrue iffalse)]
-    [_ stmt]))
 
-(define+ (exp-ssa exp block-id context)
-  (match exp
-    [(Prim op exps) (Prim op (map (λ (exp) (exp-ssa exp block-id context)) exps))]
-    [(? symbol?) (read-var exp block-id context)]
-    [(Dot left id) (Dot (exp-ssa left block-id context) id)]
-    [(Inv id args) (Inv id (map (λ (exp) (exp-ssa exp block-id context)) args))]
-    [_ exp]))
 
 ;; Given a var orginial name, the block id, and the value, updates current-def
 ;; returns void
