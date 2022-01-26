@@ -57,7 +57,6 @@
 
 
 
-
 (define (@ id) (IdLL id #t))
 (define (% id) (IdLL id #f))
 
@@ -120,10 +119,11 @@
         (translate-stmt stmt))))
 
   (define (translate-stmt* block)
+
     (define (add-stmt! s)
       (set-Block-ssa-stmts! block (cons s (Block-ssa-stmts block))))
-    
-    (define+ (translate-stmt s)
+
+    (define (translate-stmt s)
       (match s
         [(Goto* label) (add-stmt! (BrLL (% label)))]
         [(GotoCond* cond iftrue iffalse)
@@ -157,7 +157,7 @@
                                 (PtrLL byte)) arg) #t)))]))
 
     ;;
-    (define+ (translate-arg arg)
+    (define (translate-arg arg)
       (match arg
         [(? boolean?) (cons arg bit)]
         [(? integer?) (cons arg int)]
@@ -225,7 +225,7 @@
         (cons (CallLL ret-ty (@ id) new-args #f) ret-ty)))
 
     ;;
-    (define+ (ensure-type (and dec (cons id ty)) new-ty (list _ _ _ add-stmt!))
+    (define+ (ensure-type (and dec (cons id ty)) new-ty)
       (match* (ty new-ty)
         [((IntLL s) (IntLL s2))
          (if (equal? s s2) dec
@@ -234,19 +234,18 @@
                (cons tmp new-ty)))]
         [(s (? IntLL?)) dec]
         [(_ _) (cons id new-ty)]))
-    
+
     translate-stmt)
 
-  
 
   ;; Given a var orginial name, the block id, and the value, updates current-def
   ;; returns void
-  (define+ (write-var var block val)
+  (define (write-var var block val)
     (hash-set! (hash-ref! current-def var (make-hash)) block val))
 
   ;; Given a var original name, and the block id, returns a value that will serve as an
   ;; argument, something like an id or a number
-  (define+ (read-var var block)
+  (define (read-var var block)
     (if (hash-has-key? (hash-ref current-def var) block)
         (hash-ref (hash-ref current-def var) block)
         (read-var-from-pred var block)))
@@ -255,14 +254,14 @@
     (set-Block-ssa-phis! block (cons p (Block-ssa-phis block))))
 
   ;; returns a value that will serve as an argument, something like an id or a number
-  (define+ (read-var-from-pred var block)
+  (define (read-var-from-pred var block)
     (define val
       (cond
         [(not (set-member? sealed-blocks block))
          ;; this CFG is not complete, the block might gain a predecessor
          ;; thus the need for a phi is unclear, so let’s assume it is needed
          (define p (Phi (make-label var) '() #f var))
-         (add-phi! block p) 
+         (add-phi! block p)
          ;(hash-set! (hash-ref incomplete-phis block) var p)
          (Phi-id p)]
         [(empty? (Block-ssa-preds block))
@@ -285,24 +284,24 @@
   ;; (list current-def incomplete-phis sealed-blocks)
 
 
-  (define+ (add-phi-operands var phi block)
+  (define (add-phi-operands var phi block)
     (for ([pred (Block-ssa-preds block)])
       (phi-append-operand phi pred (read-var var pred))))
 
   (define (phi-append-operand phi pred var)
     (set-Phi-args! phi (cons (cons (Block-ssa-id pred) var) (Phi-args phi))))
-  
+
   ;;
-  (define+ (seal-block block)
+  (define (seal-block block)
     ;; get target variables of all incomplete phis in this block
     (for ([phi (get-incomplete-phis block)])
       ;; for each variable, fill phi based on predecessors
       (add-phi-operands (Phi-var phi) phi block))
     (set-add sealed-blocks block))
-  
+
   (define (get-incomplete-phis block)
     (filter (lambda (p) (not (Phi-complete? p))) (Block-ssa-phis block)))
-  
+
   translate-cfg)
 
 

@@ -54,16 +54,14 @@
   (define (check-stmt stmt)
     (match stmt
       [(? list? stmts) (for ([stmt stmts]) (check-stmt stmt))]
-      [(Assign target src) (ensure-type-match (check-exp target) (check-exp src) 'assignment)]
-      [(If guard then else)
-       (ensure-type-match 'bool (check-exp guard) 'if)
-       (check-stmt then)
-       (check-stmt else)]
-      [(While guard body)
-       (ensure-type-match 'bool (check-exp guard) 'while)
-       (check-stmt body)]
+      [(Assign target src)  (ensure-type-match (check-exp target) (check-exp src) 'assignment)]
+      [(If guard then else) (ensure-type-match 'bool (check-exp guard) 'if)
+                            (check-stmt then)
+                            (check-stmt else)]
+      [(While guard body)   (ensure-type-match 'bool (check-exp guard) 'while)
+                            (check-stmt body)]
       [(Print exp _) (ensure-type-match 'int (check-exp exp) 'print)]
-      [(Return exp) (ensure-type-match ret-type (check-exp exp) 'return)]
+      [(Return exp)  (ensure-type-match ret-type (check-exp exp) 'return)]
       [(Inv id args) (check-fun (get-sig id) (map check-exp args) id)]
       [(Delete exp)
        (let ([exp-type (check-exp exp)])
