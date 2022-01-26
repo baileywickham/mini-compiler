@@ -52,7 +52,7 @@
 (define+ (translate-fun (Fun id params ret-type decs body) locs structs funs)
   (match-let* ([new-params (translate-decs % params)]
                [cfg (compute-preds body)])
-    ((translate-cfg* locs structs funs cfg) body)
+    ((translate-cfg* locs structs funs cfg) body params)
     (FunLL (@ id) new-params (translate-type ret-type) '())))
 
 
@@ -108,10 +108,15 @@
     [_ '()]))
 
 (define (translate-cfg* locs structs funs cfg)
+  
   (define current-def (make-hash))
   (define sealed-blocks (set))
 
-  (define (translate-cfg blocks)
+  (define (translate-cfg blocks params)
+    (define first-block (hash-ref cfg (Block*-id (first blocks))))
+    (for ([param params])
+      (write-var (car param) first-block (translate-dec % param))) 
+    ;(hash-set! current-def (Block*-id (first blocks)) (make-hash (map cons (map car params) (translate-decs % params)))) 
     (for ([block blocks])
       (define block-ssa (hash-ref cfg (Block*-id block)))
       (define translate-stmt (translate-stmt* block-ssa))
@@ -119,7 +124,7 @@
         (translate-stmt stmt))))
 
   (define (translate-stmt* block)
-
+    
     (define (add-stmt! s)
       (set-Block-ssa-stmts! block (cons s (Block-ssa-stmts block))))
 
@@ -134,8 +139,8 @@
          (match-let ([(cons ret-id ret-ty) (translate-arg id)])
            (list (ReturnLL ret-ty ret-id)))]
         [(Assign (? symbol? target) src)
-         (match-let ([(cons src-id _) (ensure-type (translate-arg src) int )])
-           (write-var target block src-id))]
+         (let ([src-val (ensure-type (translate-arg src) int )])
+           (write-var target block src-val))]
         [(Assign (? Dot? target) src)
          (match-let ([(cons src-id _) (ensure-type (translate-arg src ) int )]
                      [(cons target-id target-ty) (translate-dot target)])
@@ -156,7 +161,6 @@
                                         (if endl? 'println 'print))
                                 (PtrLL byte)) arg) #t)))]))
 
-    ;;
     (define (translate-arg arg)
       (match arg
         [(? boolean?) (cons arg bit)]
@@ -241,11 +245,13 @@
   ;; Given a var orginial name, the block id, and the value, updates current-def
   ;; returns void
   (define (write-var var block val)
-    (hash-set! (hash-ref! current-def var (make-hash)) block val))
+    (displayln block)
+    (displayln val) 
+    (hash-set! (hash-ref! current-def var (make-hash)) (Block-ssa-id block) val))
 
   ;; Given a var original name, and the block id, returns a value that will serve as an
   ;; argument, something like an id or a number
-  (define (read-var var block)
+  (define (read-var var block) 
     (if (hash-has-key? (hash-ref current-def var) block)
         (hash-ref (hash-ref current-def var) block)
         (read-var-from-pred var block)))

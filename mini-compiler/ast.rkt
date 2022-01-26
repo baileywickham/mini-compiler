@@ -39,7 +39,7 @@
 ;; --------------------------------------------
 
 (struct Block-ssa (id [preds #:mutable] [phis #:mutable] [stmts #:mutable]) #:transparent)
-(struct Phi (id [args #:mutable] [complete? #:mutable] var) #:transparent)
+(struct Phi (id ty [args #:mutable] [complete? #:mutable] var) #:transparent)
 
 ;; --------------------------------------------
 ;; LLVM
