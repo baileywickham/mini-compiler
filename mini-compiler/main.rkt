@@ -13,11 +13,11 @@
 ;; Main
 (define (compile path stack? llvm? debug?)
   (define mini (parse (java-parse path)))
-  (type-check mini)
+  (define typed-mini (type-check mini))
   (define llvm-ir
     (if stack?
-        (translate-llvm (control-flow mini))
-        (translate-ssa-llvm (control-flow mini))))
+        (stack-llvm (control-flow mini))
+        (register-llvm typed-mini)))
   (when debug? (display (format-llvm llvm-ir)))
   (define llvm-path (path-replace-extension path ".ll"))
   (with-output-to-file llvm-path
