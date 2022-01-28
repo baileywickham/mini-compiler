@@ -1,9 +1,6 @@
 #lang racket
 
-(require "ast.rkt")
-(require "util.rkt")
-(require "symbol.rkt" "common-llvm.rkt")
-
+(require "ast.rkt" "util.rkt" "symbol.rkt" "common-llvm.rkt")
 
 (define return-var '_retval_)
 (define label-prefix 'LU)

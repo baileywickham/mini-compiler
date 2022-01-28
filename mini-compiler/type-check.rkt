@@ -50,7 +50,7 @@
       (type-error "main expects no arguments and returns an int"))
 
     (Mini types decs new-funs)))
-  
+
 
 ;;
 (define (check-stmt* structs get-sig tenv ret-type)
@@ -66,7 +66,7 @@
       [(If guard then else)
        (let ([new-guard (check-exp guard)])
          (ensure-type-match 'bool (cdr new-guard) 'if)
-         (If new-guard (check-stmt then) (check-stmt else)))]         
+         (If new-guard (check-stmt then) (check-stmt else)))]
       [(While guard body)
        (let ([new-guard (check-exp guard)])
          (ensure-type-match 'bool (cdr new-guard) 'while)
@@ -78,7 +78,7 @@
       [(Return exp)
        (let ([new-exp (check-exp exp)])
          (ensure-type-match ret-type (cdr new-exp) 'return)
-         (Return new-exp))]  
+         (Return new-exp))]
       [(Inv id args) (car (check-fun (get-sig id) (map check-exp args) id Inv))]
       [(Delete exp)
        (let ([new-exp (check-exp exp)])
@@ -89,9 +89,9 @@
   ;;
   (define (check-exp exp)
     (match exp
-      [(Read)       (cons exp 'int)]
-      [(Null)       (cons exp 'null)]
-      [(? void?)    (cons exp 'void)]  ;; void isn't really an exp, will only happen in (Return void)
+      [(Read) (cons exp 'int)]
+      [(Null) (cons exp 'null)]
+      [(? void?) (cons exp 'void)]  ;; void isn't really an exp, will only happen in (Return void)
       [(? integer?) (cons exp 'int)]
       [(? boolean?) (cons exp 'bool)]
       [(? symbol? s)
@@ -109,7 +109,7 @@
        (let* ([new-exps (map check-exp exps)]
               [new-exp-tys (map cdr new-exps)])
          (if (and (type=? (first new-exp-tys) (second new-exp-tys)) (not (member 'bool new-exp-tys)))
-             (cons (Prim op new-exps) 'bool) 
+             (cons (Prim op new-exps) 'bool)
              (type-error "~e: invalid types ~e" op new-exp-tys)))]
       [(Prim op exps)
        (check-fun (hash-ref prim-types (cons op (length exps))) (map check-exp exps) op Prim)]
