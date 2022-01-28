@@ -34,7 +34,8 @@
 (define+ (type-check (Mini types decs funs))
   (let* ([check-type (make-check-type types)]
          [get-sig (gather-fun-types funs check-type)]
-         [structs (make-hash (map (λ+ ((Struct id fs)) (cons id (build-tenv fs check-type #f))) types))]
+         [structs (make-hash (map (λ+ ((Struct id fs))
+                                      (cons id (build-tenv fs check-type #f))) types))]
          [global-tenv (build-tenv decs check-type #t)])
 
     (define new-funs
@@ -82,8 +83,7 @@
       [(Inv id args) (car (check-fun (get-sig id) (map check-exp args) id Inv))]
       [(Delete exp)
        (let ([new-exp (check-exp exp)])
-         (unless (hash-has-key? structs (cdr new-exp))
-           (type-error "could not delete non struct: ~e" (cdr new-exp)))
+         (get-struct (cdr new-exp))  
          (Delete new-exp))]))
 
   ;;
@@ -95,25 +95,29 @@
       [(? integer?) (cons exp 'int)]
       [(? boolean?) (cons exp 'bool)]
       [(? symbol? s)
-       (match-let ([(cons ty global?) (hash-ref tenv s (λ () (type-error "unbound identifier: ~e" s)))])
+       (match-let ([(cons ty global?)
+                    (hash-ref tenv s (λ () (type-error "unbound identifier: ~e" s)))])
          (cons (if global? (Global s) s) ty))]
-      [(New id) (cons exp (hash-ref-key structs id
-                                        (λ () (type-error "undefined struct type: ~e" id))))]
+      [(New id) (cons exp (car (get-struct id)))]
       [(Dot left id)
        (let* ([new-left (check-exp left)]
-              [type (car (hash-ref (hash-ref structs (cdr new-left)
-                                        (λ () (type-error "~e is not of struct type" left)))
-                              id (λ () (type-error "struct does not have member ~e" id))))])
+              [type (car (hash-ref (cdr (get-struct (cdr new-left)))
+                                   id (λ () (type-error "struct does not have member ~e" id))))])
          (cons (Dot new-left id) type))]
       [(Prim (? equality-op? op) exps)
        (let* ([new-exps (map check-exp exps)]
-              [new-exp-tys (map cdr new-exps)])
-         (if (and (type=? (first new-exp-tys) (second new-exp-tys)) (not (member 'bool new-exp-tys)))
+              [exp-types (map cdr new-exps)])
+         (if (and (type=? (first exp-types) (second exp-types)) (not (member 'bool exp-types)))
              (cons (Prim op new-exps) 'bool)
-             (type-error "~e: invalid types ~e" op new-exp-tys)))]
+             (type-error "~e: invalid types ~e" op exp-types)))]
       [(Prim op exps)
        (check-fun (hash-ref prim-types (cons op (length exps))) (map check-exp exps) op Prim)]
       [(Inv id args) (check-fun (get-sig id) (map check-exp args) id Inv)]))
+
+  ;;
+  (define (get-struct struct-id)
+    (cons struct-id (hash-ref structs struct-id
+                              (λ () (type-error "~e is not of struct type" struct-id)))))
 
   check-stmt)
 
