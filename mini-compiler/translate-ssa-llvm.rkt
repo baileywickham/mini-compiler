@@ -116,7 +116,6 @@
     (define first-block (hash-ref cfg (Block*-id (first blocks))))
     (for ([param params])
       (write-var (car param) first-block (translate-dec % param))) 
-    ;(hash-set! current-def (Block*-id (first blocks)) (make-hash (map cons (map car params) (translate-decs % params)))) 
     (for ([block blocks])
       (define block-ssa (hash-ref cfg (Block*-id block)))
       (define translate-stmt (translate-stmt* block-ssa))

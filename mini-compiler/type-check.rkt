@@ -60,14 +60,13 @@
       [(? list? stmts) (map check-stmt stmts)]
       [(Assign target src)
        (let ([new-target (check-exp target)]
-                                  [new-src (check-exp src)])
-                              (ensure-type-match (cdr new-target) (cdr new-src) 'assignment)
-                              (Assign new-target new-src))]
+             [new-src (check-exp src)])
+         (ensure-type-match (cdr new-target) (cdr new-src) 'assignment)
+         (Assign new-target new-src))]
       [(If guard then else)
        (let ([new-guard (check-exp guard)])
          (ensure-type-match 'bool (cdr new-guard) 'if)
-         (If new-guard (check-stmt then) (check-stmt else)))]
-            
+         (If new-guard (check-stmt then) (check-stmt else)))]         
       [(While guard body)
        (let ([new-guard (check-exp guard)])
          (ensure-type-match 'bool (cdr new-guard) 'while)
@@ -83,8 +82,8 @@
       [(Inv id args) (car (check-fun (get-sig id) (map check-exp args) id Inv))]
       [(Delete exp)
        (let ([new-exp (check-exp exp)])
-         (unless (hash-has-key? structs new-exp)
-           (type-error "could not delete non struct: ~e" new-exp))
+         (unless (hash-has-key? structs (cdr new-exp))
+           (type-error "could not delete non struct: ~e" (cdr new-exp)))
          (Delete new-exp))]))
 
   ;;
@@ -92,11 +91,12 @@
     (match exp
       [(Read)       (cons exp 'int)]
       [(Null)       (cons exp 'null)]
-      [(? void?)    (cons exp 'void)]   ;; void isn't really an exp, this will only happen in (Return void)
+      [(? void?)    (cons exp 'void)]  ;; void isn't really an exp, will only happen in (Return void)
       [(? integer?) (cons exp 'int)]
       [(? boolean?) (cons exp 'bool)]
       [(? symbol? s) (cons s (hash-ref tenv s (λ () (type-error "unbound identifier: ~e" s))))]
-      [(New id) (cons exp (hash-ref-key structs id (λ () (type-error "undefined struct type: ~e" id))))]
+      [(New id) (cons exp (hash-ref-key structs id
+                                        (λ () (type-error "undefined struct type: ~e" id))))]
       [(Dot left id)
        (let* ([new-left (check-exp left)]
               [type (hash-ref (hash-ref structs (cdr new-left)
@@ -132,7 +132,8 @@
 
 ;;
 (define+ (check-fun (Fun-type param-types ret-type) arg-types id ast-node)
-  (unless (and (equal? (length arg-types) (length param-types)) (andmap type=? (map cdr arg-types) param-types))
+  (unless (and (equal? (length arg-types) (length param-types))
+               (andmap type=? (map cdr arg-types) param-types))
     (type-error "could not call ~e with arguments ~e" id arg-types))
   (cons (ast-node id arg-types) ret-type))
 
