@@ -34,15 +34,15 @@
 (define+ (type-check (Mini types decs funs))
   (let* ([check-type (make-check-type types)]
          [get-sig (gather-fun-types funs check-type)]
-         [structs (make-hash (map (λ+ ((Struct id fs)) (cons id (build-tenv fs check-type))) types))]
-         [global-tenv (build-tenv decs check-type)])
+         [structs (make-hash (map (λ+ ((Struct id fs)) (cons id (build-tenv fs check-type #f))) types))]
+         [global-tenv (build-tenv decs check-type #t)])
 
     (define new-funs
       (for/list ([fun funs])
         (match-let ([(Fun id params ret-type decs body) fun])
           (unless (or (equal? ret-type 'void) (always-returns? body))
             (type-error "function ~e does not return in all cases" id))
-          (let* ([tenv (extend-env global-tenv (build-tenv (append params decs) check-type))]
+          (let* ([tenv (extend-env global-tenv (build-tenv (append params decs) check-type #f))]
                  [check-stmt (check-stmt* structs get-sig tenv ret-type)])
             (Fun id params ret-type decs (map check-stmt body))))))
 
@@ -94,14 +94,16 @@
       [(? void?)    (cons exp 'void)]  ;; void isn't really an exp, will only happen in (Return void)
       [(? integer?) (cons exp 'int)]
       [(? boolean?) (cons exp 'bool)]
-      [(? symbol? s) (cons s (hash-ref tenv s (λ () (type-error "unbound identifier: ~e" s))))]
+      [(? symbol? s)
+       (match-let ([(cons ty global?) (hash-ref tenv s (λ () (type-error "unbound identifier: ~e" s)))])
+         (cons (if global? (Global s) s) ty))]
       [(New id) (cons exp (hash-ref-key structs id
                                         (λ () (type-error "undefined struct type: ~e" id))))]
       [(Dot left id)
        (let* ([new-left (check-exp left)]
-              [type (hash-ref (hash-ref structs (cdr new-left)
+              [type (car (hash-ref (hash-ref structs (cdr new-left)
                                         (λ () (type-error "~e is not of struct type" left)))
-                              id (λ () (type-error "struct does not have member ~e" id)))])
+                              id (λ () (type-error "struct does not have member ~e" id))))])
          (cons (Dot new-left id) type))]
       [(Prim (? equality-op? op) exps)
        (let* ([new-exps (map check-exp exps)]
@@ -159,9 +161,10 @@
     (Fun-type param-types ret-type)))
 
 ;;
-(define (build-tenv decs check-type)
+(define (build-tenv decs check-type global?)
   (map (compose check-type cdr) decs)
-  (make-hash-unique decs (λ (id) (type-error "redefinition of variable ~e" id))))
+  (make-hash-unique (map (λ+ ((cons id ty)) (cons id (cons ty global?))) decs)
+                    (λ (id) (type-error "redefinition of variable ~e" id))))
 
 ;;
 (define (make-hash-unique assocs err)

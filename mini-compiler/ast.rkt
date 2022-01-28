@@ -25,6 +25,7 @@
 (struct Null () #:transparent)
 (struct New (id) #:transparent)
 (struct Read () #:transparent)
+(struct Global (id) #:transparent)
 
 ;; --------------------------------------------
 ;; Mini*

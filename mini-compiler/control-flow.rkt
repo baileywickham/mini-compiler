@@ -17,7 +17,7 @@
   (let-values ([(add-block! get-cfg) (make-cfg)])
     (with-labels (end-id start-id)
       (add-block! end-id (list (Return (if (equal? ret-type 'void) (void) return-var))))
-      (add-block! start-id ((stmt-cfg add-block! end-id ret-type) body (Goto* end-id))))
+      (add-block! start-id ((stmt-cfg add-block! end-id) body (Goto* end-id))))
     (Fun id params ret-type
          (if (equal? ret-type 'void) decs (cons (cons return-var ret-type) decs)) (get-cfg))))
 
@@ -28,7 +28,7 @@
             (thunk (unbox cfg))))) ;; get-cfg
 
 ;;
-(define (stmt-cfg add-block! ret-id ret-type)
+(define (stmt-cfg add-block! ret-id)
   (define (stmt-cfg* body next)
     (match body
       [(cons (? list? body) rest) (stmt-cfg* (append body rest) next)]
@@ -48,8 +48,8 @@
          (add-block! after-id (stmt-cfg* rest next))
          (add-block! while-id (stmt-cfg* body (GotoCond* guard while-id after-id)))
          (list (GotoCond* guard while-id after-id)))]
-      [(cons (Return (cons (? void?) 'void)) _) (list (Goto* ret-id))]
-      [(cons (Return exp) _) (list (Assign (cons return-var ret-type) exp) (Goto* ret-id))]
+      [(cons (Return (? void?)) _) (list (Goto* ret-id))]
+      [(cons (Return exp) _) (list (Assign return-var exp) (Goto* ret-id))]
       [(cons stmt rest) (cons stmt (stmt-cfg* rest next))]
       ['() (list next)]))
   stmt-cfg*)
