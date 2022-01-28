@@ -6,9 +6,9 @@
 (require "parse-json.rkt"
          "type-check.rkt"
          "control-flow.rkt"
-         "translate-llvm.rkt"
-         "format-llvm.rkt"
-         "translate-ssa-llvm.rkt")
+         "stack-llvm.rkt"
+         "register-llvm.rkt"
+         "format-llvm.rkt")
 
 ;; Main
 (define (compile path stack? llvm? debug?)

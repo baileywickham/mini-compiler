@@ -1,14 +1,13 @@
 #lang racket
 
-(provide translate-llvm)
+(provide stack-llvm)
 
 (require racket/hash)
 (require "ast.rkt" "util.rkt" "symbol.rkt" "common-llvm.rkt")
 
 
-
 ;;
-(define+ (translate-llvm (Mini types decs funs))
+(define+ (stack-llvm (Mini types decs funs))
   (reset-labels tmp-prefix)
   (define globs (translate-decs @ decs))
   (define locs (make-immutable-hash (map (λ (dec glob) (cons (car dec) glob)) decs globs)))

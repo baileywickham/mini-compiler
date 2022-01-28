@@ -1,12 +1,14 @@
 #lang racket
 
+(provide register-llvm)
+
 (require "ast.rkt" "util.rkt" "symbol.rkt" "common-llvm.rkt")
 
 (define return-var '_retval_)
 (define label-prefix 'LU)
 
 ;;
-(define+ (control-flow (Mini types decs funs))
+(define+ (register-llvm (Mini types decs funs))
   (reset-labels label-prefix)
   (reset-labels tmp-prefix)
   (define structs (make-immutable-hash (map get-struct-info types)))
