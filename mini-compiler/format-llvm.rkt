@@ -79,7 +79,8 @@ declare i32 @scanf(i8*, ...)
      (format "call ~a~a ~a(~a)"
              (format-ty ty) (if var-args? " (i8*, ... )" "")  (format-id fn) (format-args args))]
     [(CastLL op ty value ty2)
-     (format "~a ~a ~a to ~a" op (format-ty ty) (format-arg value) (format-ty ty2))]))
+     (format "~a ~a ~a to ~a" op (format-ty ty) (format-arg value) (format-ty ty2))]
+    [o (~a o)]))
 
 ;;
 (define (format-args args)
