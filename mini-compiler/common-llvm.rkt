@@ -1,5 +1,7 @@
 #lang racket
+
 (provide (all-defined-out))
+
 (require "ast.rkt" "util.rkt" "symbol.rkt")
 
 (define int-size 64)
@@ -30,11 +32,11 @@
   (StructLL (translate-struct-id id)
             (map (compose translate-type cdr) fields)))
 
-
+;;
 (define+ (translate-global (cons id ty))
   (GlobalLL id ty (if (IntLL? ty) 0 'null)))
 
-
+;;
 (define (@ id) (IdLL id #t))
 (define (% id) (IdLL id #f))
 

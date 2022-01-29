@@ -5,8 +5,10 @@
 (define symbol-table (make-hash))
 
 ;;
-(define (reset-labels prefix)
-  (hash-remove! symbol-table prefix))
+(define (reset-labels [prefix #f])
+  (if prefix 
+      (hash-remove! symbol-table prefix)
+      (hash-clear! symbol-table)))
 
 ;;
 (define (make-label prefix)

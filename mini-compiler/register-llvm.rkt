@@ -9,8 +9,7 @@
 
 ;;
 (define+ (register-llvm (Mini types decs funs))
-  (reset-labels label-prefix)
-  (reset-labels tmp-prefix)
+  (reset-labels)
   (define structs (make-immutable-hash (map get-struct-info types)))
   (define fun-info (make-immutable-hash (map get-fun-info funs)))
   (LLVM (map translate-struct types)

@@ -116,8 +116,9 @@
 
   ;;
   (define (get-struct struct-id)
-    (cons struct-id (hash-ref structs struct-id
-                              (λ () (type-error "~e is not of struct type" struct-id)))))
+    (cons struct-id
+          (hash-ref structs struct-id
+                    (λ () (type-error "~e is not of struct type" struct-id)))))
 
   check-stmt)
 
