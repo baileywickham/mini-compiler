@@ -168,7 +168,7 @@
          (add-stmt! block (CallLL i32 (@ 'scanf)
                                           (list (cons "getelementptr inbounds ([5 x i8], [5 x i8]* @.read, i32 0, i32 0)"
                                                       (PtrLL byte))
-                                                (cons (@ '.read_scratch (PtrLL int))) #t)))
+                                                (cons (@ '.read_scratch) (PtrLL int)) #t)))
          (add-stmt! block (AssignLL tmp (LoadLL int (@ '.read_scratch))))
          (cons tmp int))]))
 
