@@ -7,7 +7,6 @@
 (define return-var '_retval_)
 (define label-prefix 'LU)
 (struct Block (id [phis #:mutable] [stmts #:mutable] [sealed? #:mutable]) #:transparent)
-(struct GotoNowhere* () #:transparent)
 
 ;;
 (define+ (register-llvm (Mini types decs funs))
@@ -47,7 +46,6 @@
         (let ([block (Block id '() '() sealed?)])
           (set-box! cfg (cons block (unbox cfg)))
           block)))
-    
 
   ;;
   (define (translate-body* ret-id)
@@ -182,7 +180,7 @@
          (add-stmt! block (AssignLL tmp (LoadLL int (@ '.read_scratch))))
          (cons tmp int))]))
 
-
+  ;;
   (define+ (translate-dot (Dot left id) block)
     (match-let* ([(cons left-id left-ty) (translate-arg left block)]
                  [fields (hash-ref structs left-ty)])
@@ -210,7 +208,6 @@
       [(s (? IntLL?)) dec]
       [(_ _) (cons id new-ty)]))
 
-
   ;; Given a var original name, the block id, and the value, updates current-def
   ;; returns void
   (define+ (write-var var block val)
@@ -221,7 +218,6 @@
   (define+ (read-var var block)
     (hash-ref (hash-ref current-def var) (Block-id block)
               (thunk (read-var-from-pred var block))))
-
 
   ;; returns a value that will serve as an argument, something like an id or a number
   (define+ (read-var-from-pred var block)
@@ -245,7 +241,7 @@
             p-var)))
     (write-var var block val) ;; variable maps to value
     val)
-  
+
   (define (make-phi var block sealed?)
     (define p (Phi (% (make-label (car var))) (translate-type (cdr var)) '() sealed? var))
     (add-phi! block p)
