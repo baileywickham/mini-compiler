@@ -7,6 +7,7 @@
 (define return-var '_retval_)
 (define label-prefix 'LU)
 (struct Block (id [phis #:mutable] [stmts #:mutable] [sealed? #:mutable]) #:transparent)
+(struct GotoNowhere* () #:transparent)
 
 ;;
 (define+ (register-llvm (Mini types decs funs))
@@ -19,9 +20,9 @@
 
 ;;
 (define+ (translate-fun (Fun id params ret-type decs body) structs fun-info)
-  (define translate-cfg (translate-cfg* structs fun-info))
+  (define translate-cfg (translate-cfg* structs fun-info ret-type))
   (FunLL (@ id) (translate-decs % params) (translate-type ret-type)
-         (translate-cfg params body ret-type)))
+         (translate-cfg params body)))
 
 (define (add-stmt! block stmt)
   (set-Block-stmts! block (cons stmt (Block-stmts block))))
@@ -35,45 +36,47 @@
                     (BlockLL id (append phis (reverse stmts)))) cfg)))
 
 
-(define (translate-cfg* structs funs)
+(define (translate-cfg* structs funs ret-type)
   (define cfg (box '()))
-  (define cfg-hash (make-hash))
   (define current-def (make-hash))
   (define preds (make-hash))
 
-  (define (add-block! id sealed?)
-    (define block (Block id '() '() sealed?))
-    (hash-set! cfg-hash id block)
-    (set-box! cfg (cons block (unbox cfg)))
-    block)
+  (define (add-block! id sealed? [start? #f])
+    (if (and (not start?) (empty? (hash-ref preds id '())))
+        #f
+        (let ([block (Block id '() '() sealed?)])
+          (set-box! cfg (cons block (unbox cfg)))
+          block)))
+    
 
   ;;
   (define (translate-body* ret-id)
     (define+ (translate-body body current-block next)
-      (match body
-        [(cons (? list? stmts) rest)
-         (translate-body (append stmts rest) current-block next)]
-        [(cons (If guard then else) after)
-         (with-labels (then-id else-id after-id)
-           (end-block current-block (GotoCond* guard then-id else-id))
-           (translate-body then (add-block! then-id #t) (Goto* after-id))
-           (translate-body else (add-block! else-id #t) (Goto* after-id))
-           (translate-body after (add-block! after-id #t) next))]
-        [(cons (While guard while-body) after)
-         (with-labels (while-id after-id)
-           (end-block current-block (GotoCond* guard while-id after-id))
-           (translate-body while-body (add-block! while-id #f) (GotoCond* guard while-id after-id))
-           (translate-body after (add-block! after-id #t) next))]
-        [(cons (Return (? void?)) _)
-         (end-block current-block (Goto* ret-id))]
-        [(cons (Return exp) _)
-         (write-var return-var current-block (translate-arg exp current-block))
-         (end-block current-block (Goto* ret-id))]
-        [(cons stmt rest)
-         (translate-stmt stmt current-block)
-         (translate-body rest current-block next)]
-        ['()
-         (end-block current-block next)]))
+      (when current-block
+        (match body
+          [(cons (? list? stmts) rest)
+           (translate-body (append stmts rest) current-block next)]
+          [(cons (If guard then else) after)
+           (with-labels (then-id else-id after-id)
+             (end-block current-block (GotoCond* guard then-id else-id))
+             (translate-body then (add-block! then-id #t) (Goto* after-id))
+             (translate-body else (add-block! else-id #t) (Goto* after-id))
+             (translate-body after (add-block! after-id #t) next))]
+          [(cons (While guard while-body) after)
+           (with-labels (while-id after-id)
+             (end-block current-block (GotoCond* guard while-id after-id))
+             (translate-body while-body (add-block! while-id #f) (GotoCond* guard while-id after-id))
+             (translate-body after (add-block! after-id #t) next))]
+          [(cons (Return (cons (? void?) 'void)) _)
+           (end-block current-block (Goto* ret-id))]
+          [(cons (Return exp) _)
+           (write-var (cons return-var ret-type) current-block (translate-arg exp current-block))
+           (end-block current-block (Goto* ret-id))]
+          [(cons stmt rest)
+           (translate-stmt stmt current-block)
+           (translate-body rest current-block next)]
+          ['()
+           (end-block current-block next)])))
 
     translate-body)
 
@@ -105,11 +108,14 @@
        (match-let ([(cons src-id _) (ensure-type (translate-arg src block) int block)]
                    [(cons target-id target-ty) (translate-dot target block)])
          (add-stmt! block (StoreLL target-ty src-id target-id)))]
+      [(Assign (cons (Global target-id) target-ty) src)
+       (match-let ([(cons src-id src-type) (ensure-type (translate-arg src block) int block)]                   )
+         (add-stmt! block (StoreLL src-type src-id (@ target-id))))]
       [(? Inv?)
-       (match-let ([(cons call _) (translate-inv stmt)])
+       (match-let ([(cons call _) (translate-inv stmt block)])
          (add-stmt! block call))]
       [(Delete exp)
-       (match-let ([(cons arg-id arg-ty) (translate-arg exp)])
+       (match-let ([(cons arg-id arg-ty) (translate-arg exp block)])
          (with-tmp (tmp)
            (add-stmt! block (AssignLL tmp (CastLL 'bitcast arg-ty arg-id (PtrLL byte))))
            (add-stmt! block (CallLL 'void (@ 'free) (list (cons tmp (PtrLL byte))) #f))))]
@@ -128,6 +134,10 @@
       [(Null) (cons 'null int)]
       [(? symbol?)
        (read-var arg block)]
+      [(Global id)
+       (with-tmp (tmp)
+         (add-stmt! block (AssignLL tmp (LoadLL (translate-type arg-ty) (@ id))))
+         (cons tmp (translate-type arg-ty)))]
       [(Prim op (list op1 op2))
        (match-let*
            ([(list op-name in-ty out-ty) (hash-ref ops op)]
@@ -147,12 +157,12 @@
            (add-stmt! block (AssignLL tmp (BinaryLL 'xor bit #t arg-id)))
            (cons tmp bit)))]
       [(Dot left id)
-       (match-let ([(cons dot-id dot-ty) (translate-dot arg block)])
+       (match-let ([(cons dot-id dot-ty) (translate-dot arg-val block)])
          (with-tmp (tmp)
            (add-stmt! block (AssignLL tmp (LoadLL dot-ty dot-id)))
            (cons tmp dot-ty)))]
       [(Inv id args)
-       (match-let ([(cons call ret-ty) (translate-inv arg)])
+       (match-let ([(cons call ret-ty) (translate-inv arg-val block)])
          (with-tmp (tmp)
            (add-stmt! block (AssignLL tmp call))
            (cons tmp ret-ty)))]
@@ -166,9 +176,9 @@
       [(Read)
        (with-tmp (tmp)
          (add-stmt! block (CallLL i32 (@ 'scanf)
-                                          (list (cons "getelementptr inbounds ([5 x i8], [5 x i8]* @.read, i32 0, i32 0)"
-                                                      (PtrLL byte))
-                                                (cons (@ '.read_scratch) (PtrLL int)) #t)))
+                                  (list (cons "getelementptr inbounds ([5 x i8], [5 x i8]* @.read, i32 0, i32 0)"
+                                              (PtrLL byte))
+                                        (cons (@ '.read_scratch) (PtrLL int))) #t))
          (add-stmt! block (AssignLL tmp (LoadLL int (@ '.read_scratch))))
          (cons tmp int))]))
 
@@ -209,40 +219,38 @@
   ;; Given a var original name, and the block id, returns a value that will serve as an
   ;; argument, something like an id or a number
   (define+ (read-var var block)
-    ;(pretty-display current-def)
-    (if (hash-has-key? (hash-ref current-def var) (Block-id block))
-        (hash-ref (hash-ref current-def var) (Block-id block))
-        (read-var-from-pred var block)))
+    (hash-ref (hash-ref current-def var) (Block-id block)
+              (thunk (read-var-from-pred var block))))
 
 
   ;; returns a value that will serve as an argument, something like an id or a number
   (define+ (read-var-from-pred var block)
     (define val
-      (cond
-        [(not (Block-sealed? block))
-         ;; this CFG is not complete, the block might gain a predecessor
-         ;; thus the need for a phi is unclear, so let’s assume it is needed
-         (define p (Phi (make-label var) '() #f var))
-         (add-phi! block p)
-         ;(hash-set! (hash-ref incomplete-phis block) var p)
-         (Phi-id p)]
-        [(empty? (hash-ref preds (Block-id block) '()))
-         (error 'ssa "undefined ~a" var)]
-        [(empty? (rest (hash-ref preds (Block-id block))))
-         ;; there is only one predecessor (and the block is sealed)
-         (read-var var (first (hash-ref preds (Block-id block))))]
-        [else
-         ;; ok, let’s search through predecessors and join them
-         ;; with a phi instruction at the beginning of this block
-         (define p (Phi (% (make-label (car var))) (translate-type (cdr var)) '() #t var))
-         (add-phi! block p)
-         (write-var var block p) ;; variable maps to new value breaks cycles
-         ;;^^^^^^^^ differs from paper, return value not used, so last
-         ;; writeVariable is redundant along this path
-         (add-phi-operands var p block)
-         (cons (Phi-id p) (Phi-ty p))]))
+      (if (Block-sealed? block)
+          (match (hash-ref preds (Block-id block) '())
+            ['() (pretty-display current-def)
+                 (pretty-display preds)
+                 (error 'ssa "undefined ~a in block ~a" var block)]
+            [(list pred) (read-var var pred)]
+            [(? list?)
+             ;; ok, let’s search through predecessors and join them
+             ;; with a phi instruction at the beginning of this block
+             (define-values (p p-var) (make-phi var block #t))
+             (write-var var block p-var) ;; variable maps to new value breaks cycles
+             ;;^^^^^^^^ differs from paper, return value not used, so last
+             ;; writeVariable is redundant along this path
+             (add-phi-operands var p block)
+             p-var])
+          (let-values ([(p p-var) (make-phi var block #f)])
+            p-var)))
     (write-var var block val) ;; variable maps to value
     val)
+  
+  (define (make-phi var block sealed?)
+    (define p (Phi (% (make-label (car var))) (translate-type (cdr var)) '() sealed? var))
+    (add-phi! block p)
+    (values p
+            (cons (Phi-id p) (Phi-ty p))))
 
   (define+ (add-phi-operands var phi block)
     (for ([pred (hash-ref preds (Block-id block))])
@@ -262,17 +270,20 @@
   (define (get-incomplete-phis block)
     (filter (negate Phi-complete?) (Block-phis block)))
 
-  (define (translate-cfg params body ret-type)
+  (define (translate-cfg params body)
     (with-labels (end-id start-id)
-      (define start-block (add-block! start-id #t))
+      (define start-block (add-block! start-id #t #t))
       (for ([param params])
         (write-var param start-block (translate-dec % param)))
       ((translate-body* end-id) body start-block (Goto* end-id))
       (define end-block (add-block! end-id #t))
       (if (equal? ret-type 'void)
           (add-stmt! end-block (ReturnLL 'void (void)))
-          (match-let ([(cons val _) (read-var return-var end-block)])
-            (add-stmt! end-block (ReturnLL (translate-type ret-type) val)))))
+          (match-let ([(cons val _) (read-var (cons return-var ret-type) end-block)])
+            (add-stmt! end-block (ReturnLL (translate-type ret-type) val))))
+      (for ([block (unbox cfg)])
+        (unless (Block-sealed? block)
+          (seal-block block))))
     (unpack-cfg (unbox cfg)))
 
   translate-cfg)

@@ -17,7 +17,7 @@ declare i32 @scanf(i8*, ...)
 @.println = private unnamed_addr constant [6 x i8] c\"%ld\\0A\\00\\00\", align 1
 @.print = private unnamed_addr constant [6 x i8] c\"%ld \\00\\00\", align 1
 @.read = private unnamed_addr constant [5 x i8] c\"%ld\\00\\00\", align 1
-@.read_scratch = common global i32 0, align 4\n")
+@.read_scratch = common global i64 0, align 4\n")
 
 ;;
 (define+ (format-llvm (LLVM types decs funs))
