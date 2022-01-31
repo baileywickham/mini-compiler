@@ -22,7 +22,7 @@
         (delete-file llvm-file)
         (delete-file executable))
 
-      (compile mini-file #t #f #f)
+      (compile mini-file #f #f #f)
 
       (when (and error? (not (file-exists? executable)))
         (error "compilation failed"))

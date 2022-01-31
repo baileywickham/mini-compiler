@@ -18,7 +18,19 @@ fun main() int {
     e = new A;
     e.i = 3;
 
+    if (true) {
+        a = b + 1;
+    } else {
+        a = 6;
+    }
+    b = a;
+
+    while (true) {
+        a = 1 + 1;
+    }
+    c = a;
 
 
-    return 1;
+
+    return c;
 }
