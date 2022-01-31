@@ -58,7 +58,7 @@
            (end-block current-block (GotoCond* guard then-id else-id))
            (translate-body then (add-block! then-id #t) (Goto* after-id))
            (translate-body else (add-block! else-id #t) (Goto* after-id))
-           (translate-body after (add-block! after-id #t) next ))]
+           (translate-body after (add-block! after-id #t) next))]
         [(cons (While guard while-body) after)
          (with-labels (while-id after-id)
            (end-block current-block (GotoCond* guard while-id after-id))
@@ -212,7 +212,7 @@
     ;(pretty-display current-def)
     (if (hash-has-key? (hash-ref current-def var) (Block-id block))
         (hash-ref (hash-ref current-def var) (Block-id block))
-        (read-var-from-pred var block )))
+        (read-var-from-pred var block)))
 
 
   ;; returns a value that will serve as an argument, something like an id or a number
@@ -230,7 +230,7 @@
          (error 'ssa "undefined ~a" var)]
         [(empty? (rest (hash-ref preds (Block-id block))))
          ;; there is only one predecessor (and the block is sealed)
-         (read-var var (first (hash-ref preds (Block-id block))) )]
+         (read-var var (first (hash-ref preds (Block-id block))))]
         [else
          ;; ok, let’s search through predecessors and join them
          ;; with a phi instruction at the beginning of this block
@@ -239,14 +239,14 @@
          (write-var var block p) ;; variable maps to new value breaks cycles
          ;;^^^^^^^^ differs from paper, return value not used, so last
          ;; writeVariable is redundant along this path
-         (add-phi-operands var p block )
+         (add-phi-operands var p block)
          (cons (Phi-id p) (Phi-ty p))]))
     (write-var var block val) ;; variable maps to value
     val)
 
-  (define+ (add-phi-operands var phi block )
+  (define+ (add-phi-operands var phi block)
     (for ([pred (hash-ref preds (Block-id block))])
-      (phi-append-operand phi pred (read-var var pred ))))
+      (phi-append-operand phi pred (read-var var pred))))
 
   (define (phi-append-operand phi pred var)
     (set-Phi-args! phi (cons (cons (Block-id pred) var) (Phi-args phi))))
