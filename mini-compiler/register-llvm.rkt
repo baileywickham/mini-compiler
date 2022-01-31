@@ -32,12 +32,22 @@
   (define preds (make-hash))
 
   ;;
-  (define (add-block! id sealed? [start? #f])
-    (if (and (not start?) (empty? (hash-ref preds id '())))
-        #f
-        (let ([block (Block id '() '() sealed?)])
-          (set-box! cfg (cons block (unbox cfg)))
-          block)))
+  (define (translate-cfg params body)
+    (with-labels (end-id start-id)
+      (let ([start-block (add-block! start-id #t #t)])
+        (for ([param params])
+          (write-var param start-block (translate-dec % param)))
+        ((translate-body* end-id) body start-block (Goto* end-id)))
+      (let ([end-block (add-block! end-id #t)])
+        (if (equal? ret-type 'void)
+            (add-stmt! end-block (ReturnLL 'void (void)))
+            (match-let ([(cons val _) (read-var (cons return-var ret-type) end-block)])
+              (add-stmt! end-block (ReturnLL (translate-type ret-type) val)))))
+      (for ([block (unbox cfg)])
+        (unless (Block-sealed? block)
+          (seal-block block))))
+    (unpack-cfg (unbox cfg)))
+
 
   ;;
   (define (translate-body* ret-id)
@@ -67,8 +77,15 @@
            (translate-body rest block next)]
           ['()
            (end-block block next)])))
-
     translate-body)
+
+  ;;
+  (define (add-block! id sealed? [start? #f])
+    (if (and (not start?) (empty? (hash-ref preds id '())))
+        #f
+        (let ([block (Block id '() '() sealed?)])
+          (set-box! cfg (cons block (unbox cfg)))
+          block)))
 
   ;;
   (define+ (end-block block next)
@@ -112,11 +129,14 @@
            (add-stmt! block (CallLL 'void (@ 'free) (list (cons tmp (PtrLL byte))) #f))))]
       [(Print exp endl?)
        (let ([arg (translate-arg exp block)])
-         (add-stmt! block
-                    (CallLL i32 (@ 'printf)
-                            (list (cons (format "getelementptr inbounds ([6 x i8], [6 x i8]* @.~a, i32 0, i32 0)"
-                                                (if endl? 'println 'print))
-                                        (PtrLL byte)) arg) #t)))]))
+         (add-stmt!
+          block
+          (CallLL i32 (@ 'printf)
+                  (list
+                   (cons
+                    (format "getelementptr inbounds ([6 x i8], [6 x i8]* @.~a, i32 0, i32 0)"
+                            (if endl? 'println 'print))
+                    (PtrLL byte)) arg) #t)))]))
 
   ;;
   (define+ (translate-arg (and arg (cons arg-val arg-ty)) block)
@@ -162,15 +182,18 @@
        (let* ([ty (translate-type id)]
               [size (* (/ int-size byte-size) (length (hash-ref structs ty)))])
          (with-tmp (tmp tmp2)
-           (add-stmt! block (AssignLL tmp (CallLL (PtrLL byte) (@ 'malloc) (list (cons size i32)) #f)))
+           (add-stmt! block (AssignLL tmp (CallLL (PtrLL byte) (@ 'malloc)
+                                                  (list (cons size i32)) #f)))
            (add-stmt! block (AssignLL tmp2 (CastLL 'bitcast (PtrLL byte) tmp ty)))
            (cons tmp2 ty)))]
       [(Read)
        (with-tmp (tmp)
-         (add-stmt! block (CallLL i32 (@ 'scanf)
-                                  (list (cons "getelementptr inbounds ([5 x i8], [5 x i8]* @.read, i32 0, i32 0)"
-                                              (PtrLL byte))
-                                        (cons read-scratch (PtrLL int))) #t))
+         (add-stmt!
+          block
+          (CallLL i32 (@ 'scanf)
+                  (list (cons "getelementptr inbounds ([5 x i8], [5 x i8]* @.read, i32 0, i32 0)"
+                              (PtrLL byte))
+                        (cons read-scratch (PtrLL int))) #t))
          (add-stmt! block (AssignLL tmp (LoadLL int read-scratch)))
          (cons tmp int))]))
 
@@ -245,11 +268,6 @@
     (values phi (cons (Phi-id phi) (Phi-ty phi))))
 
   ;;
-  (define+ (add-phi-operands var phi block)
-    (for ([pred (hash-ref preds (Block-id block))])
-      (phi-append-operand! phi pred (read-var var pred))))
-
-  ;;
   (define (seal-block block)
     ;; get target variables of all incomplete phis in this block
     (for ([phi (get-incomplete-phis block)])
@@ -258,25 +276,13 @@
     (set-Block-sealed?! block #t))
 
   ;;
-  (define (get-incomplete-phis block)
-    (filter (negate Phi-complete?) (Block-phis block)))
+  (define+ (add-phi-operands var phi block)
+    (for ([pred (hash-ref preds (Block-id block))])
+      (phi-append-operand! phi pred (read-var var pred))))
 
   ;;
-  (define (translate-cfg params body)
-    (with-labels (end-id start-id)
-      (let ([start-block (add-block! start-id #t #t)])
-        (for ([param params])
-          (write-var param start-block (translate-dec % param)))
-        ((translate-body* end-id) body start-block (Goto* end-id)))
-      (let ([end-block (add-block! end-id #t)])
-        (if (equal? ret-type 'void)
-            (add-stmt! end-block (ReturnLL 'void (void)))
-            (match-let ([(cons val _) (read-var (cons return-var ret-type) end-block)])
-              (add-stmt! end-block (ReturnLL (translate-type ret-type) val)))))
-      (for ([block (unbox cfg)])
-        (unless (Block-sealed? block)
-          (seal-block block))))
-    (unpack-cfg (unbox cfg)))
+  (define (get-incomplete-phis block)
+    (filter (negate Phi-complete?) (Block-phis block)))
 
   translate-cfg)
 

@@ -37,21 +37,18 @@
          [structs (make-hash (map (λ+ ((Struct id fs))
                                       (cons id (build-tenv fs check-type #f))) types))]
          [global-tenv (build-tenv decs check-type #t)])
-
-    (define new-funs
-      (for/list ([fun funs])
-        (match-let ([(Fun id params ret-type decs body) fun])
-          (unless (or (equal? ret-type 'void) (always-returns? body))
-            (type-error "function ~e does not return in all cases" id))
-          (let* ([tenv (extend-env global-tenv (build-tenv (append params decs) check-type #f))]
-                 [check-stmt (check-stmt* structs get-sig tenv ret-type)])
-            (Fun id params ret-type decs (map check-stmt body))))))
-
+    
     (unless (equal? (get-sig 'main) main-type)
       (type-error "main expects no arguments and returns an int"))
+    
+    (define+ (check-fun (Fun id params ret-type decs body))
+      (unless (or (equal? ret-type 'void) (always-returns? body))
+        (type-error "function ~e does not return in all cases" id))
+      (let* ([tenv (extend-env global-tenv (build-tenv (append params decs) check-type #f))]
+             [check-stmt (check-stmt* structs get-sig tenv ret-type)])
+        (Fun id params ret-type decs (map check-stmt body))))
 
-    (Mini types decs new-funs)))
-
+    (Mini types decs (map check-fun funs))))
 
 ;;
 (define (check-stmt* structs get-sig tenv ret-type)
