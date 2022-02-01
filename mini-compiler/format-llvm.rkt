@@ -79,10 +79,10 @@ declare i32 @scanf(i8*, ...)
              (format-ty ty) (if var-args? " (i8*, ... )" "")  (format-id fn) (format-args args))]
     [(CastLL op ty value ty2)
      (format "~a ~a ~a to ~a" op (format-ty ty) (format-arg value) (format-ty ty2))]
-    ;(struct Phi (id ty [args #:mutable] [complete? #:mutable] var) #:transparent)
-    [(Phi id ty args _ _)
+    [(PhiLL id ty args)
      (format "~a = phi ~a ~a" (format-id id) (format-ty ty)
-           (string-join (map (λ+ ((cons label (cons id _))) (format "[~a, %~a]" (format-arg id) label)) args) ", "))] 
+           (string-join (map (λ+ ((cons label (cons id _)))
+                                 (format "[~a, %~a]" (format-arg id) label)) args) ", "))]
     [o (~a o)]))
 
 ;;

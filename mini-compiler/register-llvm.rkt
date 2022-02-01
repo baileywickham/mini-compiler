@@ -9,6 +9,8 @@
 (define read-scratch (@ '.read_scratch))
 
 (struct Block (id [phis #:mutable] [stmts #:mutable] [sealed? #:mutable]) #:transparent)
+(struct Phi (id ty [args #:mutable] [complete? #:mutable] var) #:transparent)
+
 
 ;;
 (define+ (register-llvm (Mini types decs funs))
@@ -51,7 +53,7 @@
 
   ;;
   (define (translate-body* ret-id)
-    (define+ (translate-body body block next)
+    (define (translate-body body block next)
       (when block
         (match body
           [(cons (? list? stmts) rest)
@@ -88,7 +90,7 @@
           block)))
 
   ;;
-  (define+ (end-block block next)
+  (define (end-block block next)
     (match next
       [(Goto* label)
        (add-stmt! block (BrLL (% label)))
@@ -107,7 +109,7 @@
       (hash-set! preds succ-id (cons pred current-preds))))
 
   ;;
-  (define+ (translate-stmt stmt block)
+  (define (translate-stmt stmt block)
     (match stmt
       [(Assign (and target (cons (? symbol?) _)) src)
        (let ([src-val (ensure-type (translate-arg src block) int block)])
@@ -227,17 +229,17 @@
 
   ;; Given a var original name, the block id, and the value, updates current-def
   ;; returns void
-  (define+ (write-var var block val)
+  (define (write-var var block val)
     (hash-set! (hash-ref! current-def var (make-hash)) (Block-id block) val))
 
   ;; Given a var original name, and the block id, returns a value that will serve as an
   ;; argument, something like an id or a number
-  (define+ (read-var var block)
+  (define (read-var var block)
     (hash-ref (hash-ref current-def var) (Block-id block)
               (thunk (read-var-from-pred var block))))
 
   ;; returns a value that will serve as an argument, something like an id or a number
-  (define+ (read-var-from-pred var block)
+  (define (read-var-from-pred var block)
     (define val
       (if (Block-sealed? block)
           (match (hash-ref preds (Block-id block) '())
@@ -276,7 +278,7 @@
     (set-Block-sealed?! block #t))
 
   ;;
-  (define+ (add-phi-operands var phi block)
+  (define (add-phi-operands var phi block)
     (for ([pred (hash-ref preds (Block-id block))])
       (phi-append-operand! phi pred (read-var var pred))))
 
@@ -302,6 +304,10 @@
 (define (unpack-cfg cfg)
   (reverse (map (λ+ ((Block id phis stmts _))
                     (BlockLL id (append phis (reverse stmts)))) cfg)))
+
+;;
+(define+ (unpack-phi (Phi id ty args _ _))
+   (PhiLL id ty args))
 
 
 ;; Macro that given a set of IDs that labels are needed for binds the labels to freshly

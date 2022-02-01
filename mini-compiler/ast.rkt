@@ -36,13 +36,6 @@
 (struct Block* (id stmts) #:transparent)
 
 ;; --------------------------------------------
-;; SSA
-;; --------------------------------------------
-
-(struct Block-ssa (id [preds #:mutable] [phis #:mutable] [stmts #:mutable]) #:transparent)
-(struct Phi (id ty [args #:mutable] [complete? #:mutable] var) #:transparent)
-
-;; --------------------------------------------
 ;; LLVM
 ;; --------------------------------------------
 
@@ -66,6 +59,7 @@
 
 (struct BrLL (dest) #:transparent)
 (struct BrCondLL (cond iftrue iffalse) #:transparent)
+(struct PhiLL (id ty args) #:transparent)
 
 ;; Arguments
 (struct PtrLL (to) #:transparent)
