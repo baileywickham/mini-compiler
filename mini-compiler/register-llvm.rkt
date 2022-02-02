@@ -72,7 +72,7 @@
           [(cons (Return (cons (? void?) 'void)) _)
            (end-block block (Goto* ret-id))]
           [(cons (Return exp) _)
-           (write-var (cons return-var ret-type) block (translate-arg exp block))
+           (write-var (cons return-var ret-type) block (ensure-type (translate-arg exp block) (translate-type ret-type) block))
            (end-block block (Goto* ret-id))]
           [(cons stmt rest)
            (translate-stmt stmt block)
@@ -120,7 +120,7 @@
          (add-stmt! block (StoreLL target-ty src-id target-id)))]
       [(Assign (cons (Global target-id) target-ty) src)
        (match-let ([(cons src-id src-type) (ensure-type (translate-arg src block) int block)])
-         (add-stmt! block (StoreLL src-type src-id (@ target-id))))]
+         (add-stmt! block (StoreLL (translate-type target-ty) src-id (@ target-id))))]
       [(? Inv?)
        (match-let ([(cons call _) (translate-inv stmt block)])
          (add-stmt! block call))]
@@ -303,7 +303,7 @@
 ;;
 (define (unpack-cfg cfg)
   (reverse (map (λ+ ((Block id phis stmts _))
-                    (BlockLL id (append phis (reverse stmts)))) cfg)))
+                    (BlockLL id (append (map unpack-phi phis) (reverse stmts)))) cfg)))
 
 ;;
 (define+ (unpack-phi (Phi id ty args _ _))
