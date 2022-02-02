@@ -82,8 +82,7 @@ declare i32 @scanf(i8*, ...)
     [(PhiLL id ty args)
      (format "~a = phi ~a ~a" (format-id id) (format-ty ty)
            (string-join (map (λ+ ((cons label (cons id _)))
-                                 (format "[~a, %~a]" (format-arg id) label)) args) ", "))]
-    [o (~a o)]))
+                                 (format "[~a, %~a]" (format-arg id) label)) args) ", "))]))
 
 ;;
 (define (format-args args)
