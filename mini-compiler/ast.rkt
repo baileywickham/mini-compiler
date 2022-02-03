@@ -65,11 +65,16 @@
 (struct PtrLL (to) #:transparent)
 (struct IdLL (id global?) #:transparent)
 (struct IntLL (size) #:transparent)
+(struct StringConstLL (id) #:transparent)
 
+;; --------------------------------------------
 ;; ARM
+;; --------------------------------------------
+
 (struct ARM (comms funs) #:transparent)
 (struct BlockA (id stmts) #:transparent)
 (struct FunA (id blocks) #:transparent)
+
 (struct CommA (id) #:transparent)
 (struct OpA (op target r1 op2) #:transparent)
 (struct CmpA (r1 op2) #:transparent)

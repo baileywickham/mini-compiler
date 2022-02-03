@@ -1,22 +1,27 @@
 #lang racket
-(require "ast.rkt" "util.rkt")
+
 (provide format-arm)
 
-(define header "\t.arch armv7-a")
+(require "ast.rkt" "util.rkt")
+
+
+(define header "\t.arch armv7-a\n")
+
+(define funs-header "\n\t.text\n")
+
 (define footer "
 \t.section\t.rodata
-	.align	2
+\t.align\t2
 .PRINTLN_FMT:
-	.asciz	\"%ld\\n\"
-	.align	2
+\t.asciz\t\"%ld\\n\"
+\t.align\t2
 .PRINT_FMT:
-	.asciz	\"%ld \"
-	.align	2
+\t.asciz\t\"%ld \"
+\t.align\t2
 .READ_FMT:
-	.asciz	\"%ld\"
-	.global	__aeabi_idiv")
+\t.asciz\t\"%ld\"
+\t.global\t__aeabi_idiv")
 
-(define funs-header "\t.text")
 
 (define+ (format-arm (ARM comms funs))
   (string-append
@@ -39,5 +44,4 @@
 
 (define (format-stmt stmt)
   (match stmt
-    [o (~a o)]))
-  
+    [o (~v o)]))

@@ -46,11 +46,8 @@
          (list (ReturnLL ret-ty ret-id)))]
       [(Assign target (Read))
        (match-let ([(cons loc-id loc-ty) (translate-assign-target target)])
-         (list
-          (CallLL i32 (@ 'scanf)
-                  (list (cons "getelementptr inbounds ([5 x i8], [5 x i8]* @.read, i32 0, i32 0)"
-                              (PtrLL byte))
-                        (cons loc-id (PtrLL loc-ty))) #t)))]
+         (list (CallLL i32 (@ 'scanf) (list (cons (StringConstLL 'read) (PtrLL byte))
+                                            (cons loc-id (PtrLL loc-ty))) #t)))]
       [(Assign target src)
        (match-let ([(cons src-id _) (ensure-type (translate-arg src) int)]
                    [(cons target-id target-ty) (translate-assign-target target)])
@@ -65,12 +62,9 @@
                  (CallLL 'void (@ 'free) (list (cons tmp (PtrLL byte))) #f))))]
       [(Print exp endl?)
        (let ([arg (translate-arg exp)])
-         (list
-          (CallLL i32 (@ 'printf)
-                  (list (cons
-                         (format "getelementptr inbounds ([6 x i8], [6 x i8]* @.~a, i32 0, i32 0)"
-                                 (if endl? 'println 'print))
-                         (PtrLL byte)) arg) #t)))]))
+         (list (CallLL i32 (@ 'printf)
+                       (list (cons (StringConstLL (if endl? 'println 'print)) (PtrLL byte))
+                             arg) #t)))]))
 
   ;;
   (define (translate-assign-target target)

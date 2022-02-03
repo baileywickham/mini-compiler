@@ -8,6 +8,11 @@
 ;;
 (define comp-ops (set 'sle 'sgt 'sge 'slt 'eq 'ne))
 
+(define format-strings
+  #hash((read    . "getelementptr inbounds ([5 x i8], [5 x i8]* @.read,    i32 0, i32 0)")
+        (println . "getelementptr inbounds ([6 x i8], [6 x i8]* @.println, i32 0, i32 0)")
+        (print   . "getelementptr inbounds ([6 x i8], [6 x i8]* @.print,   i32 0, i32 0)")))
+
 (define header "target triple=\"i686\"\n")
 
 (define footer "declare i8* @malloc(i32)
@@ -81,8 +86,8 @@ declare i32 @scanf(i8*, ...)
      (format "~a ~a ~a to ~a" op (format-ty ty) (format-arg value) (format-ty ty2))]
     [(PhiLL id ty args)
      (format "~a = phi ~a ~a" (format-id id) (format-ty ty)
-           (string-join (map (λ+ ((cons label (cons id _)))
-                                 (format "[~a, %~a]" (format-arg id) label)) args) ", "))]))
+             (string-join (map (λ+ ((cons label (cons id _)))
+                                   (format "[~a, %~a]" (format-arg id) label)) args) ", "))]))
 
 ;;
 (define (format-args args)
@@ -101,9 +106,10 @@ declare i32 @scanf(i8*, ...)
 (define (format-arg arg)
   (match arg
     ['null "null"]
-    [(or (? string?) (? integer?)) arg]
+    [(? integer?) arg]
     [(? boolean?) (if arg "true" "false")]
-    [(? IdLL?) (format-id arg)]))
+    [(? IdLL?) (format-id arg)]
+    [(StringConstLL id) (hash-ref format-strings id)]))
 
 ;;
 (define+ (format-id (IdLL id global?))

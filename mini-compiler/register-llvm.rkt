@@ -72,7 +72,8 @@
           [(cons (Return (cons (? void?) 'void)) _)
            (end-block block (Goto* ret-id))]
           [(cons (Return exp) _)
-           (write-var (cons return-var ret-type) block (ensure-type (translate-arg exp block) (translate-type ret-type) block))
+           (write-var (cons return-var ret-type) block
+                      (ensure-type (translate-arg exp block) (translate-type ret-type) block))
            (end-block block (Goto* ret-id))]
           [(cons stmt rest)
            (translate-stmt stmt block)
@@ -131,14 +132,10 @@
            (add-stmt! block (CallLL 'void (@ 'free) (list (cons tmp (PtrLL byte))) #f))))]
       [(Print exp endl?)
        (let ([arg (translate-arg exp block)])
-         (add-stmt!
-          block
-          (CallLL i32 (@ 'printf)
-                  (list
-                   (cons
-                    (format "getelementptr inbounds ([6 x i8], [6 x i8]* @.~a, i32 0, i32 0)"
-                            (if endl? 'println 'print))
-                    (PtrLL byte)) arg) #t)))]))
+         (add-stmt! block
+                    (CallLL i32 (@ 'printf)
+                            (list (cons (StringConstLL (if endl? 'println 'print)) (PtrLL byte))
+                                  arg) #t)))]))
 
   ;;
   (define+ (translate-arg (and arg (cons arg-val arg-ty)) block)
@@ -190,12 +187,8 @@
            (cons tmp2 ty)))]
       [(Read)
        (with-tmp (tmp)
-         (add-stmt!
-          block
-          (CallLL i32 (@ 'scanf)
-                  (list (cons "getelementptr inbounds ([5 x i8], [5 x i8]* @.read, i32 0, i32 0)"
-                              (PtrLL byte))
-                        (cons read-scratch (PtrLL int))) #t))
+         (add-stmt! block (CallLL i32 (@ 'scanf) (list (cons (StringConstLL 'read) (PtrLL byte))
+                                                       (cons read-scratch (PtrLL int))) #t))
          (add-stmt! block (AssignLL tmp (LoadLL int read-scratch)))
          (cons tmp int))]))
 
@@ -307,7 +300,7 @@
 
 ;;
 (define+ (unpack-phi (Phi id ty args _ _))
-   (PhiLL id ty args))
+  (PhiLL id ty args))
 
 
 ;; Macro that given a set of IDs that labels are needed for binds the labels to freshly

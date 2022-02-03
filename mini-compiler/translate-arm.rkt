@@ -1,9 +1,8 @@
 #lang racket
 
-
-(require "ast.rkt" "util.rkt")
 (provide translate-arm)
 
+(require "ast.rkt" "util.rkt")
 
 
 (define+ (translate-arm (LLVM tys decs funs))
@@ -18,7 +17,4 @@
 
 (define+ (translate-block (BlockLL id stmts))
   (BlockA id stmts))
-  
 
-
-  
