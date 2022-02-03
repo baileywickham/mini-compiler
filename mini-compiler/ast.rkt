@@ -2,6 +2,7 @@
 
 (provide (all-defined-out))
 
+
 ;; --------------------------------------------
 ;; Mini
 ;; --------------------------------------------
@@ -84,6 +85,14 @@
 (struct StrA (r2 addr) #:transparent)
 (struct PushA (regs) #:transparent)
 (struct PopA (regs) #:transparent)
+
+(define int-size 64)
+(define byte-size 8)
+
+(define bit  (IntLL 1))
+(define byte (IntLL byte-size))
+(define i32  (IntLL 32))
+(define int  (IntLL int-size))
 
 
 

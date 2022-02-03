@@ -1,4 +1,4 @@
-#lang racket
+ #lang racket
 
 (provide format-arm)
 
@@ -44,4 +44,20 @@
 
 (define (format-stmt stmt)
   (match stmt
-    [o (~v o)]))
+    [(BrA op id) (format "b~a ~a" (or op "") id)]
+    [(CmpA arg1 arg2) (format "cmp ~a, ~a" (format-arg arg1) (format-arg arg2))]
+    [(OpA op target arg1 arg2) (format "~a ~a, ~a, ~a" op (format-arg target) (format-arg arg1) (format-arg arg2))]
+    [(MvA op target val) (format "mov~a ~a, ~a" (or op "") (format-arg target) (format-arg val))]
+    [(StrA r2 addr) (format "str ~a, [~a]" (format-arg r2) (format-arg addr))] 
+    [o (~v o)]
+    ))
+
+(define (format-arg arg)
+  (match arg
+    [(? number?) (format "#~a" arg)]
+    [(? IdLL?) (format-id arg)]))
+
+(define+ (format-id (IdLL id global?))
+  (format "~a~a" (if global? "@" "%") id))
+    
+                    
