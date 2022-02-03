@@ -8,7 +8,9 @@
          "control-flow.rkt"
          "stack-llvm.rkt"
          "register-llvm.rkt"
-         "format-llvm.rkt")
+         "format-llvm.rkt"
+         "format-arm.rkt"
+         "arm.rkt")
 
 ;; Main
 (define (compile path stack? llvm? debug?)
@@ -18,11 +20,16 @@
     (if stack?
         (stack-llvm (control-flow mini))
         (register-llvm typed-mini)))
-  (when debug? (display (format-llvm llvm-ir)))
-  (define llvm-path (path-replace-extension path ".ll"))
-  (with-output-to-file llvm-path
-    (λ () (display (format-llvm llvm-ir))) #:exists 'replace)
-  (unless llvm? (clang llvm-path))
+  (when debug?
+    (display (format-llvm llvm-ir))
+    (display (format-arm (translate-arm llvm-ir))))
+  (if llvm?
+      (let ([llvm-path (path-replace-extension path ".ll")])
+        (with-output-to-file llvm-path
+          (λ () (display (format-llvm llvm-ir))) #:exists 'replace))
+      (let ([arm-path (path-replace-extension path ".s")])
+        (with-output-to-file arm-path
+          (λ () (display (format-arm (translate-arm llvm-ir)))) #:exists 'replace)))
   (void))
 
 ;; Calls the Java MiniCompiler parser and reads the generated JSON into hash tables

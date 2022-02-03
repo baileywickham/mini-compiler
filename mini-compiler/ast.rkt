@@ -66,5 +66,20 @@
 (struct IdLL (id global?) #:transparent)
 (struct IntLL (size) #:transparent)
 
+;; ARM
+(struct ARM (comms funs) #:transparent)
+(struct BlockA (id stmts) #:transparent)
+(struct FunA (id blocks) #:transparent)
+(struct CommA (id) #:transparent)
+(struct OpA (op target r1 op2) #:transparent)
+(struct CmpA (r1 op2) #:transparent)
+(struct BrA (op label) #:transparent)
+(struct MvA (op r1 op2) #:transparent)
+(struct LdrA (r1 addr) #:transparent)
+(struct StrA (r2 addr) #:transparent)
+(struct PushA (regs) #:transparent)
+(struct PopA (regs) #:transparent)
+
+
 
 
