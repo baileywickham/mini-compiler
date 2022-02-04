@@ -4,9 +4,12 @@
 
 (require "ast.rkt" "util.rkt")
 
-(define easy-ops #hash((add . add) (sub . sub) (and . and)
-                                   (or . orr)
-                                   (xor . eor)))
+(define easy-ops
+  #hash((add . add)
+        (sub . sub)
+        (and . and)
+        (or . orr)
+        (xor . eor)))
 
 (define+ (translate-arm (LLVM tys decs funs))
   (ARM (map translate-dec decs)
@@ -25,10 +28,9 @@
   (match stmt
     [(BrLL (IdLL id _)) (list (BrA #f id))]
     [(BrCondLL cond (IdLL iftrue _) (IdLL iffalse _))
-     (list
-      (CmpA cond 1)
-      (BrA 'eq iftrue)
-      (BrA #f iffalse))]
+     (list (CmpA cond 1)
+           (BrA 'eq iftrue)
+           (BrA #f iffalse))]
     [(AssignLL target (BinaryLL (? easy-op? op) _ arg1 arg2))
      (list (OpA (hash-ref easy-ops op) target arg1 arg2))]
     [(AssignLL target (GetEltLL _ ptr index))
