@@ -86,6 +86,8 @@
 (struct PushA (regs) #:transparent)
 (struct PopA (regs) #:transparent)
 
+(struct RegA (reg) #:transparent)
+
 (define int-size 64)
 (define byte-size 8)
 
