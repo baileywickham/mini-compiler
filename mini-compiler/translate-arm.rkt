@@ -22,7 +22,7 @@
 (define arg-regs (list (RegA 'r0) (RegA 'r1) (RegA 'r2) (RegA 'r3)))
 
 
-(define+ (translate-arm (LLVM tys decs funs))
+(define+ (translate-arm (LLVM _ decs funs))
   (ARM (map translate-dec decs)
        (map translate-fun funs)))
 
