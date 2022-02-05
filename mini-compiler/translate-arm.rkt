@@ -30,7 +30,13 @@
   (CommA id))
 
 (define+ (translate-fun (FunLL (IdLL id _) params _ body))
-  (FunA id (map translate-block (remove-phis body))))
+  (define header (make-fun-header params))
+  (define blocks (map translate-block (remove-phis body)))
+  (FunA id (list-update blocks 0 (curry extend-block header))))
+
+(define (make-fun-header params)
+  (append (list (PushA (list (RegA 'fp ) (RegA 'lr)))
+                (OpA 'add (RegA 'fp) (RegA 'sp) 4))))
 
 (define (remove-phis blocks)
   (define phi-moves (make-hash))
@@ -74,6 +80,8 @@
      (list (OpA (hash-ref easy-ops op) target arg1 arg2))]
     [(AssignLL target (BinaryLL 'mul _ arg1 arg2))
      (list (OpA 'mul target arg1 arg2))]
+    [(AssignLL target (GetEltLL _ ptr 0))
+     (list (MvA #f target ptr))]
     [(AssignLL target (GetEltLL _ ptr index))
      (list (OpA 'add target ptr (* index (/ int-size byte-size))))]
     [(AssignLL target (CastLL op _ val _))
@@ -106,6 +114,9 @@
   (if (<= i (length arg-regs))
       (MvA #f (list-ref arg-regs i) arg)
       (PushA (list arg))))
+
+(define+ (extend-block stmts (BlockA id block-stmts))
+  (BlockA id (append stmts block-stmts)))
 
 (define (comp-op? op)
   (hash-has-key? comp-ops op))

@@ -88,7 +88,7 @@
 
 (struct RegA (reg) #:transparent)
 
-(define int-size 64)
+(define int-size 32)
 (define byte-size 8)
 
 (define bit  (IntLL 1))

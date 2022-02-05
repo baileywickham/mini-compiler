@@ -13,5 +13,5 @@
 ;;
 (define (make-label prefix)
   (let ([v (hash-ref! symbol-table prefix 0)])
-    (hash-update! symbol-table prefix add1)
+    (hash-update! symbol-table prefix (if (and (equal? prefix '_u) (= v 1)) (curry + 2) add1))
     (string->symbol (format "~a~a" prefix v))))

@@ -39,12 +39,12 @@
           id id (string-join (map format-block blocks) "\n") id id))
 
 (define+ (format-block (BlockA id stmts))
-  (format "~a:\n~a"
+  (format ".~a:\n~a"
           id (string-join (map (λ (stmt) (format "\t~a" (format-stmt stmt))) stmts) "\n")))
 
 (define (format-stmt stmt)
   (match stmt
-    [(BrA op id) (format "b~a ~a" (or op "") id)]
+    [(BrA op id) (format "b~a .~a" (or op "") id)]
     [(CmpA arg1 arg2) (format "cmp ~a, ~a" (format-arg arg1) (format-arg arg2))]
     [(OpA op target arg1 arg2)
      (format "~a ~a, ~a, ~a" op (format-arg target) (format-arg arg1) (format-arg arg2))]
