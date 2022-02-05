@@ -4,6 +4,10 @@
 
 (require "ast.rkt" "util.rkt")
 
+(define format-strings
+  #hash((read    . ".READ_FMT")
+        (println . ".PRINTLN_FMT")
+        (print   . ".PRINT_FMT")))
 
 (define header "\t.arch armv7-a\n")
 
@@ -59,8 +63,10 @@
 (define (format-arg arg)
   (match arg
     [(? number?) (format "#~a" arg)]
+    [(HalfA arg lower?) (format "#:~a16:~a" (if lower? "lower" "upper") (format-arg arg))]
     [(RegA r) (~a r)]
     [(? IdLL?) (format-id arg)]
+    [(StringConstLL id) (hash-ref format-strings id)]
     [o (~v o)]))
 
 (define (format-label lbl)
@@ -70,3 +76,4 @@
 
 (define+ (format-id (IdLL id global?))
   (format "~a~a" (if global? "@" "%") id))
+

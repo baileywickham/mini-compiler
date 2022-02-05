@@ -19,6 +19,19 @@
         (eq  . eq)
         (ne  . ne)))
 
+(struct ImmRange (min max))
+(define imm16 (ImmRange 0 65535))
+(define imm12 (ImmRange 0 4095))
+(define imm13 (ImmRange -4095 4095))
+(define imm8 (ImmRange 0 255))
+
+;; MOVW 16b,
+;; ADD 12b, 0-4095
+;; LDR/SDR 13b -4095-4095
+;; cmp is weird
+;; we will assume operand2 is 8 bits
+;; mov  0-65535
+
 (define arg-regs (list (RegA 'r0) (RegA 'r1) (RegA 'r2) (RegA 'r3)))
 
 
@@ -77,59 +90,96 @@
   (BlockA (LabelA id) (append-map translate-stmt stmts)))
 
 (define (translate-stmt stmt)
-  (match stmt
-    [(BrLL (IdLL id _))
-     (list (BrA #f (LabelA id)))]
-    [(BrCondLL cond (IdLL iftrue _) (IdLL iffalse _))
-     (list (CmpA cond 1)
-           (BrA 'eq (LabelA iftrue))
-           (BrA #f (LabelA iffalse)))]
-    [(AssignLL target (? IdLL? src))
-     (list (MovA #f target src))]
-    [(AssignLL target (BinaryLL (? easy-op? op) _ arg1 arg2))
-     (list (OpA (hash-ref easy-ops op) target arg1 arg2))]
-    [(AssignLL target (BinaryLL 'mul _ arg1 arg2))
-     (list (OpA 'mul target arg1 arg2))]
-    [(AssignLL target (GetEltLL _ ptr 0))
-     (list (MovA #f target ptr))]
-    [(AssignLL target (GetEltLL _ ptr index))
-     (list (OpA 'add target ptr (* index (/ int-size byte-size))))]
-    [(AssignLL target (CastLL op _ val _))
-     (list (MovA #f target val))]
-    [(AssignLL target (BinaryLL 'sdiv _ arg1 arg2))
-     (translate-stmt (AssignLL target (CallLL #f (IdLL '__aeabi_idiv #t)
-                                              (list (cons arg1 int) (cons arg2 int)) #f)))]
-    [(StoreLL _ val ptr)
-     (list (StrA val ptr))]
-    [(AssignLL target (BinaryLL (? comp-op? op) _ arg1 arg2))
-     (list (MovA #f target 0)
-           (CmpA arg1 arg2)
-           (MovA (hash-ref comp-ops op) target 1))]
-    [(AssignLL target (? CallLL? c))
-     (append (translate-call c)
-             (list (MovA #f target (RegA 'r0))))]
-    [(? CallLL? c) (translate-call c)]
-    [(AssignLL target (LoadLL _ ptr))
-     (list (LdrA target ptr))]
-    [(ReturnLL _ (? void?))
-     (list (PopA (list (RegA 'fp) (RegA 'pc))))]
-    [(ReturnLL _ arg)
-     (list (MovA #f (RegA 'r0) arg)
-           (PopA (list (RegA 'fp) (RegA 'pc))))]
-    [o (list o)]))
+  ((translate-stmt*) stmt))
 
-(define+ (translate-call (CallLL _ (IdLL fn _) args _))
-  (define new-args (map store-arg args (build-list (length args) identity)))
-  (append new-args (list (BrA 'l fn))))
+(define (translate-stmt*)
+  (define stmts (box '()))
+  
+  (define (add-stmt! . new-stmts)
+    (set-box! stmts (append (unbox stmts) new-stmts)))
+  
+  (define (translate-stmt stmt)
+    (match stmt
+      [(BrLL (IdLL id _))
+       (list (BrA #f (LabelA id)))]
+      [(BrCondLL cond (IdLL iftrue _) (IdLL iffalse _))
+       (list (CmpA (translate-arg cond #f) 1)
+             (BrA 'eq (LabelA iftrue))
+             (BrA #f (LabelA iffalse)))]
+      [(AssignLL target (? IdLL? src))
+       (make-mov #f target src)]
+      [(AssignLL target (BinaryLL (? easy-op? op) _ arg1 arg2))
+       (list (OpA (hash-ref easy-ops op) target (translate-arg arg1 #f) (translate-arg arg2 imm12)))]
+      [(AssignLL target (BinaryLL 'mul _ arg1 arg2))
+       (list (OpA 'mul target (translate-arg arg1 #f) (translate-arg arg2 #f)))]
+      [(AssignLL target (GetEltLL _ ptr 0))
+       (make-mov #f target ptr)]
+      [(AssignLL target (GetEltLL _ ptr index))
+       (list (OpA 'add target ptr (translate-arg (* index (/ int-size byte-size)) imm12)))]
+      [(AssignLL target (CastLL op _ val _))
+       (make-mov #f target val)]
+      [(AssignLL target (BinaryLL 'sdiv _ arg1 arg2))
+       (translate-stmt (AssignLL target (CallLL #f (IdLL '__aeabi_idiv #t)
+                                                (list (cons arg1 int) (cons arg2 int)) #f)))]
+      [(StoreLL _ val ptr)
+       (list (StrA (translate-arg val #f) ptr))]
+      [(AssignLL target (BinaryLL (? comp-op? op) _ arg1 arg2))
+       (list (MovA #f target 0)
+             (CmpA (translate-arg arg1 #f) (translate-arg arg2 imm8))
+             (MovA (hash-ref comp-ops op) target 1))]
+      [(AssignLL target (? CallLL? c))
+       (append (translate-call c)
+               (list (MovA #f target (RegA 'r0))))]
+      [(? CallLL? c) (translate-call c)]
+      [(AssignLL target (LoadLL _ ptr))
+       (list (LdrA target ptr))]
+      [(ReturnLL _ (? void?))
+       (list (PopA (list (RegA 'fp) (RegA 'pc))))]
+      [(ReturnLL _ arg)
+       (append (make-mov #f (RegA 'r0) arg)
+             (list (PopA (list (RegA 'fp) (RegA 'pc)))))]
+      [o (list o)]))
 
-(define+ (store-arg (cons arg _) i)
-  (if (<= i (length arg-regs))
-      (MovA #f (list-ref arg-regs i) arg)
-      (PushA (list arg))))
+  (define+ (translate-call (CallLL _ (IdLL fn _) args _))
+    (define new-args (append-map store-arg args (build-list (length args) identity)))
+    (append new-args (list (BrA 'l fn))))
+
+  (define+ (store-arg (cons arg _) i)
+    (if (<= i (length arg-regs))
+        (make-mov #f (list-ref arg-regs i) arg)
+        (list (PushA (list arg)))))
+
+  (define (translate-arg arg imm-spec)
+    (if (or (not (imm? arg)) (and imm-spec (in-range arg imm-spec)))
+        arg
+        (let ([tmp (IdLL (make-label 't) #f)])
+          (apply add-stmt! (make-mov 'w tmp arg))
+          tmp)))
+  
+  
+  (define (translate-stmt2 stmt)
+    (let ([last-stmts (translate-stmt stmt)])
+      (append (unbox stmts) last-stmts)))
+  translate-stmt2)
+
+(define (make-mov pred target src)
+  (match src
+    [(? imm?) #:when (in-range src imm16) (list (MovA (or pred 'w) target src))]
+    [(? imm?) (when pred (error "pred error")) (list (MovA 'w target (HalfA src #t))
+                                                         (MovA 't target (HalfA src #f)))]
+    [else (list (MovA pred target src))]))
 
 (define+ (extend-block stmts (BlockA id block-stmts))
   (BlockA id (append stmts block-stmts)))
 
+(define (imm? arg)
+  (or (integer? arg) (StringConstLL? arg)))
+
+(define+ (in-range arg (ImmRange min max))
+  (and (integer? arg) (<= arg max) (>= arg min)))
+  
+
+  
 (define (comp-op? op)
   (hash-has-key? comp-ops op))
 
