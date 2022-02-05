@@ -1,4 +1,4 @@
- #lang racket
+#lang racket
 
 (provide translate-arm)
 
@@ -31,7 +31,7 @@
 
 (define+ (translate-fun (FunLL (IdLL id _) params _ body))
   (define header (make-fun-header params))
-  (define blocks (map translate-block (remove-phis body)))
+  (define blocks (map translate-block ((remove-phis*) body)))
   (FunA id (list-update blocks 0 (curry extend-block header))))
 
 (define (make-fun-header params)
@@ -45,11 +45,11 @@
       (MvA #f param (list-ref arg-regs index))
       (LdrA param (OffsetA (RegA 'sp) (* 4 (- index (length arg-regs)))))))
 
-(define (remove-phis blocks)
+(define (remove-phis*)
   (define phi-moves (make-hash))
 
-  (define (add-phi-move! block-id move)
-    (hash-set! phi-moves block-id (cons move (hash-ref phi-moves block-id '()))))
+  (define (remove-phis blocks)
+    (map add-mvs-block (map remove-phis-block blocks)))
 
   (define+ (remove-phis-block (BlockLL id stmts))
     (BlockLL id (map remove-phis-stmt stmts)))
@@ -64,12 +64,14 @@
          (AssignLL id phi-id))]
       [_ stmt]))
 
-  (define+ (add-mvs-block (BlockLL id stmts))
-  (BlockLL id (let-values ([(before after) (split-at-right stmts 1)])
-                (append before (hash-ref phi-moves id '()) after))))
+  (define (add-phi-move! block-id move)
+    (hash-set! phi-moves block-id (cons move (hash-ref phi-moves block-id '()))))
 
-  (define no-phis (map remove-phis-block blocks))
-  (map add-mvs-block no-phis))
+  (define+ (add-mvs-block (BlockLL id stmts))
+    (BlockLL id (let-values ([(before after) (split-at-right stmts 1)])
+                  (append before (hash-ref phi-moves id '()) after))))
+
+  remove-phis)
 
 (define+ (translate-block (BlockLL id stmts))
   (BlockA (LabelA id) (append-map translate-stmt stmts)))

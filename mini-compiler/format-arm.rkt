@@ -1,4 +1,4 @@
- #lang racket
+#lang racket
 
 (provide format-arm)
 
@@ -40,7 +40,8 @@
 
 (define+ (format-block (BlockA id stmts))
   (format "~a:\n~a"
-          (format-label id) (string-join (map (λ (stmt) (format "\t~a" (format-stmt stmt))) stmts) "\n")))
+          (format-label id)
+          (string-join (map (λ (stmt) (format "\t~a" (format-stmt stmt))) stmts) "\n")))
 
 (define (format-stmt stmt)
   (match stmt
@@ -51,7 +52,7 @@
     [(MvA op target val) (format "mov~a ~a, ~a" (or op "") (format-arg target) (format-arg val))]
     [(StrA r2 addr) (format "str ~a, [~a]" (format-arg r2) (format-arg addr))]
     [(LdrA r2 addr) (format "ldr ~a, [~a]" (format-arg r2) (format-arg addr))]
-    [(PushA regs) (format "push {~a}" (string-join (map format-arg regs) ", "))] 
+    [(PushA regs) (format "push {~a}" (string-join (map format-arg regs) ", "))]
     [(PopA regs) (format "pop {~a}" (string-join (map format-arg regs) ", "))]
     [o (~v o)]))
 
@@ -66,9 +67,6 @@
   (match lbl
     [(LabelA l) (format ".~a" l)]
     [(? symbol?) lbl]))
-  
 
 (define+ (format-id (IdLL id global?))
   (format "~a~a" (if global? "@" "%") id))
-    
-                  

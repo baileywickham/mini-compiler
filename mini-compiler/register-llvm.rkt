@@ -275,11 +275,13 @@
     (for ([pred (hash-ref preds (Block-id block))])
       (phi-append-operand! phi pred (read-var var pred))))
 
-  ;;
-  (define (get-incomplete-phis block)
-    (filter (negate Phi-complete?) (Block-phis block)))
-
   translate-cfg)
+
+
+;;
+(define (get-incomplete-phis block)
+  (filter (negate Phi-complete?) (Block-phis block)))
+
 
 ;;
 (define (add-stmt! block stmt)
