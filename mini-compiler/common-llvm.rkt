@@ -19,7 +19,7 @@
                   '<    `(slt  ,int ,bit)
                   '!=   `(ne   ,int ,bit)))
 
-(define tmp-prefix 'u)
+(define tmp-prefix '_u)
 
 ;;
 (define+ (translate-struct (Struct id fields))

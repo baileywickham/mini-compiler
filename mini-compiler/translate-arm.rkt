@@ -1,4 +1,4 @@
-#lang racket
+ #lang racket
 
 (provide translate-arm)
 
@@ -51,12 +51,12 @@
          (AssignLL id phi-id))]
       [_ stmt]))
 
+  (define+ (add-mvs-block (BlockLL id stmts))
+  (BlockLL id (let-values ([(before after) (split-at-right stmts 1)])
+                (append before (hash-ref phi-moves id '()) after))))
+
   (define no-phis (map remove-phis-block blocks))
-  (pretty-display phi-moves)
-  no-phis
-  )
-
-
+  (map add-mvs-block no-phis))
 
 (define+ (translate-block (BlockLL id stmts))
   (BlockA id (append-map translate-stmt stmts)))
@@ -68,6 +68,8 @@
      (list (CmpA cond 1)
            (BrA 'eq iftrue)
            (BrA #f iffalse))]
+    [(AssignLL target (? IdLL? src))
+     (list (MvA #f target src))]
     [(AssignLL target (BinaryLL (? easy-op? op) _ arg1 arg2))
      (list (OpA (hash-ref easy-ops op) target arg1 arg2))]
     [(AssignLL target (BinaryLL 'mul _ arg1 arg2))
@@ -94,7 +96,6 @@
     [(ReturnLL _ (? void?)) (list (PopA (list (RegA 'fp) (RegA 'pc))))]
     [(ReturnLL _ arg) (list (MvA #f (RegA 'r0) arg)
                             (PopA (list (RegA 'fp) (RegA 'pc))))]
-
     [o (list o)]))
 
 (define+ (translate-call (CallLL _ (IdLL fn _) args _))
