@@ -22,7 +22,7 @@
 (define arg-regs (list (RegA 'r0) (RegA 'r1) (RegA 'r2) (RegA 'r3)))
 
 
-(define+ (translate-arm (LLVM _ decs funs))
+(define+ (translate-arm (LLVM tys decs funs))
   (ARM (map translate-dec decs)
        (map translate-fun funs)))
 
@@ -78,7 +78,8 @@
 
 (define (translate-stmt stmt)
   (match stmt
-    [(BrLL (IdLL id _)) (list (BrA #f (LabelA id)))]
+    [(BrLL (IdLL id _))
+     (list (BrA #f (LabelA id)))]
     [(BrCondLL cond (IdLL iftrue _) (IdLL iffalse _))
      (list (CmpA cond 1)
            (BrA 'eq (LabelA iftrue))
@@ -110,9 +111,11 @@
     [(? CallLL? c) (translate-call c)]
     [(AssignLL target (LoadLL _ ptr))
      (list (LdrA target ptr))]
-    [(ReturnLL _ (? void?)) (list (PopA (list (RegA 'fp) (RegA 'pc))))]
-    [(ReturnLL _ arg) (list (MovA #f (RegA 'r0) arg)
-                            (PopA (list (RegA 'fp) (RegA 'pc))))]
+    [(ReturnLL _ (? void?))
+     (list (PopA (list (RegA 'fp) (RegA 'pc))))]
+    [(ReturnLL _ arg)
+     (list (MovA #f (RegA 'r0) arg)
+           (PopA (list (RegA 'fp) (RegA 'pc))))]
     [o (list o)]))
 
 (define+ (translate-call (CallLL _ (IdLL fn _) args _))
