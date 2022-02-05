@@ -8,7 +8,7 @@
   #hash((add . add)
         (sub . sub)
         (and . and)
-        (or . orr)
+        (or  . orr)
         (xor . eor)))
 
 (define comp-ops
@@ -16,8 +16,8 @@
         (sgt . gt)
         (sge . ge)
         (slt . lt)
-        (eq . eq)
-        (ne . ne)))
+        (eq  . eq)
+        (ne  . ne)))
 
 (define arg-regs (list (RegA 'r0) (RegA 'r1) (RegA 'r2) (RegA 'r3)))
 
