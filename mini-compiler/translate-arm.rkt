@@ -11,7 +11,6 @@
         (or . orr)
         (xor . eor)))
 
-;(define comp-ops (set 'sle 'sgt 'sge 'slt 'eq 'ne))
 (define comp-ops
   #hash((sle . le)
         (sgt . gt)
@@ -35,19 +34,29 @@
 
 (define (remove-phis blocks)
   (define phi-moves (make-hash))
+
+  (define (add-phi-move! block-id move)
+    (hash-set! phi-moves block-id (cons move (hash-ref phi-moves block-id '()))))
+
   (define+ (remove-phis-block (BlockLL id stmts))
     (BlockLL id (map remove-phis-stmt stmts)))
+
   (define (remove-phis-stmt stmt)
     (match stmt
-      [(PhiLL id _ args) (let ([phi-id (make-label '_phi)])
-                           (for ([arg args])
-                             (hash-set! phi-moves (car arg)
-                                        (cons (AssignLL phi-id (cdr arg)) (hash-ref phi-moves (car arg) '()))))
-                           (AssignLL id phi-id))]
+      [(PhiLL id _ args)
+       (let ([phi-id (IdLL (make-label '_phi) #f)])
+         (for ([arg args])
+           (match-let ([(cons block-id (cons id _)) arg])
+             (add-phi-move! block-id (AssignLL phi-id id))))
+         (AssignLL id phi-id))]
       [_ stmt]))
-  (map remove-phis-block blocks))
 
- 
+  (define no-phis (map remove-phis-block blocks))
+  (pretty-display phi-moves)
+  no-phis
+  )
+
+
 
 (define+ (translate-block (BlockLL id stmts))
   (BlockA id (append-map translate-stmt stmts)))
@@ -68,7 +77,8 @@
     [(AssignLL target (CastLL op _ val _))
      (list (MvA #f target val))]
     [(AssignLL target (BinaryLL 'sdiv _ arg1 arg2))
-     (translate-stmt (AssignLL target (CallLL #f (IdLL '__aeabi_idiv #t) (list (cons arg1 int) (cons arg2 int)) #f)))]
+     (translate-stmt (AssignLL target (CallLL #f (IdLL '__aeabi_idiv #t)
+                                              (list (cons arg1 int) (cons arg2 int)) #f)))]
     [(StoreLL _ val ptr)
      (list (StrA val ptr))]
     [(AssignLL target (BinaryLL (? comp-op? op) _ arg1 arg2))
@@ -84,7 +94,7 @@
     [(ReturnLL _ (? void?)) (list (PopA (list (RegA 'fp) (RegA 'pc))))]
     [(ReturnLL _ arg) (list (MvA #f (RegA 'r0) arg)
                             (PopA (list (RegA 'fp) (RegA 'pc))))]
-               
+
     [o (list o)]))
 
 (define+ (translate-call (CallLL _ (IdLL fn _) args _))
