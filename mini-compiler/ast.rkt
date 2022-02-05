@@ -80,7 +80,7 @@
 (struct OpA (op target r1 op2) #:transparent)
 (struct CmpA (r1 op2) #:transparent)
 (struct BrA (op label) #:transparent)
-(struct MvA (op r1 op2) #:transparent)
+(struct MovA (op r1 op2) #:transparent)
 (struct LdrA (r1 addr) #:transparent)
 (struct StrA (r2 addr) #:transparent)
 (struct PushA (regs) #:transparent)

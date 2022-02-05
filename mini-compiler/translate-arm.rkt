@@ -22,7 +22,7 @@
 (define arg-regs (list (RegA 'r0) (RegA 'r1) (RegA 'r2) (RegA 'r3)))
 
 
-(define+ (translate-arm (LLVM tys decs funs))
+(define+ (translate-arm (LLVM _ decs funs))
   (ARM (map translate-dec decs)
        (map translate-fun funs)))
 
@@ -42,7 +42,7 @@
 
 (define+  (move-parameter (cons param _) index)
   (if (< index (length arg-regs))
-      (MvA #f param (list-ref arg-regs index))
+      (MovA #f param (list-ref arg-regs index))
       (LdrA param (OffsetA (RegA 'sp) (* 4 (- index (length arg-regs)))))))
 
 (define (remove-phis*)
@@ -84,34 +84,34 @@
            (BrA 'eq (LabelA iftrue))
            (BrA #f (LabelA iffalse)))]
     [(AssignLL target (? IdLL? src))
-     (list (MvA #f target src))]
+     (list (MovA #f target src))]
     [(AssignLL target (BinaryLL (? easy-op? op) _ arg1 arg2))
      (list (OpA (hash-ref easy-ops op) target arg1 arg2))]
     [(AssignLL target (BinaryLL 'mul _ arg1 arg2))
      (list (OpA 'mul target arg1 arg2))]
     [(AssignLL target (GetEltLL _ ptr 0))
-     (list (MvA #f target ptr))]
+     (list (MovA #f target ptr))]
     [(AssignLL target (GetEltLL _ ptr index))
      (list (OpA 'add target ptr (* index (/ int-size byte-size))))]
     [(AssignLL target (CastLL op _ val _))
-     (list (MvA #f target val))]
+     (list (MovA #f target val))]
     [(AssignLL target (BinaryLL 'sdiv _ arg1 arg2))
      (translate-stmt (AssignLL target (CallLL #f (IdLL '__aeabi_idiv #t)
                                               (list (cons arg1 int) (cons arg2 int)) #f)))]
     [(StoreLL _ val ptr)
      (list (StrA val ptr))]
     [(AssignLL target (BinaryLL (? comp-op? op) _ arg1 arg2))
-     (list (MvA #f target 0)
+     (list (MovA #f target 0)
            (CmpA arg1 arg2)
-           (MvA (hash-ref comp-ops op) target 1))]
+           (MovA (hash-ref comp-ops op) target 1))]
     [(AssignLL target (? CallLL? c))
      (append (translate-call c)
-             (list (MvA #f target (RegA 'r0))))]
+             (list (MovA #f target (RegA 'r0))))]
     [(? CallLL? c) (translate-call c)]
     [(AssignLL target (LoadLL _ ptr))
      (list (LdrA target ptr))]
     [(ReturnLL _ (? void?)) (list (PopA (list (RegA 'fp) (RegA 'pc))))]
-    [(ReturnLL _ arg) (list (MvA #f (RegA 'r0) arg)
+    [(ReturnLL _ arg) (list (MovA #f (RegA 'r0) arg)
                             (PopA (list (RegA 'fp) (RegA 'pc))))]
     [o (list o)]))
 
@@ -121,7 +121,7 @@
 
 (define+ (store-arg (cons arg _) i)
   (if (<= i (length arg-regs))
-      (MvA #f (list-ref arg-regs i) arg)
+      (MovA #f (list-ref arg-regs i) arg)
       (PushA (list arg))))
 
 (define+ (extend-block stmts (BlockA id block-stmts))
