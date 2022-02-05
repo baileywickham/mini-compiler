@@ -87,6 +87,8 @@
 (struct PopA (regs) #:transparent)
 
 (struct RegA (reg) #:transparent)
+(struct LabelA (lbl) #:transparent)
+(struct OffsetA (reg i) #:transparent)
 
 (define int-size 32)
 (define byte-size 8)

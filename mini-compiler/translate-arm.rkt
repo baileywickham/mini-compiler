@@ -36,7 +36,14 @@
 
 (define (make-fun-header params)
   (append (list (PushA (list (RegA 'fp ) (RegA 'lr)))
-                (OpA 'add (RegA 'fp) (RegA 'sp) 4))))
+                (OpA 'add (RegA 'fp) (RegA 'sp) 4))
+          (map move-parameter
+               params (build-list (length params) identity))))
+
+(define+  (move-parameter (cons param _) index)
+  (if (< index (length arg-regs))
+      (MvA #f param (list-ref arg-regs index))
+      (LdrA param (OffsetA (RegA 'sp) (* 4 (- index (length arg-regs)))))))
 
 (define (remove-phis blocks)
   (define phi-moves (make-hash))
@@ -65,15 +72,15 @@
   (map add-mvs-block no-phis))
 
 (define+ (translate-block (BlockLL id stmts))
-  (BlockA id (append-map translate-stmt stmts)))
+  (BlockA (LabelA id) (append-map translate-stmt stmts)))
 
 (define (translate-stmt stmt)
   (match stmt
-    [(BrLL (IdLL id _)) (list (BrA #f id))]
+    [(BrLL (IdLL id _)) (list (BrA #f (LabelA id)))]
     [(BrCondLL cond (IdLL iftrue _) (IdLL iffalse _))
      (list (CmpA cond 1)
-           (BrA 'eq iftrue)
-           (BrA #f iffalse))]
+           (BrA 'eq (LabelA iftrue))
+           (BrA #f (LabelA iffalse)))]
     [(AssignLL target (? IdLL? src))
      (list (MvA #f target src))]
     [(AssignLL target (BinaryLL (? easy-op? op) _ arg1 arg2))
