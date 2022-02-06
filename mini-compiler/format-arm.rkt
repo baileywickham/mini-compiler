@@ -9,11 +9,12 @@
         (println . ".PRINTLN_FMT")
         (print   . ".PRINT_FMT")))
 
-(define header "\t.arch armv7-a\n")
+(define boiler-plate
+  "\t.arch armv7-a
+~a
 
-(define funs-header "\n\t.text\n")
-
-(define footer "
+\t.text
+~a
 \t.section\t.rodata
 \t.align\t2
 .PRINTLN_FMT:
@@ -24,16 +25,14 @@
 \t.align\t2
 .READ_FMT:
 \t.asciz\t\"%ld\"
-\t.global\t__aeabi_idiv")
+\t.global\t__aeabi_idiv
+")
 
 
 (define+ (format-arm (ARM comms funs))
-  (string-append
-   header
-   (string-join (map format-comm comms) "\n")
-   funs-header
-   (string-join (map format-fun funs) "\n")
-   footer))
+  (format boiler-plate
+          (string-join (map format-comm comms) "\n")
+          (string-join (map format-fun funs)   "\n")))
 
 (define+ (format-comm (CommA id))
   (format "\t.comm\t~a,4,4" id))

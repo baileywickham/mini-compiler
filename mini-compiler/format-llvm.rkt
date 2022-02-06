@@ -13,24 +13,24 @@
         (println . "getelementptr inbounds ([6 x i8], [6 x i8]* @.println, i32 0, i32 0)")
         (print   . "getelementptr inbounds ([6 x i8], [6 x i8]* @.print,   i32 0, i32 0)")))
 
-(define header "target triple=\"i686\"\n")
-
-(define footer "declare i8* @malloc(i32)
+(define boiler-plate
+  "target triple=\"i686\"
+~a
+declare i8* @malloc(i32)
 declare void @free(i8*)
 declare i32 @printf(i8*, ...)
 declare i32 @scanf(i8*, ...)
 @.println = private unnamed_addr constant [6 x i8] c\"%ld\\0A\\00\\00\", align 1
 @.print = private unnamed_addr constant [6 x i8] c\"%ld \\00\\00\", align 1
-@.read = private unnamed_addr constant [5 x i8] c\"%ld\\00\\00\", align 1\n")
+@.read = private unnamed_addr constant [5 x i8] c\"%ld\\00\\00\", align 1
+")
 
 ;;
 (define+ (format-llvm (LLVM types decs funs))
-  (string-append
-   header
-   (string-join (list (string-join (map format-struct types) "\n")
-                      (string-join (map format-dec decs) "\n")
-                      (string-join (map format-fun funs) "\n")) "\n\n")
-   footer))
+  (format boiler-plate
+          (string-join (list (string-join (map format-struct types) "\n")
+                             (string-join (map format-dec decs) "\n")
+                             (string-join (map format-fun funs) "\n")) "\n\n")))
 
 ;;
 (define+ (format-struct (StructLL id tys))

@@ -17,7 +17,6 @@
         (map translate-global globs)
         (map (λ (f) (translate-fun f locs structs fun-info)) funs)))
 
-
 ;;
 (define+ (translate-fun (Fun id params ret-type decs body) locs structs funs)
   (match-let* ([(list new-params fun-locs fun-header) (translate-fun-vars params decs)]

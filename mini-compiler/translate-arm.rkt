@@ -23,7 +23,7 @@
 (define imm16 (ImmRange 0 65535))
 (define imm12 (ImmRange 0 4095))
 (define imm13 (ImmRange -4095 4095))
-(define imm8 (ImmRange 0 255))
+(define imm8  (ImmRange 0 255))
 
 ;; MOVW 16b,
 ;; ADD 12b, 0-4095
@@ -48,10 +48,9 @@
   (FunA id (list-update blocks 0 (curry extend-block header))))
 
 (define (make-fun-header params)
-  (append (list (PushA (list (RegA 'fp ) (RegA 'lr)))
+  (append (list (PushA (list (RegA 'fp) (RegA 'lr)))
                 (OpA 'add (RegA 'fp) (RegA 'sp) 4))
-          (map move-parameter
-               params (build-list (length params) identity))))
+          (map-indexed move-parameter params)))
 
 (define+  (move-parameter (cons param _) index)
   (if (< index (length arg-regs))
@@ -94,10 +93,10 @@
 
 (define (translate-stmt*)
   (define stmts (box '()))
-  
+
   (define (add-stmt! . new-stmts)
     (set-box! stmts (append (unbox stmts) new-stmts)))
-  
+
   (define (translate-stmt stmt)
     (match stmt
       [(BrLL (IdLL id _))
@@ -137,11 +136,11 @@
        (list (PopA (list (RegA 'fp) (RegA 'pc))))]
       [(ReturnLL _ arg)
        (append (make-mov #f (RegA 'r0) arg)
-             (list (PopA (list (RegA 'fp) (RegA 'pc)))))]
+               (list (PopA (list (RegA 'fp) (RegA 'pc)))))]
       [o (list o)]))
 
   (define+ (translate-call (CallLL _ (IdLL fn _) args _))
-    (define new-args (append-map store-arg args (build-list (length args) identity)))
+    (define new-args (append* (reverse (map-indexed store-arg args))))
     (append new-args (list (BrA 'l fn))))
 
   (define+ (store-arg (cons arg _) i)
@@ -150,24 +149,28 @@
         (list (PushA (list arg)))))
 
   (define (translate-arg arg imm-spec)
-    (if (or (not (imm? arg)) (and imm-spec (in-range arg imm-spec)))
+    (if (or (not (imm? arg)) (and imm-spec (in-range? arg imm-spec)))
         arg
         (let ([tmp (IdLL (make-label 't) #f)])
           (apply add-stmt! (make-mov 'w tmp arg))
           tmp)))
-  
-  
+
   (define (translate-stmt2 stmt)
     (let ([last-stmts (translate-stmt stmt)])
       (append (unbox stmts) last-stmts)))
+
   translate-stmt2)
 
 (define (make-mov pred target src)
   (match src
-    [(? imm?) #:when (in-range src imm16) (list (MovA (or pred 'w) target src))]
-    [(? imm?) (when pred (error "pred error")) (list (MovA 'w target (HalfA src #t))
-                                                         (MovA 't target (HalfA src #f)))]
-    [else (list (MovA pred target src))]))
+    [(? imm?)
+     #:when (in-range? src imm16)
+     (list (MovA (or pred 'w) target src))]
+    [(? imm?)
+     (when pred (error "pred error"))
+     (list (MovA 'w target (HalfA src #t))
+           (MovA 't target (HalfA src #f)))]
+    [_ (list (MovA pred target src))]))
 
 (define+ (extend-block stmts (BlockA id block-stmts))
   (BlockA id (append stmts block-stmts)))
@@ -175,13 +178,14 @@
 (define (imm? arg)
   (or (integer? arg) (StringConstLL? arg)))
 
-(define+ (in-range arg (ImmRange min max))
+(define+ (in-range? arg (ImmRange min max))
   (and (integer? arg) (<= arg max) (>= arg min)))
-  
 
-  
 (define (comp-op? op)
   (hash-has-key? comp-ops op))
 
 (define (easy-op? op)
   (hash-has-key? easy-ops op))
+
+(define (map-indexed proc lst)
+  (map proc lst (range (length lst))))
