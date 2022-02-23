@@ -1,4 +1,12 @@
+Welcome to DrRacket, version 8.0 [cs].
+Language: racket, with debugging [custom]; memory limit: 128 MB.
+#(struct:IdLL _u71 #f)
+#(struct:IdLL _u72 #f)
+#(struct:IdLL _u73 #f)
+#(struct:IdLL _u74 #f)
+#(struct:IdLL _u75 #f)
 	.arch armv7-a
+	.comm	.read_scratch,4,4
 	.comm	globalfoo,4,4
 
 	.text
@@ -85,14 +93,14 @@ domath:
 	ldr %_u24, [%_u23]
 	mov %_u25, %_u24
 	str %_u22, [%_u25]
-	mov %_phi0, %num
-	mov %_phi1, %_u10
-	mov %_phi2, %_u5
-	mov %_phi3, %_u10
-	mov %_phi4, %_u5
 	mov %_u26, #0
 	cmp %num, #0
 	movgt %_u26, #1
+	mov %_phi4, %_u5
+	mov %_phi3, %_u10
+	mov %_phi2, %_u5
+	mov %_phi1, %_u10
+	mov %_phi0, %num
 	cmp %_u26, #1
 	beq .LU9
 	b .LU10
@@ -132,14 +140,14 @@ domath:
 	ldr %_u50, [%_u49]
 	sub %_u51, %_u48, %_u50
 	sub %_u52, %num0, #1
-	mov %_phi0, %_u52
-	mov %_phi1, %math20
-	mov %_phi2, %math10
-	mov %_phi3, %math20
-	mov %_phi4, %math10
 	mov %_u53, #0
 	cmp %_u52, #0
 	movgt %_u53, #1
+	mov %_phi4, %math10
+	mov %_phi3, %math20
+	mov %_phi2, %math10
+	mov %_phi1, %math20
+	mov %_phi0, %_u52
 	cmp %_u53, #1
 	beq .LU9
 	b .LU10
@@ -163,15 +171,15 @@ objinstantiation:
 	push {fp, lr}
 	add fp, sp, #4
 	mov %num, r0
-	mov %_phi5, %num
 	mov %_u56, #0
 	cmp %num, #0
 	movgt %_u56, #1
+	mov %_phi5, %num
 	cmp %_u56, #1
 	beq .LU13
 	b .LU14
 .LU13:
-	mov %num0, %_phi5
+	mov %num1, %_phi5
 	movw r0, #12
 	bl malloc
 	mov %_u57, r0
@@ -179,11 +187,11 @@ objinstantiation:
 	mov %_u59, %_u58
 	mov r0, %_u59
 	bl free
-	sub %_u60, %num0, #1
-	mov %_phi5, %_u60
+	sub %_u60, %num1, #1
 	mov %_u61, #0
 	cmp %_u60, #0
 	movgt %_u61, #1
+	mov %_phi5, %_u60
 	cmp %_u61, #1
 	beq .LU13
 	b .LU14
@@ -248,48 +256,43 @@ ackermann:
 	.align 2
 	.global main
 main:
-.LU23:
+.LU24:
 	push {fp, lr}
 	add fp, sp, #4
-	movw r1, #:lower16:.read_scratch
-	movt r1, #:upper16:.read_scratch
+	mov r1, @.read_scratch
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw %_u71, #:lower16:.read_scratch
-	movt %_u71, #:upper16:.read_scratch
+	movw %_u71, #:lower16:(LabelA '.read_scratch)
+	movt %_u71, #:upper16:(LabelA '.read_scratch)
 	ldr %_u71, [%_u71]
-	movw r1, #:lower16:.read_scratch
-	movt r1, #:upper16:.read_scratch
+	mov r1, @.read_scratch
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw %_u72, #:lower16:.read_scratch
-	movt %_u72, #:upper16:.read_scratch
+	movw %_u72, #:lower16:(LabelA '.read_scratch)
+	movt %_u72, #:upper16:(LabelA '.read_scratch)
 	ldr %_u72, [%_u72]
-	movw r1, #:lower16:.read_scratch
-	movt r1, #:upper16:.read_scratch
+	mov r1, @.read_scratch
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw %_u73, #:lower16:.read_scratch
-	movt %_u73, #:upper16:.read_scratch
+	movw %_u73, #:lower16:(LabelA '.read_scratch)
+	movt %_u73, #:upper16:(LabelA '.read_scratch)
 	ldr %_u73, [%_u73]
-	movw r1, #:lower16:.read_scratch
-	movt r1, #:upper16:.read_scratch
+	mov r1, @.read_scratch
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw %_u74, #:lower16:.read_scratch
-	movt %_u74, #:upper16:.read_scratch
+	movw %_u74, #:lower16:(LabelA '.read_scratch)
+	movt %_u74, #:upper16:(LabelA '.read_scratch)
 	ldr %_u74, [%_u74]
-	movw r1, #:lower16:.read_scratch
-	movt r1, #:upper16:.read_scratch
+	mov r1, @.read_scratch
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw %_u75, #:lower16:.read_scratch
-	movt %_u75, #:upper16:.read_scratch
+	movw %_u75, #:lower16:(LabelA '.read_scratch)
+	movt %_u75, #:upper16:(LabelA '.read_scratch)
 	ldr %_u75, [%_u75]
 	mov r0, %_u71
 	bl tailrecursive
@@ -312,13 +315,13 @@ main:
 	mov r1, %_u75
 	mov r0, %_u74
 	bl ackermann
-	mov %_u79, r0
-	mov r1, %_u79
+	mov %_u76, r0
+	mov r1, %_u76
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .LU22
-.LU22:
+	b .LU23
+.LU23:
 	movw r0, #0
 	pop {fp, pc}
 	.size main, .-main
@@ -332,5 +335,5 @@ main:
 	.align	2
 .READ_FMT:
 	.asciz	"%ld"
-	.comm	.read_scratch,4,4
 	.global	__aeabi_idiv
+>

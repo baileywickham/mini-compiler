@@ -66,6 +66,7 @@
     [(RegA r) (~a r)]
     [(? IdLL?) (format-id arg)]
     [(StringConstLL id) (hash-ref format-strings id)]
+    [(? LabelA?) (format-label arg)]
     [o (~v o)]))
 
 (define (format-label lbl)

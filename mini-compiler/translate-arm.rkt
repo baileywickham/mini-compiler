@@ -44,7 +44,7 @@
 
 (define+ (translate-fun (FunLL (IdLL id _) params _ body))
   (define header (make-fun-header params))
-  (define blocks (map translate-block ((remove-phis*) body)))
+  (define blocks (map translate-block body))
   (FunA id (list-update blocks 0 (curry extend-block header))))
 
 (define (make-fun-header params)
@@ -115,7 +115,7 @@
        (make-mov #f target ptr)]
       [(AssignLL target (GetEltLL _ ptr index))
        (list (OpA 'add target ptr (translate-arg (* index (/ int-size byte-size)) imm12)))]
-      [(AssignLL target (CastLL op _ val _))
+      [(AssignLL target (CastLL _ _ val _))
        (make-mov #f target val)]
       [(AssignLL target (BinaryLL 'sdiv _ arg1 arg2))
        (translate-stmt (AssignLL target (CallLL #f (IdLL '__aeabi_idiv #t)
@@ -130,6 +130,10 @@
        (append (translate-call c)
                (list (MovA #f target (RegA 'r0))))]
       [(? CallLL? c) (translate-call c)]
+      [(AssignLL target (LoadLL _ (IdLL id #t)))
+       (displayln target) 
+       (append (make-mov #f target (LabelA id))
+       (list (LdrA target target)))]
       [(AssignLL target (LoadLL _ ptr))
        (list (LdrA target ptr))]
       [(ReturnLL _ (? void?))
@@ -175,8 +179,7 @@
 (define+ (extend-block stmts (BlockA id block-stmts))
   (BlockA id (append stmts block-stmts)))
 
-(define (imm? arg)
-  (or (integer? arg) (StringConstLL? arg)))
+(define imm? (disjoin integer? StringConstLL? LabelA?))
 
 (define+ (in-range? arg (ImmRange min max))
   (and (integer? arg) (<= arg max) (>= arg min)))

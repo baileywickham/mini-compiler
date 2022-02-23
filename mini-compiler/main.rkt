@@ -10,7 +10,8 @@
          "register-llvm.rkt"
          "format-llvm.rkt"
          "translate-arm.rkt"
-         "format-arm.rkt")
+         "format-arm.rkt"
+         "allocate-registers.rkt")
 
 ;; Main
 (define (compile path stack? llvm? debug?)
@@ -28,7 +29,7 @@
 
   (if llvm?
       (write-file (format-llvm llvm-ir) ".ll")
-      (write-file (format-arm (translate-arm llvm-ir)) ".s"))
+      (write-file (format-arm (allocate-registers (translate-arm llvm-ir))) ".s"))
 
   (when llvm? (clang (path-replace-extension path ".ll")))
   (void))
