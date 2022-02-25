@@ -1,6 +1,6 @@
 #lang racket
 
-(provide format-arm)
+(provide format-arm format-stmt format-arg)
 
 (require "ast.rkt" "util.rkt")
 
