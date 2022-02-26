@@ -50,7 +50,6 @@
           (seal-block block))))
     (unpack-cfg (unbox cfg)))
 
-
   ;;
   (define (translate-body* ret-id)
     (define (translate-body body block next)
