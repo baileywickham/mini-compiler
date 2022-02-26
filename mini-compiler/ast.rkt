@@ -99,6 +99,9 @@
 (define i32  (IntLL 32))
 (define int  (IntLL int-size))
 
+(define arg-regs (list (RegA 'r0) (RegA 'r1) (RegA 'r2) (RegA 'r3)))
+(define callee-saved-regs (map RegA '(r4 r5 r6 r7 r8 r9 r10 r11)))
+
 
 
 

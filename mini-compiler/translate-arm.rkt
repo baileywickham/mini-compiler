@@ -2,7 +2,7 @@
 
 (provide translate-arm)
 
-(require "ast.rkt" "util.rkt" "symbol.rkt")
+(require "ast.rkt" "util.rkt" "symbol.rkt" "allocate-registers.rkt")
 
 (define easy-ops
   #hash((add . add)
@@ -32,8 +32,6 @@
 ;; we will assume operand2 is 8 bits
 ;; mov  0-65535
 
-(define arg-regs (list (RegA 'r0) (RegA 'r1) (RegA 'r2) (RegA 'r3)))
-
 
 (define+ (translate-arm (LLVM _ decs funs))
   (ARM (map translate-dec decs)
@@ -44,7 +42,10 @@
 
 (define+ (translate-fun (FunLL (IdLL id _) params _ body))
   (define header (make-fun-header params))
-  (define blocks (map translate-block body))
+  (define var-blocks (map translate-block body))
+  (match-define (cons num-colors locations) (allocate-registers var-blocks))
+  (define no-phi-blocks ((remove-phis*) var-blocks))
+  (define blocks ((sub-locations* locations) no-phi-blocks))
   (FunA id (list-update blocks 0 (curry extend-block header))))
 
 (define (make-fun-header params)
@@ -105,7 +106,7 @@
       [(AssignLL target (LoadLL _ (IdLL id #t)))
        (displayln target) 
        (append (make-mov #f target (LabelA id))
-       (list (LdrA target target)))]
+               (list (LdrA target target)))]
       [(AssignLL target (LoadLL _ ptr))
        (list (LdrA target ptr))]
       [(ReturnLL _ (? void?))
@@ -162,8 +163,6 @@
 (define (easy-op? op)
   (hash-has-key? easy-ops op))
 
-(define (map-indexed proc lst)
-  (map proc lst (range (length lst))))
 
 ;; ------------------------------------------------
 
@@ -173,8 +172,8 @@
   (define (remove-phis blocks)
     (map add-mvs-block (map remove-phis-block blocks)))
 
-  (define+ (remove-phis-block (BlockLL id stmts))
-    (BlockLL id (map remove-phis-stmt stmts)))
+  (define+ (remove-phis-block (BlockA id stmts))
+    (BlockA id (map remove-phis-stmt stmts)))
 
   (define (remove-phis-stmt stmt)
     (match stmt
@@ -183,14 +182,38 @@
          (for ([arg args])
            (match-let ([(cons block-id (cons id _)) arg])
              (add-phi-move! block-id (AssignLL phi-id id))))
-         (AssignLL id phi-id))]
+         ; might not both be registers
+         (MovA #f id phi-id))]
       [_ stmt]))
 
   (define (add-phi-move! block-id move)
     (hash-set! phi-moves block-id (cons move (hash-ref phi-moves block-id '()))))
 
-  (define+ (add-mvs-block (BlockLL id stmts))
-    (BlockLL id (let-values ([(before after) (split-at-right stmts 1)])
+  (define+ (add-mvs-block (BlockA id stmts))
+    (BlockA id (let-values ([(before after) (split-at-right stmts 1)])
                   (append before (hash-ref phi-moves id '()) after))))
 
   remove-phis)
+
+(define (sub-locations* locations)
+  
+  (define (sub-locations/blocks blocks)
+    (map sub-locations/block blocks))
+
+  (define+ (sub-locations/block (BlockA id stmts))
+    (BlockA id (map sub-locations/stmt stmts)))
+
+  (define (sub-locations/stmt stmt)
+    (match stmt
+      [(OpA op target r1 op2) (OpA op (get-location target) (get-location r1) (get-location op2))]
+      [(CmpA r1 op2) (CmpA (get-location r1) (get-location op2))]
+      [(MovA op r1 op2) (MovA op (get-location r1) (get-location op2))]
+      [(LdrA r1 addr) (LdrA (get-location r1) (get-location addr))]
+      [(StrA r1 addr) (StrA (get-location r1) (get-location addr))]
+      [_ stmt]))
+
+  (define (get-location op)
+    (if (IdLL? op)
+        (hash-ref locations op (RegA 'r0))
+        op))
+  sub-locations/blocks)

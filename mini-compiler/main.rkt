@@ -29,7 +29,7 @@
 
   (if llvm?
       (write-file (format-llvm llvm-ir) ".ll")
-      (write-file (format-arm (allocate-registers (translate-arm llvm-ir))) ".s"))
+      (write-file (format-arm (translate-arm llvm-ir)) ".s"))
 
   (when llvm? (clang (path-replace-extension path ".ll")))
   (void))

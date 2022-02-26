@@ -1,6 +1,6 @@
 #lang racket
 
-(provide define+ λ+)
+(provide define+ λ+ map-indexed)
 
 (define-syntax (define+ syntax-object)
   (syntax-case syntax-object ()
@@ -17,6 +17,9 @@
        #'(λ (arg ...)
            (match-let ([pat arg] ...)
              body ...)))]))
+
+(define (map-indexed proc lst)
+  (map proc lst (range (length lst))))
 
 
 ;(define+ (print-pair (cons a b))

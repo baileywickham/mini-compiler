@@ -1,6 +1,6 @@
 #lang racket
 
-(provide get-live/blocks)
+(provide get-live/blocks get-writes)
 
 (require "ast.rkt" "util.rkt" "symbol.rkt" "format-arm.rkt")
 
@@ -64,6 +64,7 @@
   (filter var?
           (match inst
             [(OpA _ target _ _) (list target)]
+            [(BrA 'l _) arg-regs]
             [(MovA (or #f 'l 'w) r1 _) (list r1)]
             [(LdrA r1 _) (list r1)]
             [(PhiLL id _ _) (list id)]
