@@ -2,11 +2,8 @@
 
 (provide allocate-registers)
 
-(require "ast.rkt"
-         "util.rkt"
-         "symbol.rkt"
-         "live-analysis.rkt"
-         graph)
+(require graph)
+(require "ast.rkt" "util.rkt" "symbol.rkt" "live-analysis.rkt")
 
 ;;
 (define+ (allocate-registers (and arm (ARM comms funs)))
