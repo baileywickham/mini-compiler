@@ -222,19 +222,19 @@
   ;; Given a var original name, the block id, and the value, updates current-def
   ;; returns void
   (define (write-var var block val)
-    (hash-set! (hash-ref! current-def var (make-hash)) (Block-id block) val))
+    (hash-set! (hash-ref! current-def var (make-hash)) (Block*-id block) val))
 
   ;; Given a var original name, and the block id, returns a value that will serve as an
   ;; argument, something like an id or a number
   (define (read-var var block)
-    (hash-ref (hash-ref current-def var) (Block-id block)
+    (hash-ref (hash-ref current-def var) (Block*-id block)
               (thunk (read-var-from-pred var block))))
 
   ;; returns a value that will serve as an argument, something like an id or a number
   (define (read-var-from-pred var block)
     (define val
       (if (Block*-sealed? block)
-          (match (hash-ref preds (Block-id block) '())
+          (match (hash-ref preds (Block*-id block) '())
             ['() (error 'ssa "undefined ~a in block ~a" var block)]
             [(list pred)
              ;; there is only one predecessor (and the block is sealed)

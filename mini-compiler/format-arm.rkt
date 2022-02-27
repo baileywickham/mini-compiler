@@ -67,6 +67,7 @@
     [(? IdLL?) (format-id arg)]
     [(StringConstLL id) (hash-ref format-strings id)]
     [(? LabelA?) (format-label arg)]
+    [(OffsetA src offset) (format "~a, ~a" (format-arg src) (format-arg offset))] 
     [o (~v o)]))
 
 (define (format-label lbl)

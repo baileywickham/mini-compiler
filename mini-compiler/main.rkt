@@ -20,7 +20,8 @@
     (if stack?
         (stack-llvm (control-flow mini))
         (register-llvm typed-mini)))
-
+  (when debug?
+    (displayln (format-llvm llvm-ir)))
   (define (write-file content ext)
     (let ([new-path (path-replace-extension path ext)])
       (when debug? (display content))
