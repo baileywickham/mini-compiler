@@ -2,7 +2,7 @@
 
 (provide (all-defined-out))
 
-(require "ast.rkt" "util.rkt" "symbol.rkt")
+(require "ast/mini.rkt" "ast/llvm.rkt" "util.rkt" "symbol.rkt")
 
 
 

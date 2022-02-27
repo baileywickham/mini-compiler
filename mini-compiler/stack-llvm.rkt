@@ -3,7 +3,7 @@
 (provide stack-llvm)
 
 (require racket/hash)
-(require "ast.rkt" "util.rkt" "symbol.rkt" "common-llvm.rkt")
+(require "ast/mini.rkt" "ast/llvm.rkt" "util.rkt" "symbol.rkt" "common-llvm.rkt")
 
 
 ;;
@@ -26,8 +26,8 @@
            (list-update blocks 0 (λ (block) (extend-block block fun-header))))))
 
 ;;
-(define+ (translate-block (Block* id stmts) locs structs funs)
-  (BlockLL id (append-map (λ (s) ((translate-stmt* locs structs funs) s)) stmts)))
+(define+ (translate-block (Block id stmts) locs structs funs)
+  (Block id (append-map (λ (s) ((translate-stmt* locs structs funs) s)) stmts)))
 
 ;;
 (define (translate-stmt* locs structs funs)
@@ -167,5 +167,5 @@
   (format "_P_~a" p))
 
 ;;
-(define+ (extend-block (BlockLL id stmts) new-stmts)
-  (BlockLL id (append new-stmts stmts)))
+(define+ (extend-block (Block id stmts) new-stmts)
+  (Block id (append new-stmts stmts)))

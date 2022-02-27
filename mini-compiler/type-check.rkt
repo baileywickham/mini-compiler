@@ -3,7 +3,7 @@
 (provide type-check)
 
 (require racket/hash)
-(require "ast.rkt" "util.rkt")
+(require "ast/mini.rkt" "util.rkt")
 
 (struct	exn:fail:type-error exn:fail () #:transparent)
 

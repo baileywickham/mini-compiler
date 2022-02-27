@@ -2,7 +2,7 @@
 
 (provide control-flow)
 
-(require "ast.rkt" "util.rkt" "symbol.rkt")
+(require "ast/mini.rkt" "util.rkt" "symbol.rkt")
 
 (define return-var '_retval_)
 (define label-prefix 'LU)
@@ -24,7 +24,7 @@
 ;;
 (define (make-cfg)
   (let* ([cfg (box '())])
-    (values (λ (label block) (set-box! cfg (cons (Block* label block) (unbox cfg)))) ;; add-block!
+    (values (λ (label block) (set-box! cfg (cons (Block label block) (unbox cfg)))) ;; add-block!
             (thunk (unbox cfg))))) ;; get-cfg
 
 ;;

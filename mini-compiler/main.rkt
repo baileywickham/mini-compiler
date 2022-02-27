@@ -10,8 +10,7 @@
          "register-llvm.rkt"
          "format-llvm.rkt"
          "translate-arm.rkt"
-         "format-arm.rkt"
-         "allocate-registers.rkt")
+         "format-arm.rkt")
 
 ;; Main
 (define (compile path stack? llvm? debug?)

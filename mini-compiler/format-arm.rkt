@@ -2,7 +2,7 @@
 
 (provide format-arm format-stmt format-arg)
 
-(require "ast.rkt" "util.rkt")
+(require "ast/arm.rkt" "ast/llvm.rkt" "util.rkt")
 
 (define format-strings
   #hash((read    . ".READ_FMT")
@@ -41,7 +41,7 @@
   (format "\t.align 2\n\t.global ~a\n~a:\n~a\n\t.size ~a, .-~a"
           id id (string-join (map format-block blocks) "\n") id id))
 
-(define+ (format-block (BlockA id stmts))
+(define+ (format-block (Block id stmts))
   (format "~a:\n~a"
           (format-label id)
           (string-join (map (λ (stmt) (format "\t~a" (format-stmt stmt))) stmts) "\n")))

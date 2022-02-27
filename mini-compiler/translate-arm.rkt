@@ -2,7 +2,7 @@
 
 (provide translate-arm)
 
-(require "ast.rkt" "util.rkt" "symbol.rkt" "allocate-registers.rkt")
+(require "ast/llvm.rkt" "ast/arm.rkt" "util.rkt" "symbol.rkt" "allocate-registers.rkt")
 
 (define easy-ops
   #hash((add . add)
@@ -58,8 +58,8 @@
       (MovA #f param (list-ref arg-regs index))
       (LdrA param (OffsetA (RegA 'sp) (* 4 (- index (length arg-regs)))))))
 
-(define+ (translate-block (BlockLL id stmts))
-  (BlockA (LabelA id) (append-map translate-stmt stmts)))
+(define+ (translate-block (Block id stmts))
+  (Block (LabelA id) (append-map translate-stmt stmts)))
 
 (define (translate-stmt stmt)
   ((translate-stmt*) stmt))
@@ -149,8 +149,8 @@
            (MovA 't target (HalfA src #f)))]
     [_ (list (MovA pred target src))]))
 
-(define+ (extend-block stmts (BlockA id block-stmts))
-  (BlockA id (append stmts block-stmts)))
+(define+ (extend-block stmts (Block id block-stmts))
+  (Block id (append stmts block-stmts)))
 
 (define imm? (disjoin integer? StringConstLL? LabelA?))
 
@@ -172,8 +172,8 @@
   (define (remove-phis blocks)
     (map add-mvs-block (map remove-phis-block blocks)))
 
-  (define+ (remove-phis-block (BlockA id stmts))
-    (BlockA id (map remove-phis-stmt stmts)))
+  (define+ (remove-phis-block (Block id stmts))
+    (Block id (map remove-phis-stmt stmts)))
 
   (define (remove-phis-stmt stmt)
     (match stmt
@@ -189,8 +189,8 @@
   (define (add-phi-move! block-id move)
     (hash-set! phi-moves block-id (cons move (hash-ref phi-moves block-id '()))))
 
-  (define+ (add-mvs-block (BlockA id stmts))
-    (BlockA id (let-values ([(before after) (split-at-right stmts 1)])
+  (define+ (add-mvs-block (Block id stmts))
+    (Block id (let-values ([(before after) (split-at-right stmts 1)])
                   (append before (hash-ref phi-moves id '()) after))))
 
   remove-phis)
@@ -200,8 +200,8 @@
   (define (sub-locations/blocks blocks)
     (map sub-locations/block blocks))
 
-  (define+ (sub-locations/block (BlockA id stmts))
-    (BlockA id (map sub-locations/stmt stmts)))
+  (define+ (sub-locations/block (Block id stmts))
+    (Block id (map sub-locations/stmt stmts)))
 
   (define (sub-locations/stmt stmt)
     (match stmt
@@ -216,4 +216,5 @@
     (if (IdLL? op)
         (hash-ref locations op (RegA 'r0))
         op))
+  
   sub-locations/blocks)

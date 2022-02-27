@@ -2,13 +2,13 @@
 
 (provide register-llvm)
 
-(require "ast.rkt" "util.rkt" "symbol.rkt" "common-llvm.rkt")
+(require "ast/llvm.rkt" "ast/mini.rkt" "util.rkt" "symbol.rkt" "common-llvm.rkt")
 
 (define return-var '_retval_)
 (define label-prefix 'LU)
 (define read-scratch (@ '.read_scratch))
 
-(struct Block (id [phis #:mutable] [stmts #:mutable] [sealed? #:mutable]) #:transparent)
+(struct Block* (id [phis #:mutable] [stmts #:mutable] [sealed? #:mutable]) #:transparent)
 (struct Phi (id ty [args #:mutable] [complete? #:mutable] var) #:transparent)
 
 
@@ -46,7 +46,7 @@
             (match-let ([(cons val _) (read-var (cons return-var ret-type) end-block)])
               (add-stmt! end-block (ReturnLL (translate-type ret-type) val)))))
       (for ([block (unbox cfg)])
-        (unless (Block-sealed? block)
+        (unless (Block*-sealed? block)
           (seal-block block))))
     (unpack-cfg (unbox cfg)))
 
@@ -85,7 +85,7 @@
   (define (add-block! id sealed? [start? #f])
     (if (and (not start?) (empty? (hash-ref preds id '())))
         #f
-        (let ([block (Block id '() '() sealed?)])
+        (let ([block (Block* id '() '() sealed?)])
           (set-box! cfg (cons block (unbox cfg)))
           block)))
 
@@ -233,7 +233,7 @@
   ;; returns a value that will serve as an argument, something like an id or a number
   (define (read-var-from-pred var block)
     (define val
-      (if (Block-sealed? block)
+      (if (Block*-sealed? block)
           (match (hash-ref preds (Block-id block) '())
             ['() (error 'ssa "undefined ~a in block ~a" var block)]
             [(list pred)
@@ -267,7 +267,7 @@
     (for ([phi (get-incomplete-phis block)])
       ;; for each variable, fill phi based on predecessors
       (add-phi-operands (Phi-var phi) phi block))
-    (set-Block-sealed?! block #t))
+    (set-Block*-sealed?! block #t))
 
   ;;
   (define (add-phi-operands var phi block)
@@ -278,15 +278,15 @@
 
 ;;
 (define (get-incomplete-phis block)
-  (filter (negate Phi-complete?) (Block-phis block)))
+  (filter (negate Phi-complete?) (Block*-phis block)))
 
 ;;
 (define (add-stmt! block stmt)
-  (set-Block-stmts! block (cons stmt (Block-stmts block))))
+  (set-Block*-stmts! block (cons stmt (Block*-stmts block))))
 
 ;;
 (define (add-phi! block phi)
-  (set-Block-phis! block (cons phi (Block-phis block))))
+  (set-Block*-phis! block (cons phi (Block*-phis block))))
 
 ;;
 (define (phi-append-operand! phi pred var)
@@ -294,8 +294,8 @@
 
 ;;
 (define (unpack-cfg cfg)
-  (reverse (map (λ+ ((Block id phis stmts _))
-                    (BlockLL id (append (map unpack-phi phis) (reverse stmts)))) cfg)))
+  (reverse (map (λ+ ((Block* id phis stmts _))
+                    (Block id (append (map unpack-phi phis) (reverse stmts)))) cfg)))
 
 ;;
 (define+ (unpack-phi (Phi id ty args _ _))

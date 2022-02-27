@@ -2,7 +2,7 @@
 
 (provide get-live/blocks get-writes)
 
-(require "ast.rkt" "util.rkt" "symbol.rkt" "format-arm.rkt")
+(require "ast/arm.rkt" "ast/llvm.rkt" "util.rkt" "format-arm.rkt")
 
 ;;
 (define (get-live/blocks blocks)
@@ -13,9 +13,9 @@
   (define new-live-sets (hash-copy live-sets))
   (define live-blocks
     (for/list [(block blocks)]
-      (define live-stmts (get-live/stmts (BlockA-stmts block) live-sets))
-      (hash-set! new-live-sets (BlockA-id block) (first live-stmts))
-      (BlockA (BlockA-id block) (rest live-stmts))))
+      (define live-stmts (get-live/stmts (Block-stmts block) live-sets))
+      (hash-set! new-live-sets (Block-id block) (first live-stmts))
+      (Block (Block-id block) (rest live-stmts))))
   (if (equal? live-sets new-live-sets)
       live-blocks
       (get-live/blocks* blocks new-live-sets)))
@@ -39,7 +39,7 @@
        (get-writes stmt))))
 
 ;;
-(define+ (test (BlockA id stmts))
+(define+ (test (Block id stmts))
   (displayln id)
   (for [(stmt stmts)]
     (displayln stmt)

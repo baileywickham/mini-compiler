@@ -3,7 +3,7 @@
 (provide format-llvm)
 
 
-(require "ast.rkt" "util.rkt")
+(require "ast/llvm.rkt" "util.rkt")
 
 ;;
 (define comp-ops (set 'sle 'sgt 'sge 'slt 'eq 'ne))
@@ -49,7 +49,7 @@ declare i32 @scanf(i8*, ...)
           (string-join (map format-block body) "\n")))
 
 ;;
-(define+ (format-block (BlockLL id stmts))
+(define+ (format-block (Block id stmts))
   (format "~a:\n~a"
           id (string-join (map (λ (stmt) (format "\t~a" (format-stmt stmt))) stmts) "\n")))
 
