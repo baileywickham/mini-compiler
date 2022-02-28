@@ -39,99 +39,113 @@
   (ARM (map translate-dec decs)
        (map translate-fun funs)))
 
+;;
 (define+ (translate-dec (GlobalLL (IdLL id _) _ _))
   (CommA id))
 
+;;
 (define+ (translate-fun (FunLL (IdLL id _) params _ body))
-  (define header (make-fun-header params))
-  (define var-blocks (translate-blocks body (hash)))
+  (define var-blocks (list-update (translate-blocks body (hash)) 0
+                                  (curry extend-block (make-param-moves params))))
   (match-define (cons num-colors locations) (allocate-registers var-blocks))
   (define no-phi-blocks ((remove-phis*) var-blocks))
   (define blocks (patch-stack ((sub-locations* locations) no-phi-blocks)))
+  (define header (make-fun-header))
   (FunA id (list-update blocks 0 (curry extend-block header))))
 
-(define (make-fun-header params)
-  (append (list (PushA (list (RegA 'fp) (RegA 'lr)))
-                (OpA 'add (RegA 'fp) (RegA 'sp) 4))
-          (map-indexed move-parameter params)))
+;;
+(define (make-fun-header)
+  (list (PushA (list (RegA 'fp) (RegA 'lr)))
+        (OpA 'add (RegA 'fp) (RegA 'sp) 4)))
 
-(define+  (move-parameter (cons param _) index)
+;;
+(define (make-param-moves params)
+  (map-indexed move-parameter params))
+
+;;
+(define+ (move-parameter (cons param _) index)
   (if (< index (length arg-regs))
       (MovA #f param (list-ref arg-regs index))
-      (LdrA param (OffsetA (RegA 'fp) (* 4 (add1 (- index (length arg-regs))))))))
+      (LdrA param (StackLoc 'param index))))
 
+;;
 (define (translate-blocks blocks stack-env)
   (match blocks
     ['() '()]
     [(cons block rst) (match-let ([(cons new-block new-stack-env) (translate-block block stack-env)])
                         (cons new-block (translate-blocks rst new-stack-env)))]))
 
+;;
 (define+ (translate-block (Block id stmts) stack-env)
   (let-values ([(new-stmts new-stack-env) (split-at-right (translate-stmts stmts stack-env) 1)])
     (cons (Block (LabelA id) new-stmts) (first new-stack-env))))
 
+;;
 (define (translate-stmts stmts stack-env)
   (match stmts
     ['() (list stack-env)]
     [(cons (AssignLL target (? AllocLL?)) rst)
      (translate-stmts rst (hash-set stack-env target (StackLoc 'local (hash-count stack-env))))]
     [(cons stmt rst) (append (translate-stmt stmt stack-env) (translate-stmts rst stack-env))]))
-         
 
+;;
 (define (translate-stmt stmt stack-env)
   (match stmt
+    
+    ;; Branches
     [(BrLL (IdLL id _))
      (list (BrA #f (LabelA id)))]
-    [(BrCondLL cond (IdLL iftrue _) (IdLL iffalse _))
-     (match-let ([(cons arg stmts) (translate-arg cond #f)])
-       (append stmts
-               (list (CmpA arg 1)
-                     (BrA 'eq (LabelA iftrue))
-                     (BrA #f (LabelA iffalse)))))]
-    [(AssignLL target (? IdLL? src))
-     (make-mov #f target src)]
+    [(BrCondLL cnd (IdLL iftrue _) (IdLL iffalse _))
+     (with-args ([arg (translate-arg cnd #f)])
+       (list (CmpA arg 1)
+             (BrA 'eq (LabelA iftrue))
+             (BrA #f (LabelA iffalse))))]
+    
+    ;; Binary Ops
     [(AssignLL target (BinaryLL (? easy-op? op) _ arg1 arg2))
-     (match-let ([(cons new-arg1 stmts1) (translate-arg arg1 #f)]
-                 [(cons new-arg2 stmts2) (translate-arg arg2 imm12)])
-       (append stmts1 stmts2
-               (list (OpA (hash-ref easy-ops op) target new-arg1 new-arg2))))]
+     (with-args ([new-arg1 (translate-arg arg1 #f)]
+                 [new-arg2 (translate-arg arg2 imm12)])
+       (list (OpA (hash-ref easy-ops op) target new-arg1 new-arg2)))]
     [(AssignLL target (BinaryLL 'mul _ arg1 arg2))
-     (match-let ([(cons new-arg1 stmts1) (translate-arg arg1 #f)]
-                 [(cons new-arg2 stmts2) (translate-arg arg2 #f)])
-       (append stmts1 stmts2  
-               (list (OpA 'mul target new-arg1 new-arg2))))]
+     (with-args ([new-arg1 (translate-arg arg1 #f)]
+                 [new-arg2 (translate-arg arg2 #f)])
+       (list (OpA 'mul target new-arg1 new-arg2)))]
+    [(AssignLL target (BinaryLL 'sdiv _ arg1 arg2))
+     (translate-stmt (AssignLL target (CallLL #f (IdLL '__aeabi_idiv #t)
+                                              (list (cons arg1 int) (cons arg2 int)) #f)) stack-env)]
+    [(AssignLL target (BinaryLL (? comp-op? op) _ arg1 arg2))
+     (with-args ([new-arg1 (translate-arg arg1 #f)]
+                 [new-arg2 (translate-arg arg2 imm8)])
+       (list (MovA #f target 0)
+             (CmpA new-arg1 new-arg2)
+             (MovA (hash-ref comp-ops op) target 1)))]
+    
+    ;; Get Elt Ptr TODO args
     [(AssignLL target (GetEltLL _ ptr 0))
      (make-mov #f target ptr)]
     [(AssignLL target (GetEltLL _ ptr index))
-     (match-let ([(cons arg stmts) (translate-arg (* index (/ int-size byte-size)) imm12)])
-       (append stmts
-               (list (OpA 'add target ptr arg))))]
+     (with-args ([arg (translate-arg (* index (/ int-size byte-size)) imm12)])
+       (list (OpA 'add target ptr arg)))]
+    
+    ;; Cast TODO args
     [(AssignLL target (CastLL _ _ val _))
      (make-mov #f target val)]
-    [(AssignLL target (BinaryLL 'sdiv _ arg1 arg2))
-     (translate-stmt (AssignLL target (CallLL #f (IdLL '__aeabi_idiv #t)
-                                              (list (cons arg1 int) (cons arg2 int)) #f)))]
-    [(StoreLL _ val ptr)
-     (match-let ([(cons arg stmts) (translate-arg val #f)])
-       (append stmts
-               (list (StrA arg (hash-ref stack-env ptr ptr)))))]
-    [(AssignLL target (BinaryLL (? comp-op? op) _ arg1 arg2))
-     (match-let ([(cons new-arg1 stmts1) (translate-arg arg1 #f)]
-                 [(cons new-arg2 stmts2) (translate-arg arg2 imm8)])
-       (append stmts1 stmts2  
-               (list (MovA #f target 0)
-                     (CmpA new-arg1 new-arg2)
-                     (MovA (hash-ref comp-ops op) target 1))))]
+    
+    ;; Call
     [(AssignLL target (? CallLL? c))
      (append (translate-call c)
              (list (MovA #f target (RegA 'r0))))]
     [(? CallLL? c) (translate-call c)]
-    [(AssignLL target (LoadLL _ (IdLL id #t)))
-     ; Globals
-     (append (make-mov #f target (LabelA id))
-             (list (LdrA target target)))]
+    
+    ;; Load/Store
     [(AssignLL target (LoadLL _ ptr))
-     (list (LdrA target (hash-ref stack-env ptr ptr)))]
+     (with-args ([ptr-arg (translate-arg ptr #f)])
+       (list (LdrA target (hash-ref stack-env ptr ptr-arg))))]
+    [(StoreLL _ val ptr)
+     (with-args ([arg (translate-arg val #f)] [ptr-arg (translate-arg ptr #f)])
+       (list (StrA arg (hash-ref stack-env ptr ptr-arg))))]
+    
+    ;; Return
     [(ReturnLL _ (? void?))
      (list (PopA (list (RegA 'fp) (RegA 'pc))))]
     [(ReturnLL _ arg)
@@ -139,23 +153,24 @@
              (list (PopA (list (RegA 'fp) (RegA 'pc)))))]
     [o (list o)]))
 
+;;
 (define+ (translate-call (CallLL _ (IdLL fn _) args _))
   (define new-args (append* (reverse (map-indexed store-arg args))))
-  (append new-args (list (BrA 'l fn))))
+  (append new-args (list (BlA fn (length args)))))
 
+;;
 (define+ (store-arg (cons arg _) i)
   (if (< i (length arg-regs))
       (make-mov #f (list-ref arg-regs i) arg)
-      (match-let ([(cons new-arg stmts) (translate-arg arg #f)])
-       (append stmts
-               (list (StrA new-arg (StackLoc 'arg i)))))))
+      (with-args ([new-arg (translate-arg arg #f)])
+        (list (StrA new-arg (StackLoc 'arg i))))))
 
 (define (translate-arg arg imm-spec)
   (cond
-    [(not (imm? arg)) (cons arg '())]
-    [(and imm-spec (in-range? arg imm-spec)) (cons arg '())]
+    [(not (imm? arg)) (values arg '())]
+    [(and imm-spec (in-range? arg imm-spec)) (values arg '())]
     [else (let ([tmp (IdLL (make-label 't) #f)])
-            (cons tmp (make-mov 'w tmp arg)))]))
+            (values tmp (make-mov 'w tmp arg)))]))
 
 (define (make-mov pred target src)
   (match src
@@ -163,7 +178,7 @@
      #:when (in-range? src imm16)
      (list (MovA (or pred 'w) target src))]
     [(? imm?)
-     (when pred (error "pred error"))
+     (when (and pred (not (equal? pred 'w))) (error "pred error"))
      (list (MovA 'w target (HalfA src #t))
            (MovA 't target (HalfA src #f)))]
     [_ (list (MovA pred target src))]))
@@ -171,7 +186,8 @@
 (define+ (extend-block stmts (Block id block-stmts))
   (Block id (append stmts block-stmts)))
 
-(define imm? (disjoin integer? StringConstLL? LabelA?))
+(define (imm? v)
+  (or (integer? v) (StringConstLL? v) (and (IdLL? v) (IdLL-global? v))))
 
 (define+ (in-range? arg (ImmRange min max))
   (and (integer? arg) (<= arg max) (>= arg min)))
@@ -215,7 +231,7 @@
   remove-phis)
 
 (define (sub-locations* locations)
-  
+
   (define (sub-locations/blocks blocks)
     (map sub-locations/block blocks))
 
@@ -235,23 +251,34 @@
     (if (IdLL? op)
         (hash-ref locations op (RegA 'r0))
         op))
-  
+
   sub-locations/blocks)
 
 ; two passes, one to gather stack locations/offsets, one to resolve them
 
 (define (patch-stack blocks)
-  (define locs (list->set (append-map get-stack-locs blocks)))
+  (define locs (remove-duplicates (append-map get-stack-locs blocks)))
   (pretty-display locs)
   blocks)
 
 (define+ (get-stack-locs (Block _ stmts))
-  (append-map get-stack-locs/stmt stmts))
+  (filter-map get-stack-locs/stmt stmts))
 
 (define (get-stack-locs/stmt stmt)
   (match stmt
-    [(StrA _ (? StackLoc? addr)) (list addr)]
-    [(LdrA _ (? StackLoc? addr)) (list addr)]
-    [o '()]))
-                         
-  
+    [(StrA _ (? StackLoc? addr)) addr]
+    [(LdrA _ (? StackLoc? addr)) addr]
+    [_ #f]))
+
+
+;;--------------------------------------------
+
+(define-syntax (with-args syntax-object)
+  (syntax-case syntax-object ()
+    [(_ ([arg exp] ...) body ...)
+     (with-syntax ([(stmts ...) (generate-temporaries #'(arg ...))])
+       #'(let-values ([(arg stmts) exp] ...)
+           (append stmts ... (begin body ...))))]))
+
+
+

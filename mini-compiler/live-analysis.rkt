@@ -6,57 +6,54 @@
 
 ;;
 (define (get-live/blocks blocks)
-  (get-live/blocks* blocks (make-hash)))
+  (displayln "LIVE")
+  (define live-blocks (get-live/blocks* blocks (make-hash (map init-live-set blocks))))
+  (displayln (string-join (map format-block live-blocks) "\n"))
+  live-blocks)
+
+;;
+(define+ (init-live-set (Block id _))
+  (cons id '()))
 
 ;;
 (define (get-live/blocks* blocks live-sets)
   (define new-live-sets (hash-copy live-sets))
   (define live-blocks
-    (for/list [(block blocks)]
-      (define live-stmts (get-live/stmts (Block-stmts block) live-sets))
-      (hash-set! new-live-sets (Block-id block) (first live-stmts))
-      (Block (Block-id block) (rest live-stmts))))
+    (map (λ+ ((Block id stmts)) 
+             (define live-stmts (get-live/stmts stmts live-sets))
+             (hash-set! new-live-sets id (cdr (first live-stmts)))
+             (Block id live-stmts)) blocks))
   (if (equal? live-sets new-live-sets)
       live-blocks
       (get-live/blocks* blocks new-live-sets)))
 
 ;;
-(define (get-live/stmts stmts live-sets)
+(define (get-live/stmts stmts live-outs)
   (match stmts
-    [(list last) (list (get-live-before last '() live-sets) (cons last '()))]
+    ['() (list (cons #f '()))]
     [(cons stmt rst)
-     (define live-afters (get-live/stmts rst live-sets))
-     (define live-after (first live-afters))
-     (define live-before (get-live-before stmt live-after live-sets))
-     (list* live-before (cons stmt live-after) (rest live-afters))]))
+     (match-let ([(cons (cons #f live-after) rest-live-sets) (get-live/stmts rst live-outs)])
+       (list* (cons #f (get-live-before stmt live-after live-outs))
+              (cons stmt live-after)
+              rest-live-sets))]))
 
 ;;
-(define (get-live-before stmt live-after live-sets)
-  (if (BrA? stmt)
-      (set-union live-after (hash-ref live-sets (BrA-label stmt) '()))
-      (set-subtract
-       (set-union (get-reads stmt) live-after)
-       (get-writes stmt))))
+(define (get-live-before stmt live-after live-outs)
+  (set-union (get-reads stmt live-outs)
+             (set-subtract live-after (get-writes stmt))))
 
 ;;
-(define+ (test (Block id stmts))
-  (displayln id)
-  (for [(stmt stmts)]
-    (displayln stmt)
-    (displayln (get-reads stmt))
-    (displayln (get-writes stmt))))
-
-;;
-(define (get-reads inst)
+(define (get-reads inst live-outs)
   (filter var?
           (match inst
             [(OpA _ _ r1 op2) (list r1 op2)]
             [(CmpA r1 op2) (list r1 op2)]
             [(MovA _ _ op2) (list op2)]
             [(LdrA _ op2) (list op2)]
-            ; TODO offset
             [(StrA r1 op2) (list r1 op2)]
             [(PhiLL _ _ args) (map car args)]
+            [(BrA _ label) (hash-ref live-outs label)]
+            [(BlA _ num-args) (take arg-regs (min (length arg-regs) num-args))]
             [_ '()])))
 
 ; these are more like overwrites, these overwrite the previous value in the var
@@ -64,17 +61,11 @@
   (filter var?
           (match inst
             [(OpA _ target _ _) (list target)]
-            [(BrA 'l _) arg-regs]
-            [(MovA (or #f 'l 'w) r1 _) (list r1)]
+            [(BlA _ _) arg-regs]
+            [(MovA (or #f 'w) r1 _) (list r1)]
             [(LdrA r1 _) (list r1)]
             [(PhiLL id _ _) (list id)]
             [_ '()])))
 
 ;;
-(define var? IdLL?)
-
-
-; #;(for ((block new-blocks))
-;     (displayln (BlockA-id block))
-;     (for ((info (BlockA-stmts block)))
-;       (displayln (format "~a\t\tlive: ~a" (format-stmt (car info)) (map format-arg (cdr info))))))
+(define var? (disjoin IdLL? RegA?))

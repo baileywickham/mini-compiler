@@ -1,6 +1,6 @@
 #lang racket
 
-(provide format-arm format-stmt format-arg)
+(provide format-arm format-block)
 
 (require "ast/arm.rkt" "ast/llvm.rkt" "util.rkt")
 
@@ -49,6 +49,7 @@
 (define (format-stmt stmt)
   (match stmt
     [(BrA op id) (format "b~a ~a" (or op "") (format-label id))]
+    [(BlA id _) (format "bl ~a" (format-label id))]
     [(CmpA arg1 arg2) (format "cmp ~a, ~a" (format-arg arg1) (format-arg arg2))]
     [(OpA op target arg1 arg2)
      (format "~a ~a, ~a, ~a" op (format-arg target) (format-arg arg1) (format-arg arg2))]
@@ -57,6 +58,7 @@
     [(LdrA r2 addr) (format "ldr ~a, [~a]" (format-arg r2) (format-arg addr))]
     [(PushA regs) (format "push {~a}" (string-join (map format-arg regs) ", "))]
     [(PopA regs) (format "pop {~a}" (string-join (map format-arg regs) ", "))]
+    [(cons stmt live-after) (format "~a\t\t~a" (format-stmt stmt) (map format-arg live-after))]
     [o (~v o)]))
 
 (define (format-arg arg)
@@ -76,5 +78,5 @@
     [(? symbol?) lbl]))
 
 (define+ (format-id (IdLL id global?))
-  (format "~a~a" (if global? "@" "%") id))
+  (format "~a~a" (if global? "" "%") id))
 

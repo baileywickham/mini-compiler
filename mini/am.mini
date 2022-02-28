@@ -1,0 +1,9 @@
+int g;
+
+fun main() int {
+    g = g + 1;
+    print 1;
+    g = read;
+    return 0;
+
+}

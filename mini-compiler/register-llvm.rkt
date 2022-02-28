@@ -271,7 +271,7 @@
 
   ;;
   (define (add-phi-operands var phi block)
-    (for ([pred (hash-ref preds (Block-id block))])
+    (for ([pred (hash-ref preds (Block*-id block))])
       (phi-append-operand! phi pred (read-var var pred))))
 
   translate-cfg)
@@ -290,7 +290,7 @@
 
 ;;
 (define (phi-append-operand! phi pred var)
-  (set-Phi-args! phi (cons (cons (Block-id pred) var) (Phi-args phi))))
+  (set-Phi-args! phi (cons (cons (Block*-id pred) var) (Phi-args phi))))
 
 ;;
 (define (unpack-cfg cfg)

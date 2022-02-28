@@ -28,7 +28,7 @@
 
 ;;
 (define+ (get-edges/stmt (cons stmt live-after))
-  (define reg-writes (filter RegA? (get-writes stmt)))
+  (define reg-writes (if (BlA? stmt) arg-regs '()))
   (combinations (set-union live-after reg-writes) 2))
 
 ;;
@@ -39,9 +39,10 @@
 (define (get-locations coloring num-colors)
   (define locs (make-immutable-hash (map (λ (reg) (cons (hash-ref coloring reg) reg)) arg-regs)))
   (hash-union 
-   (make-immutable-hash (map-indexed
-                         (λ (color i) (cons color (get-location i)))
-                         (filter (λ (c) (not (hash-has-key? locs c))) (range num-colors))))
+   (make-immutable-hash
+    (map-indexed
+     (λ (color i) (cons color (get-location i)))
+     (filter (λ (c) (not (hash-has-key? locs c))) (range num-colors))))
    locs))
 
 (define (get-location i)
