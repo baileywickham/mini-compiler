@@ -7,25 +7,27 @@
 ;;
 (define (get-live/blocks blocks)
   (displayln "LIVE")
-  (define live-blocks (get-live/blocks* blocks (make-hash (map init-live-set blocks))))
+  (define live-blocks (get-live/blocks* blocks (make-immutable-hash (map init-live-out blocks))))
   (displayln (string-join (map format-block live-blocks) "\n"))
   live-blocks)
 
 ;;
-(define+ (init-live-set (Block id _))
+(define+ (init-live-out (Block id _))
   (cons id '()))
 
 ;;
-(define (get-live/blocks* blocks live-sets)
-  (define new-live-sets (hash-copy live-sets))
+(define+ (get-live-out (Block id (cons (cons #f live-out) _)))
+  (cons id live-out))
+
+;;
+(define (get-live/blocks* blocks live-outs)
   (define live-blocks
     (map (λ+ ((Block id stmts)) 
-             (define live-stmts (get-live/stmts stmts live-sets))
-             (hash-set! new-live-sets id (cdr (first live-stmts)))
-             (Block id live-stmts)) blocks))
-  (if (equal? live-sets new-live-sets)
+             (Block id (get-live/stmts stmts live-outs))) blocks))
+  (define new-live-outs (make-immutable-hash (map get-live-out live-blocks)))
+  (if (equal? live-outs new-live-outs)
       live-blocks
-      (get-live/blocks* blocks new-live-sets)))
+      (get-live/blocks* blocks new-live-outs)))
 
 ;;
 (define (get-live/stmts stmts live-outs)
@@ -51,7 +53,7 @@
             [(MovA _ _ op2) (list op2)]
             [(LdrA _ op2) (list op2)]
             [(StrA r1 op2) (list r1 op2)]
-            [(PhiLL _ _ args) (map car args)]
+            [(PhiLL _ _ (list (cons _ (cons ids _)) ...)) ids]
             [(BrA _ label) (hash-ref live-outs label)]
             [(BlA _ num-args) (take arg-regs (min (length arg-regs) num-args))]
             [_ '()])))

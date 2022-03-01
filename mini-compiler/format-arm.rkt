@@ -4,11 +4,6 @@
 
 (require "ast/arm.rkt" "ast/llvm.rkt" "util.rkt")
 
-(define format-strings
-  #hash((read    . ".READ_FMT")
-        (println . ".PRINTLN_FMT")
-        (print   . ".PRINT_FMT")))
-
 (define boiler-plate
   "\t.arch armv7-a
 ~a
@@ -34,7 +29,7 @@
           (string-join (map format-comm comms) "\n")
           (string-join (map format-fun funs)   "\n")))
 
-(define+ (format-comm (CommA id))
+(define+ (format-comm (CommDecA id))
   (format "\t.comm\t~a,4,4" id))
 
 (define+ (format-fun (FunA id blocks))
@@ -63,14 +58,17 @@
 
 (define (format-arg arg)
   (match arg
-    [(? number?) (format "#~a" arg)]
-    [(HalfA arg lower?) (format "#:~a16:~a" (if lower? "lower" "upper") (format-arg arg))]
+    [(ImmA v) (format "#~a" v)]
+    [(HalfA arg lower?) (format "#:~a16:~a" (if lower? "lower" "upper") (format-half-imm arg))]
     [(RegA r) (~a r)]
     [(? IdLL?) (format-id arg)]
-    [(StringConstLL id) (hash-ref format-strings id)]
-    [(? LabelA?) (format-label arg)]
     [(OffsetA src offset) (format "~a, ~a" (format-arg src) (format-arg offset))] 
     [o (~v o)]))
+
+(define (format-half-imm imm)
+  (match imm
+    [(ImmA v) (~a v)]
+    [(CommA id) (~a id)]))
 
 (define (format-label lbl)
   (match lbl

@@ -19,6 +19,11 @@
         (eq  . eq)
         (ne  . ne)))
 
+(define format-strings
+  #hash((read    . .READ_FMT)
+        (println . .PRINTLN_FMT)
+        (print   . .PRINT_FMT)))
+
 (struct ImmRange (min max))
 (define imm16 (ImmRange 0 65535))
 (define imm12 (ImmRange 0 4095))
@@ -41,7 +46,7 @@
 
 ;;
 (define+ (translate-dec (GlobalLL (IdLL id _) _ _))
-  (CommA id))
+  (CommDecA id))
 
 ;;
 (define+ (translate-fun (FunLL (IdLL id _) params _ body))
@@ -56,7 +61,7 @@
 ;;
 (define (make-fun-header)
   (list (PushA (list (RegA 'fp) (RegA 'lr)))
-        (OpA 'add (RegA 'fp) (RegA 'sp) 4)))
+        (OpA 'add (RegA 'fp) (RegA 'sp) (ImmA 4))))
 
 ;;
 (define (make-param-moves params)
@@ -97,7 +102,7 @@
      (list (BrA #f (LabelA id)))]
     [(BrCondLL cnd (IdLL iftrue _) (IdLL iffalse _))
      (with-args ([arg (translate-arg cnd #f)])
-       (list (CmpA arg 1)
+       (list (CmpA arg (ImmA 1))
              (BrA 'eq (LabelA iftrue))
              (BrA #f (LabelA iffalse))))]
     
@@ -116,9 +121,9 @@
     [(AssignLL target (BinaryLL (? comp-op? op) _ arg1 arg2))
      (with-args ([new-arg1 (translate-arg arg1 #f)]
                  [new-arg2 (translate-arg arg2 imm8)])
-       (list (MovA #f target 0)
+       (list (MovA #f target (ImmA 0))
              (CmpA new-arg1 new-arg2)
-             (MovA (hash-ref comp-ops op) target 1)))]
+             (MovA (hash-ref comp-ops op) target (ImmA 1))))]
     
     ;; Get Elt Ptr TODO args
     [(AssignLL target (GetEltLL _ ptr 0))
@@ -142,7 +147,8 @@
      (with-args ([ptr-arg (translate-arg ptr #f)])
        (list (LdrA target (hash-ref stack-env ptr ptr-arg))))]
     [(StoreLL _ val ptr)
-     (with-args ([arg (translate-arg val #f)] [ptr-arg (translate-arg ptr #f)])
+     (with-args ([arg (translate-arg val #f)]
+                 [ptr-arg (translate-arg ptr #f)])
        (list (StrA arg (hash-ref stack-env ptr ptr-arg))))]
     
     ;; Return
@@ -166,31 +172,41 @@
         (list (StrA new-arg (StackLoc 'arg i))))))
 
 (define (translate-arg arg imm-spec)
+  (define arg-val (translate-value arg))
   (cond
-    [(not (imm? arg)) (values arg '())]
-    [(and imm-spec (in-range? arg imm-spec)) (values arg '())]
+    [(not (imm? arg-val)) (values arg-val '())]
+    [(and imm-spec (in-range? arg-val imm-spec)) (values arg-val '())]
     [else (let ([tmp (IdLL (make-label 't) #f)])
             (values tmp (make-mov 'w tmp arg)))]))
 
 (define (make-mov pred target src)
-  (match src
+  (define src-val (translate-value src))
+  (match src-val
     [(? imm?)
-     #:when (in-range? src imm16)
-     (list (MovA (or pred 'w) target src))]
+     #:when (in-range? src-val imm16)
+     (list (MovA (or pred 'w) target src-val))]
     [(? imm?)
      (when (and pred (not (equal? pred 'w))) (error "pred error"))
-     (list (MovA 'w target (HalfA src #t))
-           (MovA 't target (HalfA src #f)))]
-    [_ (list (MovA pred target src))]))
+     (list (MovA 'w target (HalfA src-val #t))
+           (MovA 't target (HalfA src-val #f)))]
+    [_ (list (MovA pred target src-val))]))
+
+(define (translate-value val)
+  (match val
+    [(? integer?) (ImmA val)]
+    [(? boolean?) (ImmA (if val 1 0))]
+    [(StringConstLL id) (CommA (hash-ref format-strings id))]
+    [(IdLL id #t) (CommA id)]
+    [(? IdLL?) val]))
 
 (define+ (extend-block stmts (Block id block-stmts))
   (Block id (append stmts block-stmts)))
 
 (define (imm? v)
-  (or (integer? v) (StringConstLL? v) (and (IdLL? v) (IdLL-global? v))))
+  (or (ImmA? v) (CommA? v)))
 
 (define+ (in-range? arg (ImmRange min max))
-  (and (integer? arg) (<= arg max) (>= arg min)))
+  (and (ImmA? arg) (<= (ImmA-v arg) max) (>= (ImmA-v arg) min)))
 
 (define (comp-op? op)
   (hash-has-key? comp-ops op))
