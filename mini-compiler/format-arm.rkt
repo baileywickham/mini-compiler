@@ -53,17 +53,23 @@
     [(LdrA r2 addr) (format "ldr ~a, [~a]" (format-arg r2) (format-arg addr))]
     [(PushA regs) (format "push {~a}" (string-join (map format-arg regs) ", "))]
     [(PopA regs) (format "pop {~a}" (string-join (map format-arg regs) ", "))]
-    [(cons stmt live-after) (format "~a\t\t~a" (format-stmt stmt) (map format-arg live-after))]
-    [o (~v o)]))
+    
+    [(cons stmt live-after) (format "~a\t\t~a" (format-stmt stmt) (map format-live-set live-after))]
+    [(PhiLL id _ args)
+     (format "~a = phi ~a" (format-arg id) (string-join
+                                            (map (λ+ ((cons v b))
+                                                     (format "[~a ~a]" (format-arg v)
+                                                             (format-label b))) args) " "))]
+    [#f "<ENTRY SET>"]))
 
 (define (format-arg arg)
   (match arg
     [(ImmA v) (format "#~a" v)]
     [(HalfA arg lower?) (format "#:~a16:~a" (if lower? "lower" "upper") (format-half-imm arg))]
     [(RegA r) (~a r)]
-    [(? IdLL?) (format-id arg)]
-    [(OffsetA src offset) (format "~a, ~a" (format-arg src) (format-arg offset))] 
-    [o (~v o)]))
+    [(OffsetA src offset) (format "~a, ~a" (format-arg src) (format-arg offset))]
+
+    [(? IdLL?) (format-id arg)]))
 
 (define (format-half-imm imm)
   (match imm
@@ -77,4 +83,9 @@
 
 (define+ (format-id (IdLL id global?))
   (format "~a~a" (if global? "" "%") id))
+
+(define (format-live-set live-set)
+  (match live-set
+    [(cons id l) (format "[~a ~a]" (format-arg id) (format-label l))]
+    [_ (format-arg live-set)]))
 

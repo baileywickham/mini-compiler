@@ -7,11 +7,11 @@
 
 ;;
 (define (allocate-registers blocks)
-  ;(pretty-display (get-live/blocks blocks))
   (define g (build-conflict-graph (get-live/blocks blocks)))
+  (pretty-display (get-edges g))
   (let*-values ([(num-colors coloring) (color-graph g)]
                 [(locations) (get-locations-mapping coloring (get-locations coloring num-colors))])
-    ;(displayln num-colors)
+    (displayln num-colors)
     ;(pretty-display locations)
     ;(pretty-display coloring)
     ;(pretty-display blocks)
@@ -29,7 +29,7 @@
 ;;
 (define+ (get-edges/stmt (cons stmt live-after))
   (define reg-writes (if (BlA? stmt) arg-regs '()))
-  (combinations (set-union live-after reg-writes) 2))
+  (combinations (set-union (filter-not pair? live-after) reg-writes) 2))
 
 ;;
 (define (color-graph g)

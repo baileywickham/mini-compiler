@@ -6,10 +6,20 @@
 
 ;;
 (define (get-live/blocks blocks)
-  (displayln "LIVE")
+  ;(displayln "LIVE")
   (define live-blocks (get-live/blocks* blocks (make-immutable-hash (map init-live-out blocks))))
-  (displayln (string-join (map format-block live-blocks) "\n"))
+  ;(displayln (string-join (map format-block live-blocks) "\n"))
   live-blocks)
+
+;;
+(define (get-live/blocks* blocks live-outs)
+  (define live-blocks
+    (map (λ+ ((Block id stmts)) 
+             (Block id (get-live/stmts stmts (live-out-block live-outs id)))) blocks))
+  (define new-live-outs (make-immutable-hash (map get-live-out live-blocks)))
+  (if (equal? live-outs new-live-outs)
+      live-blocks
+      (get-live/blocks* blocks new-live-outs)))
 
 ;;
 (define+ (init-live-out (Block id _))
@@ -20,47 +30,48 @@
   (cons id live-out))
 
 ;;
-(define (get-live/blocks* blocks live-outs)
-  (define live-blocks
-    (map (λ+ ((Block id stmts)) 
-             (Block id (get-live/stmts stmts live-outs))) blocks))
-  (define new-live-outs (make-immutable-hash (map get-live-out live-blocks)))
-  (if (equal? live-outs new-live-outs)
-      live-blocks
-      (get-live/blocks* blocks new-live-outs)))
+(define+ (live-out-block live-outs current-block)
+  (λ (label)
+    (filter-map
+     (λ (live-member)
+       (match live-member
+         [(cons id block-id) (and (equal? current-block block-id) id)]
+         [_ live-member]))
+     (hash-ref live-outs label))))
 
 ;;
-(define (get-live/stmts stmts live-outs)
+(define (get-live/stmts stmts live-out)
   (match stmts
     ['() (list (cons #f '()))]
     [(cons stmt rst)
-     (match-let ([(cons (cons #f live-after) rest-live-sets) (get-live/stmts rst live-outs)])
-       (list* (cons #f (get-live-before stmt live-after live-outs))
+     (match-let ([(cons (cons #f live-after) rest-live-sets)
+                  (get-live/stmts rst live-out)])
+       (list* (cons #f (get-live-before stmt live-after live-out))
               (cons stmt live-after)
               rest-live-sets))]))
 
 ;;
-(define (get-live-before stmt live-after live-outs)
-  (set-union (get-reads stmt live-outs)
+(define (get-live-before stmt live-after live-out)
+  (set-union (get-reads stmt live-out)
              (set-subtract live-after (get-writes stmt))))
 
 ;;
-(define (get-reads inst live-outs)
-  (filter var?
+(define (get-reads inst live-out)
+  (filter live-member?
           (match inst
             [(OpA _ _ r1 op2) (list r1 op2)]
             [(CmpA r1 op2) (list r1 op2)]
             [(MovA _ _ op2) (list op2)]
             [(LdrA _ op2) (list op2)]
             [(StrA r1 op2) (list r1 op2)]
-            [(PhiLL _ _ (list (cons _ (cons ids _)) ...)) ids]
-            [(BrA _ label) (hash-ref live-outs label)]
+            [(PhiLL _ _ args) args]
+            [(BrA _ label) (live-out label)]
             [(BlA _ num-args) (take arg-regs (min (length arg-regs) num-args))]
             [_ '()])))
 
 ; these are more like overwrites, these overwrite the previous value in the var
 (define (get-writes inst)
-  (filter var?
+  (filter live-member?
           (match inst
             [(OpA _ target _ _) (list target)]
             [(BlA _ _) arg-regs]
@@ -68,6 +79,12 @@
             [(LdrA r1 _) (list r1)]
             [(PhiLL id _ _) (list id)]
             [_ '()])))
+
+(define (live-member? v)
+  (match v
+    [(? var?) #t]
+    [(cons (? var?) _) #t]
+    [_ #f]))
 
 ;;
 (define var? (disjoin IdLL? RegA?))
