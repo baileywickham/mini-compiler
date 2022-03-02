@@ -3,24 +3,21 @@
 (provide allocate-registers)
 
 (require graph racket/hash)
-(require "ast/arm.rkt" "util.rkt" "live-analysis.rkt")
+(require "ast/arm.rkt" "util.rkt" "live-analysis.rkt" "graph-visualized.rkt")
 
 ;;
 (define (allocate-registers blocks)
   (define g (build-conflict-graph (get-live/blocks blocks)))
-  (pretty-display (get-edges g))
   (let*-values ([(num-colors coloring) (color-graph g)]
                 [(locations) (get-locations-mapping coloring (get-locations coloring num-colors))])
-    (displayln num-colors)
-    ;(pretty-display locations)
-    ;(pretty-display coloring)
-    ;(pretty-display blocks)
+    ;; (display-graph g coloring)
     (cons num-colors locations)))
 
 ;;
 (define (build-conflict-graph blocks)
-  (unweighted-graph/undirected (append (append-map get-edges/block blocks)
-                                       (combinations arg-regs 2))))
+  (unweighted-graph/undirected
+   (append (append-map get-edges/block blocks)
+           (combinations arg-regs 2))))
 
 ;;
 (define+ (get-edges/block (Block id stmts))

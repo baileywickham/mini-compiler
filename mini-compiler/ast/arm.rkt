@@ -29,6 +29,7 @@
 (struct ImmA (v) #:transparent)
 (struct CommA (id) #:transparent)
 
+(struct StackLoc (type index) #:transparent)
 
 (define arg-regs          (map RegA '(r0 r1 r2 r3)))
 (define callee-saved-regs (map RegA '(r4 r5 r6 r7 r8 r9 r10 r11)))
