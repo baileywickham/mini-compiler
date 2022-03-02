@@ -5,6 +5,9 @@
 (require graph racket/hash)
 (require "ast/arm.rkt" "util.rkt" "live-analysis.rkt" "graph-visualized.rkt")
 
+(define-values (use-regs spill-temps) (split-at-right callee-saved-regs 2))
+(define num-regs (+ (length callee-saved-regs) (length arg-regs)))
+
 ;;
 (define (allocate-registers blocks)
   (define g (build-conflict-graph (get-live/blocks blocks)))
@@ -38,15 +41,16 @@
   (hash-union
    (make-immutable-hash
     (map-indexed
-     (λ (color i) (cons color (get-location i)))
+     (λ (color i) (cons color (get-location i num-colors)))
      (filter (λ (c) (not (hash-has-key? locs c))) (range num-colors))))
    locs))
 
-(define (get-location i)
-  (if (< i (length callee-saved-regs))
-      (list-ref callee-saved-regs i)
-      ;; Add stack support
-      (void)))
+(define (get-location i num-colors)
+  (cond
+    [(and (num-colors . > . num-regs) (i . >= . (length use-regs)))
+     (StackLoc 'spill i)]
+    [else (list-ref callee-saved-regs i)]))
 
 (define (get-locations-mapping coloring locations)
-  (make-immutable-hash (hash-map coloring (λ (id color) (cons id (hash-ref locations color))))))
+  (make-immutable-hash
+   (hash-map coloring (λ (id color) (cons id (hash-ref locations color))))))
