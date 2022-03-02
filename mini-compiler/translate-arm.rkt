@@ -6,6 +6,17 @@
          "allocate-registers.rkt" "draft-arm.rkt" )
 
 
+;;
+(define fun-header
+  `(,(PushA (list (RegA 'fp) (RegA 'lr)))
+    ,(OpA 'add (RegA 'fp) (RegA 'sp) (ImmA 4))))
+
+;;
+(define fun-footer
+  `(,(PopA (list (RegA 'fp) (RegA 'pc)))))
+
+
+;;
 (define+ (translate-arm (LLVM _ decs funs))
   (ARM (map translate-dec decs)
        (map translate-fun funs)))
@@ -18,50 +29,11 @@
 (define+ (translate-fun (FunLL (IdLL id #t) params _ body))
   (define draft-blocks (draft/fun-body params body))
   (match-define (cons num-colors locations) (allocate-registers draft-blocks))
-  (define no-phi-blocks ((remove-phis*) draft-blocks))
-  (define blocks (patch-stack ((sub-locations* locations) no-phi-blocks)))
-  (define header (make-fun-header))
-  (FunA id (list-update blocks 0 (curry extend-block header))))
+  (define blocks (patch-stack ((sub-locations* locations) draft-blocks)))
+  (FunA id (append-blocks (prepend-blocks blocks fun-header) fun-footer)))
 
-;;
-(define (make-fun-header)
-  (list (PushA (list (RegA 'fp) (RegA 'lr)))
-        (OpA 'add (RegA 'fp) (RegA 'sp) (ImmA 4))))
-
-;;
-(define (make-fun-footer)
-  (list (PopA (list (RegA 'fp) (RegA 'pc)))))
 
 ;; ------------------------------------------------
-
-(define (remove-phis*)
-  (define phi-moves (make-hash))
-
-  (define (remove-phis blocks)
-    (map add-mvs-block (map remove-phis-block blocks)))
-
-  (define+ (remove-phis-block (Block id stmts))
-    (Block id (map remove-phis-stmt stmts)))
-
-  (define (remove-phis-stmt stmt)
-    (match stmt
-      [(PhiLL id _ args)
-       (let ([phi-id (IdLL (make-label '_phi) #f)])
-         (for ([arg args])
-           (match-let ([(cons id block-id) arg])
-             (add-phi-move! block-id (MovA #f phi-id id))))
-         ; might not both be registers
-         (MovA #f id phi-id))]
-      [_ stmt]))
-
-  (define (add-phi-move! block-id move)
-    (hash-set! phi-moves block-id (cons move (hash-ref phi-moves block-id '()))))
-
-  (define+ (add-mvs-block (Block id stmts))
-    (Block id (let-values ([(before after) (split-at-right stmts 1)])
-                (append before (hash-ref phi-moves id '()) after))))
-
-  remove-phis)
 
 ;; -------------------------------------------
 
@@ -94,10 +66,10 @@
 (define (patch-stack blocks)
   (define locs (remove-duplicates (append-map get-stack-locs blocks)))
   (define-values (size stack-assignment) (get-stack-assignment locs))
-  ;(pretty-display stack-assignment)
-  (list-update ((subst-stack stack-assignment) blocks)
-               0
-               (curry extend-block (list (OpA 'add (RegA 'sp) (RegA 'sp) (ImmA size))))))
+  (append-blocks
+   (prepend-blocks ((subst-stack stack-assignment) blocks)
+                   (list (OpA 'add (RegA 'sp) (RegA 'sp) (ImmA size))))
+   (list (OpA 'sub (RegA 'sp) (RegA 'sp) (ImmA size)))))
 
 (define+ (get-stack-locs (Block _ stmts))
   (filter-map get-stack-locs/stmt stmts))
@@ -120,13 +92,12 @@
   (values stack-size
           (make-immutable-hash
            (append
-            (map-indexed (lambda (loc i) (cons loc (OffsetA (RegA 'sp) (ImmA (* i 4))))) stack-frame)
-            (map-indexed (lambda (loc i) (cons loc (OffsetA (RegA 'fp) (ImmA (* (add1 i) 4))))) params)))))
+            (map-indexed (λ (loc i) (cons loc (OffsetA (RegA 'sp) (ImmA (* i 4))))) stack-frame)
+            (map-indexed (λ (loc i) (cons loc (OffsetA (RegA 'fp) (ImmA (* (add1 i) 4))))) params)))))
 
 (define (get-locs locs type)
-  (sort (filter (lambda (loc) (equal? type (StackLoc-type loc))) locs)
-        <
-        #:key StackLoc-index))
+  (sort (filter (λ (loc) (equal? type (StackLoc-type loc))) locs)
+        < #:key StackLoc-index))
 
 (define (subst-stack stack-assignment)
   (define (subst-stack/blocks blocks)

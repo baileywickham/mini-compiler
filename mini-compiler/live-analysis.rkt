@@ -14,7 +14,7 @@
 ;;
 (define (get-live/blocks* blocks live-outs)
   (define live-blocks
-    (map (λ+ ((Block id stmts)) 
+    (map (λ+ ((Block id stmts))
              (Block id (get-live/stmts stmts (live-out-block live-outs id)))) blocks))
   (define new-live-outs (make-immutable-hash (map get-live-out live-blocks)))
   (if (equal? live-outs new-live-outs)

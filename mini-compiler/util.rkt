@@ -1,6 +1,6 @@
 #lang racket
 
-(provide define+ λ+ map-indexed)
+(provide define+ λ+ map-indexed map+fold)
 
 (define-syntax (define+ syntax-object)
   (syntax-case syntax-object ()
@@ -21,11 +21,11 @@
 (define (map-indexed proc lst)
   (map proc lst (range (length lst))))
 
-
-;(define+ (print-pair (cons a b))
-;  (display a)
-;  (display b))
-
-;(print-pair '(1 . 2))
-
+(define (map+fold proc init lst)
+  (match lst
+    ['() (values lst init)]
+    [(cons v rst)
+     (let*-values ([(new-v new-init) (proc v init)]
+                   [(new-lst newer-init) (map+fold proc new-init rst)])
+       (values (cons new-v new-lst) newer-init))]))
 

@@ -35,7 +35,7 @@
 ;;
 (define (get-locations coloring num-colors)
   (define locs (make-immutable-hash (map (λ (reg) (cons (hash-ref coloring reg) reg)) arg-regs)))
-  (hash-union 
+  (hash-union
    (make-immutable-hash
     (map-indexed
      (λ (color i) (cons color (get-location i)))
@@ -43,7 +43,7 @@
    locs))
 
 (define (get-location i)
-  (if (< i (length callee-saved-regs)) 
+  (if (< i (length callee-saved-regs))
       (list-ref callee-saved-regs i)
       ;; Add stack support
       (void)))

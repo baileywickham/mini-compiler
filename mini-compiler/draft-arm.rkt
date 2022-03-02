@@ -1,6 +1,6 @@
 #lang racket
 
-(provide draft/fun-body extend-block)
+(provide draft/fun-body prepend-blocks append-blocks)
 
 (require "ast/llvm.rkt" "ast/arm.rkt" "util.rkt" "symbol.rkt")
 
@@ -38,7 +38,7 @@
 ;; mov  0-65535
 
 (define (draft/fun-body params body)
-  (prepend-blocks (draft/blocks body (hash)) (make-param-moves params)))
+   (prepend-blocks (draft/blocks ((remove-phis*) body)) (make-param-moves params)))
 
 ;;
 (define (make-param-moves params)
@@ -51,29 +51,26 @@
       (LdrA param (StackLoc 'param index))))
 
 ;;
-(define (draft/blocks blocks stack-env)
-  (match blocks
-    ['() '()]
-    [(cons block rst) (match-let ([(cons new-block new-stack-env) (draft/block block stack-env)])
-                        (cons new-block (draft/blocks rst new-stack-env)))]))
+(define (draft/blocks blocks)
+  (let-values ([(draft-blocks _) (map+fold draft/block #hash() blocks)])
+    draft-blocks))
 
 ;;
 (define+ (draft/block (Block id stmts) stack-env)
-  (let-values ([(new-stmts new-stack-env) (split-at-right (draft/stmts stmts stack-env) 1)])
-    (cons (Block (LabelA id) new-stmts) (first new-stack-env))))
+  (let-values ([(new-stmts new-stack-env) (map+fold draft/stmt stack-env stmts)])
+    (values (Block (LabelA id) (append* new-stmts)) new-stack-env)))
 
-;;
-(define (draft/stmts stmts stack-env)
-  (match stmts
-    ['() (list stack-env)]
-    [(cons (AssignLL target (? AllocLL?)) rst)
-     (draft/stmts rst (hash-set stack-env target (StackLoc 'local (hash-count stack-env))))]
-    [(cons stmt rst) (append (draft/stmt stmt stack-env) (draft/stmts rst stack-env))]))
 
-;;
 (define (draft/stmt stmt stack-env)
   (match stmt
-    
+    [(AssignLL target (? AllocLL?))
+     (values '() (hash-set stack-env target (StackLoc 'local (hash-count stack-env))))]
+    [_ (values (draft/stmt* stmt stack-env) stack-env)]))
+
+;;
+(define (draft/stmt* stmt stack-env)
+  (match stmt
+
     ;; Branches
     [(BrLL (IdLL id _))
      `(,(BrA #f (LabelA id)))]
@@ -82,7 +79,7 @@
        `(,(CmpA arg (ImmA 1))
          ,(BrA 'eq (LabelA iftrue))
          ,(BrA #f (LabelA iffalse))))]
-    
+
     ;; Binary Ops
     [(AssignLL target (BinaryLL (? easy-op? op) _ arg1 arg2))
      (with-args ([new-arg1 (draft/arg arg1 #f stack-env)]
@@ -93,7 +90,7 @@
                  [new-arg2 (draft/arg arg2 #f stack-env)])
        `(,(OpA 'mul target new-arg1 new-arg2)))]
     [(AssignLL target (BinaryLL 'sdiv _ arg1 arg2))
-     (draft/stmt
+     (draft/stmt*
       (AssignLL target (CallLL #f (IdLL '__aeabi_idiv #t)
                                (list (cons arg1 int) (cons arg2 int)) #f)) stack-env)]
     [(AssignLL target (BinaryLL (? comp-op? op) _ arg1 arg2))
@@ -102,25 +99,25 @@
        `(,(MovA #f target (ImmA 0))
          ,(CmpA new-arg1 new-arg2)
          ,(MovA (hash-ref comp-ops op) target (ImmA 1))))]
-    
+
     ;; Get Elt Ptr TODO args
     [(AssignLL target (GetEltLL _ ptr 0))
-     (make-mov #f target ptr stack-env)]
+     (make-mov target ptr stack-env)]
     [(AssignLL target (GetEltLL _ ptr index))
      (with-args ([arg (draft/arg (* index (/ int-size byte-size)) imm12 stack-env)])
        `(,(OpA 'add target ptr arg)))]
-    
+
     ;; Cast TODO args
     [(AssignLL target (CastLL _ _ val _))
-     (make-mov #f target val stack-env)]
-    
+     (make-mov target val stack-env)]
+
     ;; Call
     [(AssignLL target (? CallLL? c))
      `(,@(draft/call c stack-env)
        ,(MovA #f target (RegA 'r0)))]
     [(? CallLL? c)
      (draft/call c stack-env)]
-    
+
     ;; Load/Store
     [(AssignLL target (LoadLL _ ptr))
      (with-args ([ptr-arg (draft/arg ptr #f stack-env)])
@@ -129,14 +126,15 @@
      (with-args ([arg (draft/arg val #f stack-env)]
                  [ptr-arg (draft/arg ptr #f stack-env)])
        `(,(StrA arg ptr-arg)))]
-    
+
     ;; Return
     [(ReturnLL _ (? void?)) '()]
-    [(ReturnLL _ arg) (make-mov #f (RegA 'r0) arg stack-env)]
+    [(ReturnLL _ arg) (make-mov (RegA 'r0) arg stack-env)]
 
     ;; Misc.
     [(PhiLL id ty (list (cons blocks (cons ids _)) ...))
      `(,(PhiLL id ty (map cons ids (map LabelA blocks))))]
+    [(? MovA? mov) `(,mov)]
     [o (error "what ~e" o)]))
 
 ;;
@@ -147,7 +145,7 @@
 ;;
 (define+ (store-arg (cons arg _) i stack-env)
   (if (< i (length arg-regs))
-      (make-mov #f (list-ref arg-regs i) arg stack-env)
+      (make-mov (list-ref arg-regs i) arg stack-env)
       (with-args ([new-arg (draft/arg arg #f stack-env)])
         `(,(StrA new-arg (StackLoc 'arg i))))))
 
@@ -156,8 +154,8 @@
   (draft/arg* (draft/value arg stack-env) imm-spec))
 
 ;;
-(define (make-mov pred target src stack-env)
-  (make-mov* pred target (draft/value src stack-env)))
+(define (make-mov target src stack-env)
+  (make-mov* target (draft/value src stack-env)))
 
 ;;
 (define (draft/arg* arg-val imm-spec)
@@ -165,18 +163,17 @@
     [(not (imm? arg-val)) (values arg-val '())]
     [(and imm-spec (in-range? arg-val imm-spec)) (values arg-val '())]
     [else (let ([tmp (IdLL (make-label 't) #f)])
-            (values tmp (make-mov* 'w tmp arg-val)))]))
+            (values tmp (make-mov* tmp arg-val)))]))
 
 ;;
-(define (make-mov* pred target src-val)
+(define (make-mov* target src-val)
   (match src-val
     [(? imm?) #:when (in-range? src-val imm16)
-              `(,(MovA (or pred 'w) target src-val))]
+              `(,(MovA 'w target src-val))]
     [(? imm?)
-     (when (and pred (not (equal? pred 'w))) (error "pred error"))
      `(,(MovA 'w target (HalfA src-val #t))
        ,(MovA 't target (HalfA src-val #f)))]
-    [_ `(,(MovA pred target src-val))]))
+    [_ `(,(MovA #f target src-val))]))
 
 ;;
 (define (draft/value val stack-env)
@@ -188,20 +185,15 @@
     [(? IdLL?) (hash-ref stack-env val val)]))
 
 ;;
-(define+ (extend-block stmts (Block id block-stmts))
-  (Block id (append stmts block-stmts)))
-
 (define (prepend-blocks blocks stmts)
   (list-update
-   blocks
-   0
+   blocks 0
    (λ+ ((Block id block-stmts)) (Block id (append stmts block-stmts)))))
 
 ;;
 (define (append-blocks blocks stmts)
   (list-update
-   blocks
-   (sub1 (length blocks))
+   blocks (sub1 (length blocks))
    (λ+ ((Block id block-stmts)) (Block id (append block-stmts stmts)))))
 
 ;;
@@ -219,6 +211,39 @@
 ;;
 (define (easy-op? op)
   (hash-has-key? easy-ops op))
+
+;; -------------------------------------------
+
+(define (remove-phis*)
+  (define phi-moves (make-hash))
+
+  (define (remove-phis blocks)
+    (map add-mvs-block (map remove-phis/block blocks)))
+
+  (define+ (remove-phis/block (Block id stmts))
+    (Block id (append-map remove-phis/stmt stmts)))
+
+  (define (remove-phis/stmt stmt)
+    (match stmt
+      [(PhiLL id _ args)
+       (let ([phi-id (IdLL (make-label '_phi) #f)])
+         (for ([arg args])
+           (match-let ([(cons block-id (cons id _)) arg])
+             (add-phi-move! block-id (make-mov phi-id id #hash()))))
+
+         (make-mov id phi-id #hash()))]
+      [_ (list stmt)]))
+
+  (define (add-phi-move! block-id move)
+    (hash-set! phi-moves block-id (append move (hash-ref phi-moves block-id '()))))
+
+  (define+ (add-mvs-block (and block (Block id stmts)))
+    (if (hash-has-key? phi-moves id)
+        (Block id (let-values ([(before after) (split-at-right stmts 1)])
+                    (append before (hash-ref phi-moves id '()) after)))
+        block))
+
+  remove-phis)
 
 
 ;;--------------------------------------------
