@@ -3,7 +3,7 @@
 (provide translate-arm)
 
 (require "ast/llvm.rkt" "ast/arm.rkt" "util.rkt" "symbol.rkt"
-         "allocate-registers.rkt" "draft-arm.rkt")
+         "allocate-registers.rkt" "draft-arm.rkt" )
 
 
 (define+ (translate-arm (LLVM _ decs funs))
@@ -89,8 +89,11 @@
 
 (define (patch-stack blocks)
   (define locs (remove-duplicates (append-map get-stack-locs blocks)))
-  ;(pretty-display locs)
-  blocks)
+  (define-values (size stack-assignment) (get-stack-assignment locs))
+  ;(pretty-display stack-assignment)
+  (list-update ((subst-stack stack-assignment) blocks)
+               0
+               (curry extend-block (list))) )
 
 (define+ (get-stack-locs (Block _ stmts))
   (filter-map get-stack-locs/stmt stmts))
@@ -99,9 +102,43 @@
   (match stmt
     [(StrA _ (? StackLoc? addr)) addr]
     [(LdrA _ (? StackLoc? addr)) addr]
+    [(MovA _ _ (? StackLoc? addr)) addr]
     [_ #f]))
 
+(define (get-stack-assignment locs)
+  (define stack-frame (append
+                       (get-locs locs 'arg)
+                       (get-locs locs 'spill)
+                       (get-locs locs 'temp)
+                       (get-locs locs 'local)))
+  (define stack-size (* (length stack-frame) 4))
+  (define params (get-locs locs 'param))
+  (values stack-size
+          (make-immutable-hash
+           (append
+            (map-indexed (lambda (loc i) (cons loc (OffsetA (RegA 'sp) (ImmA (* i 4))))) stack-frame)
+            (map-indexed (lambda (loc i) (cons loc (OffsetA (RegA 'fp) (ImmA (* (add1 i) 4))))) params)))))
 
+(define (get-locs locs type)
+  (sort (filter (lambda (loc) (equal? type (StackLoc-type loc))) locs)
+        <
+        #:key StackLoc-index))
 
+(define (subst-stack stack-assignment)
+  (define (subst-stack/blocks blocks)
+    (map subst-stack/block blocks))
+  
+  (define+ (subst-stack/block (Block id stmts))
+    (Block id (map subst-stack/stmt stmts)))
 
+  (define (subst-stack/stmt stmt)
+    (match stmt
+      [(StrA target (? StackLoc? addr)) (StrA target (hash-ref stack-assignment addr))]
+      [(LdrA target (? StackLoc? addr)) (LdrA target (hash-ref stack-assignment addr))]
+      [(MovA pred target (? StackLoc? addr))
+       (when pred (error "Can't handle pred"))
+       (match-let ([(OffsetA reg offset) (hash-ref stack-assignment addr)])
+         (OpA 'add target reg offset))]
+      [_ stmt]))
 
+  subst-stack/blocks)

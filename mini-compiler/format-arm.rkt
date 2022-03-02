@@ -68,8 +68,9 @@
     [(HalfA arg lower?) (format "#:~a16:~a" (if lower? "lower" "upper") (format-half-imm arg))]
     [(RegA r) (~a r)]
     [(OffsetA src offset) (format "~a, ~a" (format-arg src) (format-arg offset))]
-
-    [(? IdLL?) (format-id arg)]))
+    
+    [(? IdLL?) (format-id arg)]
+    [(? StackLoc?) (~a arg)]))
 
 (define (format-half-imm imm)
   (match imm
