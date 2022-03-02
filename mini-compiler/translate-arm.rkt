@@ -28,6 +28,10 @@
   (list (PushA (list (RegA 'fp) (RegA 'lr)))
         (OpA 'add (RegA 'fp) (RegA 'sp) (ImmA 4))))
 
+;;
+(define (make-fun-footer)
+  (list (PopA (list (RegA 'fp) (RegA 'pc)))))
+
 ;; ------------------------------------------------
 
 (define (remove-phis*)
@@ -93,7 +97,7 @@
   ;(pretty-display stack-assignment)
   (list-update ((subst-stack stack-assignment) blocks)
                0
-               (curry extend-block (list))) )
+               (curry extend-block (list (OpA 'add (RegA 'sp) (RegA 'sp) (ImmA size))))))
 
 (define+ (get-stack-locs (Block _ stmts))
   (filter-map get-stack-locs/stmt stmts))

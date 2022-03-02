@@ -38,8 +38,7 @@
 ;; mov  0-65535
 
 (define (draft/fun-body params body)
-  (list-update (draft/blocks body (hash)) 0
-               (curry extend-block (make-param-moves params))))
+  (prepend-blocks (draft/blocks body (hash)) (make-param-moves params)))
 
 ;;
 (define (make-param-moves params)
@@ -132,11 +131,8 @@
        `(,(StrA arg ptr-arg)))]
     
     ;; Return
-    [(ReturnLL _ (? void?))
-     `(,(PopA (list (RegA 'fp) (RegA 'pc))))]
-    [(ReturnLL _ arg)
-     `(,@(make-mov #f (RegA 'r0) arg stack-env)
-       ,(PopA (list (RegA 'fp) (RegA 'pc))))]
+    [(ReturnLL _ (? void?)) '()]
+    [(ReturnLL _ arg) (make-mov #f (RegA 'r0) arg stack-env)]
 
     ;; Misc.
     [(PhiLL id ty (list (cons blocks (cons ids _)) ...))
@@ -194,6 +190,19 @@
 ;;
 (define+ (extend-block stmts (Block id block-stmts))
   (Block id (append stmts block-stmts)))
+
+(define (prepend-blocks blocks stmts)
+  (list-update
+   blocks
+   0
+   (λ+ ((Block id block-stmts)) (Block id (append stmts block-stmts)))))
+
+;;
+(define (append-blocks blocks stmts)
+  (list-update
+   blocks
+   (sub1 (length blocks))
+   (λ+ ((Block id block-stmts)) (Block id (append block-stmts stmts)))))
 
 ;;
 (define (imm? v)
