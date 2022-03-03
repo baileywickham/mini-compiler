@@ -41,7 +41,7 @@
 
 (define (get-execute-cmd path llvm?)
   (if llvm?
-      ""
+      path
       (format "qemu-arm -L /usr/arm-linux-gnueabi/ ./~a"
               path)))
 
