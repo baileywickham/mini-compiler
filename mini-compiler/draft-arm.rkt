@@ -180,6 +180,7 @@
   (match val
     [(? integer?) (ImmA val)]
     [(? boolean?) (ImmA (if val 1 0))]
+    ['null (ImmA 0)]
     [(StringConstLL id) (CommA (hash-ref format-strings id))]
     [(IdLL id #t) (CommA id)]
     [(? IdLL?) (hash-ref stack-env val val)]))
