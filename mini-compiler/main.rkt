@@ -31,7 +31,9 @@
       (write-file (format-llvm llvm-ir) ".ll")
       (write-file (format-arm (translate-arm llvm-ir)) ".s"))
 
-  (when llvm? (clang (path-replace-extension path ".ll")))
+  (if llvm?
+      (clang (path-replace-extension path ".ll"))
+      (compile-arm (path-replace-extension path ".s")))
   (void))
 
 ;; Calls the Java MiniCompiler parser and reads the generated JSON into hash tables
@@ -51,6 +53,16 @@
 (define (clang path)
   (system (format "clang ~a -o ~a" path
                   (path-replace-extension path ""))))
+
+(define (compile-arm path)
+  (define .o (path-replace-extension path ".o"))
+  (system (format "arm-linux-gnueabi-as -o ~a ~a"
+                  .o
+                  path))
+  (system (format "arm-linux-gnueabi-gcc -o ~a ~a"
+                  (path-replace-extension path ".compiled")
+                  .o)))
+
 
 ;; Command line argument parser
 (module* main #f

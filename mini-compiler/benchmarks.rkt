@@ -5,7 +5,7 @@
 (define benchmark-directory "../benchmarks")
 
 ;;
-(define (benchmark pat lst? error?)
+(define (benchmark pat lst? error? llvm?)
   (for ([test-name (directory-list benchmark-directory)]
         #:when (and (directory-exists? (build-path benchmark-directory test-name))
                     (regexp-match pat (path->string test-name))))
@@ -16,13 +16,15 @@
 
       (define mini-file (findf (λ (file) (has-extension? file ".mini")) benchmark-content))
       (define llvm-file (path-replace-extension mini-file ".ll"))
-      (define executable (path-replace-extension mini-file ""))
+      (define executable (if llvm?
+                             (path-replace-extension mini-file "")
+                             (path-replace-extension mini-file ".compiled")))
 
       (with-handlers ([exn:fail:filesystem? (const (void))])
         (delete-file llvm-file)
         (delete-file executable))
 
-      (compile mini-file #f #t #f)
+      (compile mini-file #f llvm? #f)
 
       (when (and error? (not (file-exists? executable)))
         (error "compilation failed"))
@@ -33,9 +35,15 @@
           (printf "\tinput: ~a~n\toutput:  ~a~n" input output)
           (define diff
             (with-output-to-string
-              (λ () (system (format "~a < ~a | diff ~a -" executable input output)))))
+              (λ () (system (format "~a < ~a | diff ~a -" (get-execute executable llvm?) input output)))))
           (unless (equal? diff "")
             ((if error? error displayln) diff)))))))
+
+(define (get-execute path llvm?)
+  (if llvm?
+      ""
+      (format "qemu-arm -L /usr/arm-linux-gnueabi/ ./~a"
+              path)))
 
 ;;
 (define (has-extension? path ext)
@@ -52,6 +60,7 @@
   (define list? (make-parameter #f))
   (define regexp-pattern (make-parameter #rx".*"))
   (define error? (make-parameter #f))
+  (define llvm? (make-parameter #f))
 
   (command-line
    #:program "benchmark"
@@ -60,4 +69,4 @@
    [("-r" "--regexp") pat "Regexp pattern to use for test selection" (regexp-pattern (regexp pat))]
    [("-e" "--error") "Throw errors and stop on failed tests" (error? #t)])
 
-  (benchmark (regexp-pattern) (list?) (error?)))
+  (benchmark (regexp-pattern) (list?) (error?) (llvm?)))

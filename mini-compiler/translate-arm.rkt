@@ -3,7 +3,7 @@
 (provide translate-arm)
 
 (require "ast/llvm.rkt" "ast/arm.rkt" "util.rkt" "symbol.rkt"
-         "allocate-registers.rkt" "draft-arm.rkt" )
+         "allocate-registers.rkt" "draft-arm.rkt" "cleanup-arm.rkt")
 
 
 ;;
@@ -30,7 +30,15 @@
   (define draft-blocks (draft/fun-body params body))
   (match-define (cons num-colors locations) (allocate-registers draft-blocks))
   (define blocks (patch-stack ((sub-locations* locations) draft-blocks)))
-  (FunA id (append-blocks (prepend-blocks blocks fun-header) fun-footer)))
+  (define callee-saves (get-saves num-colors))
+  (FunA id (cleanup-arm/blocks (wrap-blocks
+            fun-header
+            (wrap-blocks (list (PushA callee-saves)) blocks (list (PopA callee-saves)))
+            fun-footer))))
+
+(define (get-saves num-colors)
+  (take callee-saved-regs
+        (min (- num-colors (length arg-regs)) (length callee-saved-regs))))
 
 
 ;; ------------------------------------------------
@@ -66,10 +74,10 @@
 (define (patch-stack blocks)
   (define locs (remove-duplicates (append-map get-stack-locs blocks)))
   (define-values (size stack-assignment) (get-stack-assignment locs))
-  (append-blocks
-   (prepend-blocks ((subst-stack stack-assignment) blocks)
-                   (list (OpA 'add (RegA 'sp) (RegA 'sp) (ImmA size))))
-   (list (OpA 'sub (RegA 'sp) (RegA 'sp) (ImmA size)))))
+  (wrap-blocks (list (OpA 'sub (RegA 'sp) (RegA 'sp) (ImmA size)))
+               ((subst-stack stack-assignment) blocks)
+               (list (OpA 'add (RegA 'sp) (RegA 'sp) (ImmA size)))))
+
 
 (define+ (get-stack-locs (Block _ stmts))
   (filter-map get-stack-locs/stmt stmts))

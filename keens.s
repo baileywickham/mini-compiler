@@ -1,4 +1,16 @@
+Welcome to DrRacket, version 8.4 [cs].
+Language: racket, with debugging [custom]; memory limit: 128 MB.
+4
+0
+#(struct:IdLL _u71 #f)
+#(struct:IdLL _u72 #f)
+#(struct:IdLL _u73 #f)
+#(struct:IdLL _u74 #f)
+#(struct:IdLL _u75 #f)
+4
+0
 	.arch armv7-a
+	.comm	.read_scratch,4,4
 	.comm	globalfoo,4,4
 
 	.text
@@ -8,11 +20,11 @@ tailrecursive:
 .LU1:
 	push {fp, lr}
 	add fp, sp, #4
-	mov r1, r0
-	mov r0, #0
-	cmp r1, #0
-	movle r0, #1
-	cmp r0, #1
+	mov %num, r0
+	mov r2, #0
+	cmp r3, #0
+	movle r2, #1
+	cmp r2, #1
 	beq .LU2
 	b .LU3
 .LU2:
@@ -20,7 +32,8 @@ tailrecursive:
 .LU3:
 	b .LU4
 .LU4:
-	sub r0, r1, #1
+	sub r0, r3, #1
+	mov r0, r0
 	bl tailrecursive
 	b .LU0
 .LU0:
@@ -32,11 +45,12 @@ add:
 .LU6:
 	push {fp, lr}
 	add fp, sp, #4
-	mov r2, r0
-	mov r0, r1
-	add r0, r2, r0
+	mov %x, r0
+	mov %y, r1
+	add r0, r0, r0
 	b .LU5
 .LU5:
+	mov r0, r0
 	pop {fp, pc}
 	.size add, .-add
 	.align 2
@@ -45,102 +59,103 @@ domath:
 .LU8:
 	push {fp, lr}
 	add fp, sp, #4
-	push {r4, r5, r6}
-	mov r6, r0
+	mov %num, r0
 	movw r0, #12
 	bl malloc
-	mov r5, r0
+	mov r2, r0
+	mov r0, r2
 	movw r0, #4
 	bl malloc
-	mov r1, r0
-	add r0, r5, #8
-	str r1, [r0]
+	mov r2, r0
+	mov r1, r2
+	add r2, r0, #8
+	str r1, [r2]
 	movw r0, #12
 	bl malloc
-	mov r4, r0
+	mov r2, r0
+	mov r3, r2
 	movw r0, #4
 	bl malloc
-	mov r1, r0
-	add r0, r4, #8
-	str r1, [r0]
-	mov r0, r5
-	str r6, [r0]
-	mov r1, r4
-	movw r0, #3
-	str r0, [r1]
-	mov r0, r5
+	mov r2, r0
+	mov r1, r2
+	add r2, r3, #8
+	str r1, [r2]
+	mov r2, r0
+	str r4, [r2]
+	mov r2, r3
+	movw r1, #3
+	str r1, [r2]
+	mov r2, r0
+	ldr r2, [r2]
+	add r0, r0, #8
 	ldr r0, [r0]
-	add r1, r5, #8
-	ldr r1, [r1]
-	str r0, [r1]
-	mov r0, r4
+	mov r0, r0
+	str r2, [r0]
+	mov r2, r3
+	ldr r2, [r2]
+	add r0, r3, #8
 	ldr r0, [r0]
-	add r1, r4, #8
-	ldr r1, [r1]
-	str r0, [r1]
-	mov lr, r6
-	mov r1, r4
-	mov r0, r5
-	mov ip, r4
-	mov r3, r5
+	mov r0, r0
+	str r2, [r0]
 	mov r2, #0
-	cmp r6, #0
+	cmp r4, #0
 	movgt r2, #1
 	cmp r2, #1
 	beq .LU9
 	b .LU10
 .LU9:
-	mov r6, lr
-	mov r5, r1
+	mov r3, r0
 	mov r4, r0
-	mov r0, r4
-	ldr r0, [r0]
-	mov r1, r5
-	ldr r1, [r1]
-	mul r0, r0, r1
-	add r1, r4, #8
-	ldr r1, [r1]
-	ldr r1, [r1]
-	mul r2, r0, r1
-	mov r0, r5
-	ldr r0, [r0]
 	mov r1, r0
-	mov r0, r2
+	mov r2, r1
+	ldr r0, [r2]
+	mov r2, r4
+	ldr r2, [r2]
+	mul r2, r0, r2
+	add r0, r1, #8
+	ldr r0, [r0]
+	mov r0, r0
+	ldr r0, [r0]
+	mul r0, r2, r0
+	mov r2, r4
+	ldr r2, [r2]
+	mov r1, r2
+	mov r0, r0
 	bl __aeabi_idiv
-	add r0, r5, #8
-	ldr r0, [r0]
-	ldr r2, [r0]
-	mov r0, r4
-	ldr r0, [r0]
-	mov r1, r0
-	mov r0, r2
+	mov r0, r0
+	add r2, r4, #8
+	ldr r2, [r2]
+	mov r2, r2
+	ldr r0, [r2]
+	mov r2, r1
+	ldr r2, [r2]
+	mov r1, r2
+	mov r0, r0
 	bl add
-	mov r0, r5
+	mov r0, r0
+	mov r2, r4
+	ldr r2, [r2]
+	mov r0, r1
 	ldr r0, [r0]
-	mov r1, r4
-	ldr r1, [r1]
-	sub r0, r0, r1
-	sub r6, r6, #1
-	mov lr, r6
-	mov r1, r5
-	mov r0, r4
-	mov ip, r5
-	mov r3, r4
+	sub r0, r2, r0
+	sub r0, r3, #1
 	mov r2, #0
-	cmp r6, #0
+	cmp r0, #0
 	movgt r2, #1
 	cmp r2, #1
 	beq .LU9
 	b .LU10
 .LU10:
-	mov r4, ip
-	mov r0, r3
+	mov r0, r0
+	mov r2, r0
+	mov r2, r2
+	mov r0, r2
 	bl free
-	mov r0, r4
+	mov r0, r0
+	mov r0, r0
 	bl free
 	b .LU7
 .LU7:
-	pop {r4, r5, r6}
 	pop {fp, pc}
 	.size domath, .-domath
 	.align 2
@@ -149,31 +164,32 @@ objinstantiation:
 .LU12:
 	push {fp, lr}
 	add fp, sp, #4
-	push {r4}
-	mov r1, r0
-	mov r2, #0
-	cmp r0, #0
-	movgt r2, #1
-	cmp r2, #1
+	mov %num, r0
+	mov r3, #0
+	cmp r2, #0
+	movgt r3, #1
+	cmp r3, #1
 	beq .LU13
 	b .LU14
 .LU13:
-	mov r4, r1
+	mov r3, r0
 	movw r0, #12
 	bl malloc
+	mov r2, r0
+	mov r2, r2
+	mov r2, r2
+	mov r0, r2
 	bl free
-	sub r0, r4, #1
-	mov r1, r0
-	mov r2, #0
-	cmp r0, #0
-	movgt r2, #1
-	cmp r2, #1
+	sub r2, r3, #1
+	mov r3, #0
+	cmp r2, #0
+	movgt r3, #1
+	cmp r3, #1
 	beq .LU13
 	b .LU14
 .LU14:
 	b .LU11
 .LU11:
-	pop {r4}
 	pop {fp, pc}
 	.size objinstantiation, .-objinstantiation
 	.align 2
@@ -182,12 +198,12 @@ ackermann:
 .LU16:
 	push {fp, lr}
 	add fp, sp, #4
-	push {r4}
-	mov r2, r0
-	mov r0, #0
-	cmp r2, #0
-	moveq r0, #1
-	cmp r0, #1
+	mov %m, r0
+	mov %n, r1
+	mov r2, #0
+	cmp r3, #0
+	moveq r2, #1
+	cmp r2, #1
 	beq .LU17
 	b .LU18
 .LU17:
@@ -196,107 +212,106 @@ ackermann:
 .LU18:
 	b .LU19
 .LU19:
-	mov r0, #0
+	mov r2, #0
 	cmp r1, #0
-	moveq r0, #1
-	cmp r0, #1
+	moveq r2, #1
+	cmp r2, #1
 	beq .LU20
 	b .LU21
 .LU20:
-	sub r0, r2, #1
+	sub r0, r3, #1
 	movw r1, #1
+	mov r0, r0
 	bl ackermann
+	mov r0, r0
 	b .LU15
 .LU21:
-	sub r4, r2, #1
-	sub r0, r1, #1
-	mov r1, r0
+	sub r2, r3, #1
+	sub r1, r1, #1
+	mov r1, r1
+	mov r0, r3
+	bl ackermann
+	mov r3, r0
+	mov r1, r3
 	mov r0, r2
 	bl ackermann
-	mov r1, r0
-	mov r0, r4
-	bl ackermann
+	mov r0, r0
 	b .LU15
 .LU15:
-	pop {r4}
+	mov r0, r0
+	mov r0, r0
 	pop {fp, pc}
 	.size ackermann, .-ackermann
 	.align 2
 	.global main
 main:
-.LU23:
+.LU24:
 	push {fp, lr}
 	add fp, sp, #4
-	push {r4, r5, r6, r7, r8}
-	movw r1, #:lower16:.read_scratch
-	movt r1, #:upper16:.read_scratch
+	mov r1, r3
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw r6, #:lower16:.read_scratch
-	movt r6, #:upper16:.read_scratch
-	ldr r6, [r6]
-	movw r1, #:lower16:.read_scratch
-	movt r1, #:upper16:.read_scratch
+	movw r2, #:lower16:..read_scratch
+	movt r2, #:upper16:..read_scratch
+	ldr r2, [r2]
+	mov r1, r3
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw r8, #:lower16:.read_scratch
-	movt r8, #:upper16:.read_scratch
-	ldr r8, [r8]
-	movw r1, #:lower16:.read_scratch
-	movt r1, #:upper16:.read_scratch
-	movw r0, #:lower16:.READ_FMT
-	movt r0, #:upper16:.READ_FMT
-	bl scanf
-	movw r7, #:lower16:.read_scratch
-	movt r7, #:upper16:.read_scratch
-	ldr r7, [r7]
-	movw r1, #:lower16:.read_scratch
-	movt r1, #:upper16:.read_scratch
-	movw r0, #:lower16:.READ_FMT
-	movt r0, #:upper16:.READ_FMT
-	bl scanf
-	movw r5, #:lower16:.read_scratch
-	movt r5, #:upper16:.read_scratch
-	ldr r5, [r5]
-	movw r1, #:lower16:.read_scratch
-	movt r1, #:upper16:.read_scratch
-	movw r0, #:lower16:.READ_FMT
-	movt r0, #:upper16:.READ_FMT
-	bl scanf
-	movw r4, #:lower16:.read_scratch
-	movt r4, #:upper16:.read_scratch
+	movw r4, #:lower16:..read_scratch
+	movt r4, #:upper16:..read_scratch
 	ldr r4, [r4]
-	mov r0, r6
+	mov r1, r3
+	movw r0, #:lower16:.READ_FMT
+	movt r0, #:upper16:.READ_FMT
+	bl scanf
+	movw r1, #:lower16:..read_scratch
+	movt r1, #:upper16:..read_scratch
+	ldr r1, [r1]
+	mov r1, r3
+	movw r0, #:lower16:.READ_FMT
+	movt r0, #:upper16:.READ_FMT
+	bl scanf
+	movw r0, #:lower16:..read_scratch
+	movt r0, #:upper16:..read_scratch
+	ldr r0, [r0]
+	mov r1, r3
+	movw r0, #:lower16:.READ_FMT
+	movt r0, #:upper16:.READ_FMT
+	bl scanf
+	movw r3, #:lower16:..read_scratch
+	movt r3, #:upper16:..read_scratch
+	ldr r3, [r3]
+	mov r0, r2
 	bl tailrecursive
-	mov r1, r6
+	mov r1, r2
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	mov r0, r8
+	mov r0, r4
 	bl domath
-	mov r1, r8
-	movw r0, #:lower16:.PRINTLN_FMT
-	movt r0, #:upper16:.PRINTLN_FMT
-	bl printf
-	mov r0, r7
-	bl objinstantiation
-	mov r1, r7
-	movw r0, #:lower16:.PRINTLN_FMT
-	movt r0, #:upper16:.PRINTLN_FMT
-	bl printf
 	mov r1, r4
-	mov r0, r5
+	movw r0, #:lower16:.PRINTLN_FMT
+	movt r0, #:upper16:.PRINTLN_FMT
+	bl printf
+	mov r0, r1
+	bl objinstantiation
+	mov r1, r1
+	movw r0, #:lower16:.PRINTLN_FMT
+	movt r0, #:upper16:.PRINTLN_FMT
+	bl printf
+	mov r1, r3
+	mov r0, r0
 	bl ackermann
+	mov r0, r0
 	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .LU22
-.LU22:
+	b .LU23
+.LU23:
 	movw r0, #0
-	pop {r4, r5, r6, r7, r8}
 	pop {fp, pc}
 	.size main, .-main
 	.section	.rodata
@@ -309,5 +324,5 @@ main:
 	.align	2
 .READ_FMT:
 	.asciz	"%ld"
-	.comm	.read_scratch,4,4
 	.global	__aeabi_idiv
+>

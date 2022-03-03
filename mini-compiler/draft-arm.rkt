@@ -1,6 +1,6 @@
 #lang racket
 
-(provide draft/fun-body prepend-blocks append-blocks)
+(provide draft/fun-body prepend-blocks append-blocks wrap-blocks)
 
 (require "ast/llvm.rkt" "ast/arm.rkt" "util.rkt" "symbol.rkt")
 
@@ -177,12 +177,15 @@
 
 ;;
 (define (draft/value val stack-env)
-  (match val
+  Got (match val
     [(? integer?) (ImmA val)]
     [(? boolean?) (ImmA (if val 1 0))]
     [(StringConstLL id) (CommA (hash-ref format-strings id))]
     [(IdLL id #t) (CommA id)]
     [(? IdLL?) (hash-ref stack-env val val)]))
+
+(define (wrap-blocks before blocks after)
+  (append-blocks (prepend-blocks blocks before) after))
 
 ;;
 (define (prepend-blocks blocks stmts)
