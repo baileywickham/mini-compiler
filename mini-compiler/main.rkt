@@ -28,12 +28,9 @@
       (with-output-to-file new-path (λ () (display content)) #:exists 'replace)))
 
   (if llvm?
-      (write-file (format-llvm llvm-ir) ".ll")
-      (write-file (format-arm (translate-arm llvm-ir)) ".s"))
-
-  (if llvm?
-      (clang (path-replace-extension path ".ll"))
-      (compile-arm (path-replace-extension path ".s")))
+        (write-file (format-llvm llvm-ir) ".ll")
+        (write-file (format-arm (translate-arm llvm-ir)) ".s"))
+  (assemble path llvm?)
   (void))
 
 ;; Calls the Java MiniCompiler parser and reads the generated JSON into hash tables
@@ -49,19 +46,21 @@
   (unless (and parse-ok (zero? (string-length error-message))) (error error-message))
   (read-json in))
 
-;; Calls clang on a path
-(define (clang path)
-  (system (format "clang ~a -o ~a" path
-                  (path-replace-extension path ""))))
-
-(define (compile-arm path)
-  (define .o (path-replace-extension path ".o"))
-  (system (format "arm-linux-gnueabi-as -o ~a ~a"
-                  .o
-                  path))
-  (system (format "arm-linux-gnueabi-gcc -o ~a ~a"
-                  (path-replace-extension path ".compiled")
-                  .o)))
+(define (assemble path llvm?)
+  (define out-path (if llvm?
+                       (path-replace-extension path ".ll")
+                       (path-replace-extension path ".s")))             
+  (if llvm?
+      (system (format "clang ~a -o ~a" out-path
+                      (path-replace-extension path "")))
+      (let [(.o (path-replace-extension path ".o"))]
+        (system (format "arm-linux-gnueabi-as -o ~a ~a"
+                        .o
+                        out-path))
+        (system (format "arm-linux-gnueabi-gcc -o ~a ~a"
+                        (path-replace-extension path ".compiled")
+                        .o)))))
+        
 
 
 ;; Command line argument parser

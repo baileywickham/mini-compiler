@@ -35,11 +35,11 @@
           (printf "\tinput: ~a~n\toutput:  ~a~n" input output)
           (define diff
             (with-output-to-string
-              (λ () (system (format "~a < ~a | diff ~a -" (get-execute executable llvm?) input output)))))
+              (λ () (system (format "~a < ~a | diff ~a -" (get-execute-cmd executable llvm?) input output)))))
           (unless (equal? diff "")
             ((if error? error displayln) diff)))))))
 
-(define (get-execute path llvm?)
+(define (get-execute-cmd path llvm?)
   (if llvm?
       ""
       (format "qemu-arm -L /usr/arm-linux-gnueabi/ ./~a"
@@ -67,6 +67,7 @@
    #:once-each
    [("-l" "--list") "List tests, but do not run" (list? #t)]
    [("-r" "--regexp") pat "Regexp pattern to use for test selection" (regexp-pattern (regexp pat))]
-   [("-e" "--error") "Throw errors and stop on failed tests" (error? #t)])
+   [("-e" "--error") "Throw errors and stop on failed tests" (error? #t)]
+   [("--llvm") "Execute LLVM-ir with clang" (llvm? #t)])
 
   (benchmark (regexp-pattern) (list?) (error?) (llvm?)))

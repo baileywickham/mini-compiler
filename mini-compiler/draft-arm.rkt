@@ -177,7 +177,7 @@
 
 ;;
 (define (draft/value val stack-env)
-  Got (match val
+  (match val
     [(? integer?) (ImmA val)]
     [(? boolean?) (ImmA (if val 1 0))]
     [(StringConstLL id) (CommA (hash-ref format-strings id))]
