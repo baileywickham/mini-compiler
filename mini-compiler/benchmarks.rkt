@@ -5,7 +5,7 @@
 (define benchmark-directory "../benchmarks")
 
 ;;
-(define (benchmark pat lst? error? llvm?)
+(define (benchmark pat lst? error? stack? llvm?)
   (for ([test-name (directory-list benchmark-directory)]
         #:when (and (directory-exists? (build-path benchmark-directory test-name))
                     (regexp-match pat (path->string test-name))))
@@ -24,7 +24,7 @@
         (delete-file llvm-file)
         (delete-file executable))
 
-      (compile mini-file #f llvm? #f)
+      (compile mini-file stack? llvm? #f)
 
       (when (and error? (not (file-exists? executable)))
         (error "compilation failed"))
@@ -60,6 +60,7 @@
   (define list? (make-parameter #f))
   (define regexp-pattern (make-parameter #rx".*"))
   (define error? (make-parameter #f))
+  (define stack? (make-parameter #f))
   (define llvm? (make-parameter #f))
 
   (command-line
@@ -68,6 +69,7 @@
    [("-l" "--list") "List tests, but do not run" (list? #t)]
    [("-r" "--regexp") pat "Regexp pattern to use for test selection" (regexp-pattern (regexp pat))]
    [("-e" "--error") "Throw errors and stop on failed tests" (error? #t)]
+   [("-s" "--stack") "Compile in stack mode" (stack? #t)]
    [("--llvm") "Execute LLVM-ir with clang" (llvm? #t)])
 
-  (benchmark (regexp-pattern) (list?) (error?) (llvm?)))
+  (benchmark (regexp-pattern) (list?) (error?) (stack?) (llvm?)))
