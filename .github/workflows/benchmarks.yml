@@ -17,6 +17,9 @@ jobs:
       uses: Bogdanp/setup-racket@v1.7
       with:
           version: 8.3
+    - name: Install graph
+      working-directory: mini-compiler
+      run: raco pkg install --auto graph
 
     - name: Raco Build
       working-directory: mini-compiler
