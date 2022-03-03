@@ -101,8 +101,6 @@
          ,(MovA (hash-ref comp-ops op) target (ImmA 1))))]
 
     ;; Get Elt Ptr TODO args
-    [(AssignLL target (GetEltLL _ ptr 0))
-     (make-mov target ptr stack-env)]
     [(AssignLL target (GetEltLL _ ptr index))
      (with-args ([arg (draft/arg (* index (/ int-size byte-size)) imm12 stack-env)])
        `(,(OpA 'add target ptr arg)))]

@@ -2,7 +2,7 @@
 
 (provide translate-arm)
 
-(require "ast/llvm.rkt" "ast/arm.rkt" "util.rkt" "symbol.rkt"
+(require "ast/llvm.rkt" "ast/arm.rkt" "util.rkt"
          "allocate-registers.rkt" "draft-arm.rkt" "cleanup-arm.rkt")
 
 
@@ -14,7 +14,6 @@
 ;;
 (define fun-footer
   `(,(PopA (list (RegA 'fp) (RegA 'pc)))))
-
 
 ;;
 (define+ (translate-arm (LLVM _ decs funs))
