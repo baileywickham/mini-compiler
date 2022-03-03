@@ -7,15 +7,6 @@
 
 
 ;;
-(define fun-header
-  `(,(PushA (list (RegA 'fp) (RegA 'lr)))
-    ,(OpA 'add (RegA 'fp) (RegA 'sp) (ImmA 4))))
-
-;;
-(define fun-footer
-  `(,(PopA (list (RegA 'fp) (RegA 'pc)))))
-
-;;
 (define+ (translate-arm (LLVM _ decs funs))
   (ARM (map translate-dec decs)
        (map translate-fun funs)))
@@ -27,14 +18,27 @@
 ;;
 (define+ (translate-fun (FunLL (IdLL id #t) params _ body))
   (define draft-blocks (draft/fun-body params body))
-  (match-define (cons num-colors locations) (allocate-registers draft-blocks))
+  (define-values (num-colors locations) (allocate-registers draft-blocks))
   (define blocks (patch-stack ((sub-locations* locations) draft-blocks)))
   (define callee-saves (get-saves num-colors))
-  (FunA id (cleanup-arm/blocks (wrap-blocks
-            fun-header
-            (wrap-blocks (list (PushA callee-saves)) blocks (list (PopA callee-saves)))
-            fun-footer))))
+  (FunA id (cleanup-arm/blocks
+            (wrap-blocks
+             (fun-header callee-saves)
+             blocks 
+             (fun-footer callee-saves)))))
 
+;;
+(define (fun-header callee-saves)
+  `(,(PushA (list (RegA 'fp) (RegA 'lr)))
+    ,(OpA 'add (RegA 'fp) (RegA 'sp) (ImmA 4))
+    ,(PushA callee-saves)))
+
+;;
+(define (fun-footer callee-saves)
+  `(,(PopA callee-saves)
+    ,(PopA (list (RegA 'fp) (RegA 'pc)))))
+
+;;
 (define (get-saves num-colors)
   (take callee-saved-regs
         (min (- num-colors (length arg-regs)) (length callee-saved-regs))))
@@ -73,9 +77,9 @@
 (define (patch-stack blocks)
   (define locs (remove-duplicates (append-map get-stack-locs blocks)))
   (define-values (size stack-assignment) (get-stack-assignment locs))
-  (wrap-blocks (list (OpA 'sub (RegA 'sp) (RegA 'sp) (ImmA size)))
+  (wrap-blocks `(,(OpA 'sub (RegA 'sp) (RegA 'sp) (ImmA size)))
                ((subst-stack stack-assignment) blocks)
-               (list (OpA 'add (RegA 'sp) (RegA 'sp) (ImmA size)))))
+               `(,(OpA 'add (RegA 'sp) (RegA 'sp) (ImmA size)))))
 
 
 (define+ (get-stack-locs (Block _ stmts))
@@ -89,18 +93,16 @@
     [_ #f]))
 
 (define (get-stack-assignment locs)
-  (define stack-frame (append
-                       (get-locs locs 'arg)
-                       (get-locs locs 'spill)
-                       (get-locs locs 'temp)
-                       (get-locs locs 'local)))
-  (define stack-size (* (length stack-frame) 4))
+  (define stack-frame
+    (append (get-locs locs 'arg) (get-locs locs 'spill)
+            (get-locs locs 'temp) (get-locs locs 'local)))
   (define params (get-locs locs 'param))
-  (values stack-size
-          (make-immutable-hash
-           (append
-            (map-indexed (λ (loc i) (cons loc (OffsetA (RegA 'sp) (ImmA (* i 4))))) stack-frame)
-            (map-indexed (λ (loc i) (cons loc (OffsetA (RegA 'fp) (ImmA (* (add1 i) 4))))) params)))))
+  (values
+   (* (length stack-frame) 4)
+   (make-immutable-hash
+    (append
+     (map-indexed (λ (loc i) (cons loc (OffsetA (RegA 'sp) (ImmA (* i 4))))) stack-frame)
+     (map-indexed (λ (loc i) (cons loc (OffsetA (RegA 'fp) (ImmA (* (add1 i) 4))))) params)))))
 
 (define (get-locs locs type)
   (sort (filter (λ (loc) (equal? type (StackLoc-type loc))) locs)

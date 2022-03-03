@@ -14,7 +14,7 @@
   (let*-values ([(num-colors coloring) (color-graph g)]
                 [(locations) (get-locations-mapping coloring (get-locations coloring num-colors))])
     ;; (display-graph g coloring)
-    (cons num-colors locations)))
+    (values num-colors locations)))
 
 ;;
 (define (build-conflict-graph blocks)
