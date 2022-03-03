@@ -101,8 +101,6 @@
          ,(MovA (hash-ref comp-ops op) target (ImmA 1))))]
 
     ;; Get Elt Ptr TODO args
-    [(AssignLL target (GetEltLL _ ptr 0))
-     (make-mov target ptr stack-env)]
     [(AssignLL target (GetEltLL _ ptr index))
      (with-args ([arg (draft/arg (* index (/ int-size byte-size)) imm12 stack-env)])
        `(,(OpA 'add target ptr arg)))]
@@ -180,6 +178,7 @@
   (match val
     [(? integer?) (ImmA val)]
     [(? boolean?) (ImmA (if val 1 0))]
+    ['null (ImmA 0)]
     [(StringConstLL id) (CommA (hash-ref format-strings id))]
     [(IdLL id #t) (CommA id)]
     [(? IdLL?) (hash-ref stack-env val val)]))
