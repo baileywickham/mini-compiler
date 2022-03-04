@@ -45,9 +45,6 @@
   (take callee-saved-regs
         (min (- num-colors (length arg-regs)) (length callee-saved-regs))))
 
-
-;; ------------------------------------------------
-
 ;; -------------------------------------------
 
 (define (sub-locations* locations)
@@ -120,16 +117,15 @@
     [_ #f]))
 
 (define (get-stack-assignment locs)
-  (define stack-frame
-    (append (get-locs locs 'arg) (get-locs locs 'spill)
-            (get-locs locs 'temp) (get-locs locs 'local)))
-  (define params (get-locs locs 'param))
-  (values
-   (* (length stack-frame) 4)
-   (make-immutable-hash
-    (append
-     (map-indexed (λ (loc i) (cons loc (OffsetA (RegA 'sp) (ImmA (* i 4))))) stack-frame)
-     (map-indexed (λ (loc i) (cons loc (OffsetA (RegA 'fp) (ImmA (* (add1 i) 4))))) params)))))
+  (let ([stack-frame (append (get-locs locs 'arg) (get-locs locs 'spill)
+                             (get-locs locs 'temp) (get-locs locs 'local))]
+        [params (get-locs locs 'param)])
+    (values
+     (* (length stack-frame) 4)
+     (make-immutable-hash
+      (append
+       (map-indexed (λ (loc i) (cons loc (OffsetA (RegA 'sp) (ImmA (* i 4))))) stack-frame)
+       (map-indexed (λ (loc i) (cons loc (OffsetA (RegA 'fp) (ImmA (* (add1 i) 4))))) params))))))
 
 (define (get-locs locs type)
   (sort (filter (λ (loc) (equal? type (StackLoc-type loc))) locs)

@@ -83,7 +83,7 @@
     ;; Binary Ops
     [(AssignLL target (BinaryLL (? easy-op? op) _ arg1 arg2))
      (with-stmts ([new-arg1 (draft/arg arg1 #f stack-env)]
-                 [new-arg2 (draft/arg arg2 imm8 stack-env)])
+                  [new-arg2 (draft/arg arg2 imm8 stack-env)])
        `(,(OpA (hash-ref easy-ops op) target new-arg1 new-arg2)))]
     [(AssignLL target (BinaryLL 'mul _ arg1 arg2))
      (with-stmts ([new-arg1 (draft/arg arg1 #f stack-env)]
@@ -130,8 +130,6 @@
     [(ReturnLL _ arg) (make-mov (RegA 'r0) arg stack-env)]
 
     ;; Misc.
-    [(PhiLL id ty (list (cons blocks (cons ids _)) ...))
-     `(,(PhiLL id ty (map cons ids (map LabelA blocks))))]
     [(? MovA? mov) `(,mov)]
     [o (error "what ~e" o)]))
 
