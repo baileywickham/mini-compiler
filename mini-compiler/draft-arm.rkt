@@ -83,7 +83,7 @@
     ;; Binary Ops
     [(AssignLL target (BinaryLL (? easy-op? op) _ arg1 arg2))
      (with-args ([new-arg1 (draft/arg arg1 #f stack-env)]
-                 [new-arg2 (draft/arg arg2 imm12 stack-env)])
+                 [new-arg2 (draft/arg arg2 imm8 stack-env)])
        `(,(OpA (hash-ref easy-ops op) target new-arg1 new-arg2)))]
     [(AssignLL target (BinaryLL 'mul _ arg1 arg2))
      (with-args ([new-arg1 (draft/arg arg1 #f stack-env)]
@@ -102,7 +102,7 @@
 
     ;; Get Elt Ptr TODO args
     [(AssignLL target (GetEltLL _ ptr index))
-     (with-args ([arg (draft/arg (* index (/ int-size byte-size)) imm12 stack-env)])
+     (with-args ([arg (draft/arg (* index (/ int-size byte-size)) imm8 stack-env)])
        `(,(OpA 'add target ptr arg)))]
 
     ;; Cast TODO args
