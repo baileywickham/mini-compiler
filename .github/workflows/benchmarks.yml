@@ -23,7 +23,7 @@ jobs:
       run: raco pkg install --auto graph
 
     - name: Install packages
-      run: sudo apt-get install -y gcc-arm-linux-gnueabihf gcc-arm-linux-gnueabi binutils-armlinux-gnueabi qemu-user
+      run: sudo apt-get update && sudo apt-get install -y gcc-arm-linux-gnueabihf gcc-arm-linux-gnueabi  qemu-user
 
     - name: Raco Build
       working-directory: mini-compiler
