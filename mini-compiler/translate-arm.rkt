@@ -61,36 +61,40 @@
   (define (sub-locations/stmt stmt)
     (match stmt
       [(OpA op target r1 op2)
-       (with-stmts ([arg1 (get-location r1 tmp1 #f)]
-                    [arg2 (get-location op2 tmp2 #f)]
-                    [^ new-target (get-location target tmp1 #t)])
-         (list (OpA op new-target arg1 arg2)))]
+       (with-stmts ([^ new-target (get-location target tmp1 #t)]
+                    [arg1 (get-location r1 tmp1 #f)]
+                    [arg2 (get-location op2 tmp2 #f)])
+         (if (void? new-target) '()
+             `(,(OpA op new-target arg1 arg2))))]
       [(CmpA r1 op2) 
        (with-stmts ([arg1 (get-location r1 tmp1 #f)]
                     [arg2 (get-location op2 tmp2 #f)])
-         (list (CmpA arg1 arg2)))]
+         `(,(CmpA arg1 arg2)))]
       [(MovA op r1 op2) 
        (with-stmts ([^ arg1 (get-location r1 tmp1 #t)]
                     [arg2 (get-location op2 tmp1 #f)])
-         (list (MovA op arg1 arg2)))]
+         (if (void? arg1) '()
+             `(,(MovA op arg1 arg2))))]
       [(LdrA r1 addr) 
        (with-stmts ([^ arg1 (get-location r1 tmp1 #t)]
                     [arg2 (get-location addr tmp2 #f)])
-         (list (LdrA arg1 arg2)))]
+         (if (void? arg1) '()
+             `(,(LdrA arg1 arg2))))]
       [(StrA r1 addr) 
        (with-stmts ([arg1 (get-location r1 tmp1 #f)]
                     [arg2 (get-location addr tmp2 #f)])
-         (list (StrA arg1 arg2)))]
-      [_ (list stmt)]))
+         `(,(StrA arg1 arg2)))]
+      [_ `(,stmt)]))
 
   (define (get-location op tmp write?)
     (if (IdLL? op)
-        (match (hash-ref locations op (RegA 'r0))
+        (match (hash-ref locations op (void))
           [(? RegA? r) (values r '())]
           [(? StackLoc? s)
            (values
             tmp
-            (list (if write? (StrA tmp s) (LdrA tmp s))))])
+            (list (if write? (StrA tmp s) (LdrA tmp s))))]
+          [(? void?) (values (void) '())])
         (values op '())))
 
   sub-locations/blocks)

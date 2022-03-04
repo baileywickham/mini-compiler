@@ -29,7 +29,8 @@
 ;;
 (define+ (get-edges/stmt (cons stmt live-after))
   (define reg-writes (if (BlA? stmt) arg-regs '()))
-  (combinations (set-union (filter-not pair? live-after) reg-writes) 2))
+  (append live-after
+          (combinations (set-union (filter-not pair? live-after) reg-writes) 2)))
 
 ;;
 (define (color-graph g)
