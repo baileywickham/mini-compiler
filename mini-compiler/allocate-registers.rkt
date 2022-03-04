@@ -1,6 +1,6 @@
 #lang racket
 
-(provide allocate-registers)
+(provide allocate-registers spill-temps)
 
 (require graph racket/hash)
 (require "ast/arm.rkt" "util.rkt" "live-analysis.rkt" #;"graph-visualized.rkt")

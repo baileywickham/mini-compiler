@@ -17,9 +17,13 @@ jobs:
       uses: Bogdanp/setup-racket@v1.7
       with:
           version: 8.3
+
     - name: Install graph
       working-directory: mini-compiler
       run: raco pkg install --auto graph
+
+    - name: Install packages
+      run: sudo apt-get install -y gcc-arm-linux-gnueabihf gcc-arm-linux-gnueabi binutils-armlinux-gnueabi qemu-user
 
     - name: Raco Build
       working-directory: mini-compiler

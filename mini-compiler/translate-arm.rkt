@@ -5,6 +5,8 @@
 (require "ast/llvm.rkt" "ast/arm.rkt" "util.rkt"
          "allocate-registers.rkt" "draft-arm.rkt" "cleanup-arm.rkt")
 
+(define tmp1 (first spill-temps))
+(define tmp2 (second spill-temps))
 
 ;;
 (define+ (translate-arm (LLVM _ decs funs))
@@ -54,21 +56,42 @@
     (map sub-locations/block blocks))
 
   (define+ (sub-locations/block (Block id stmts))
-    (Block id (map sub-locations/stmt stmts)))
+    (Block id (append-map sub-locations/stmt stmts)))
 
   (define (sub-locations/stmt stmt)
     (match stmt
-      [(OpA op target r1 op2) (OpA op (get-location target) (get-location r1) (get-location op2))]
-      [(CmpA r1 op2) (CmpA (get-location r1) (get-location op2))]
-      [(MovA op r1 op2) (MovA op (get-location r1) (get-location op2))]
-      [(LdrA r1 addr) (LdrA (get-location r1) (get-location addr))]
-      [(StrA r1 addr) (StrA (get-location r1) (get-location addr))]
-      [_ stmt]))
+      [(OpA op target r1 op2)
+       (with-stmts ([arg1 (get-location r1 tmp1 #f)]
+                    [arg2 (get-location op2 tmp2 #f)]
+                    [^ new-target (get-location target tmp1 #t)])
+         (list (OpA op new-target arg1 arg2)))]
+      [(CmpA r1 op2) 
+       (with-stmts ([arg1 (get-location r1 tmp1 #f)]
+                    [arg2 (get-location op2 tmp2 #f)])
+         (list (CmpA arg1 arg2)))]
+      [(MovA op r1 op2) 
+       (with-stmts ([^ arg1 (get-location r1 tmp1 #t)]
+                    [arg2 (get-location op2 tmp1 #f)])
+         (list (MovA op arg1 arg2)))]
+      [(LdrA r1 addr) 
+       (with-stmts ([^ arg1 (get-location r1 tmp1 #t)]
+                    [arg2 (get-location addr tmp2 #f)])
+         (list (LdrA arg1 arg2)))]
+      [(StrA r1 addr) 
+       (with-stmts ([arg1 (get-location r1 tmp1 #f)]
+                    [arg2 (get-location addr tmp2 #f)])
+         (list (StrA arg1 arg2)))]
+      [_ (list stmt)]))
 
-  (define (get-location op)
+  (define (get-location op tmp write?)
     (if (IdLL? op)
-        (hash-ref locations op (RegA 'r0))
-        op))
+        (match (hash-ref locations op (RegA 'r0))
+          [(? RegA? r) (values r '())]
+          [(? StackLoc? s)
+           (values
+            tmp
+            (list (if write? (StrA tmp s) (LdrA tmp s))))])
+        (values op '())))
 
   sub-locations/blocks)
 

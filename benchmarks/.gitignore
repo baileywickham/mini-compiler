@@ -1,6 +1,8 @@
 *.ll
 *.out
 *.s
+*.o
+*.compiled
 
 BenchMarkishTopics/BenchMarkishTopics
 CompatibilityTest/compat
