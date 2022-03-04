@@ -38,7 +38,7 @@
 ;; mov  0-65535
 
 (define (draft/fun-body params body)
-   (prepend-blocks (draft/blocks ((remove-phis*) body)) (make-param-moves params)))
+  (prepend-blocks (draft/blocks ((remove-phis*) body)) (make-param-moves params)))
 
 ;;
 (define (make-param-moves params)
@@ -75,34 +75,34 @@
     [(BrLL (IdLL id _))
      `(,(BrA #f (LabelA id)))]
     [(BrCondLL cnd (IdLL iftrue _) (IdLL iffalse _))
-     (with-args ([arg (draft/arg cnd #f stack-env)])
+     (with-stmts ([arg (draft/arg cnd #f stack-env)])
        `(,(CmpA arg (ImmA 1))
          ,(BrA 'eq (LabelA iftrue))
          ,(BrA #f (LabelA iffalse))))]
 
     ;; Binary Ops
     [(AssignLL target (BinaryLL (? easy-op? op) _ arg1 arg2))
-     (with-args ([new-arg1 (draft/arg arg1 #f stack-env)]
+     (with-stmts ([new-arg1 (draft/arg arg1 #f stack-env)]
                  [new-arg2 (draft/arg arg2 imm8 stack-env)])
        `(,(OpA (hash-ref easy-ops op) target new-arg1 new-arg2)))]
     [(AssignLL target (BinaryLL 'mul _ arg1 arg2))
-     (with-args ([new-arg1 (draft/arg arg1 #f stack-env)]
-                 [new-arg2 (draft/arg arg2 #f stack-env)])
+     (with-stmts ([new-arg1 (draft/arg arg1 #f stack-env)]
+                  [new-arg2 (draft/arg arg2 #f stack-env)])
        `(,(OpA 'mul target new-arg1 new-arg2)))]
     [(AssignLL target (BinaryLL 'sdiv _ arg1 arg2))
      (draft/stmt*
       (AssignLL target (CallLL #f (IdLL '__aeabi_idiv #t)
                                (list (cons arg1 int) (cons arg2 int)) #f)) stack-env)]
     [(AssignLL target (BinaryLL (? comp-op? op) _ arg1 arg2))
-     (with-args ([new-arg1 (draft/arg arg1 #f stack-env)]
-                 [new-arg2 (draft/arg arg2 imm8 stack-env)])
+     (with-stmts ([new-arg1 (draft/arg arg1 #f stack-env)]
+                  [new-arg2 (draft/arg arg2 imm8 stack-env)])
        `(,(MovA #f target (ImmA 0))
          ,(CmpA new-arg1 new-arg2)
          ,(MovA (hash-ref comp-ops op) target (ImmA 1))))]
 
     ;; Get Elt Ptr TODO args
     [(AssignLL target (GetEltLL _ ptr index))
-     (with-args ([arg (draft/arg (* index (/ int-size byte-size)) imm8 stack-env)])
+     (with-stmts ([arg (draft/arg (* index (/ int-size byte-size)) imm8 stack-env)])
        `(,(OpA 'add target ptr arg)))]
 
     ;; Cast TODO args
@@ -118,11 +118,11 @@
 
     ;; Load/Store
     [(AssignLL target (LoadLL _ ptr))
-     (with-args ([ptr-arg (draft/arg ptr #f stack-env)])
+     (with-stmts ([ptr-arg (draft/arg ptr #f stack-env)])
        `(,(LdrA target ptr-arg)))]
     [(StoreLL _ val ptr)
-     (with-args ([arg (draft/arg val #f stack-env)]
-                 [ptr-arg (draft/arg ptr #f stack-env)])
+     (with-stmts ([arg (draft/arg val #f stack-env)]
+                  [ptr-arg (draft/arg ptr #f stack-env)])
        `(,(StrA arg ptr-arg)))]
 
     ;; Return
@@ -144,7 +144,7 @@
 (define+ (store-arg (cons arg _) i stack-env)
   (if (< i (length arg-regs))
       (make-mov (list-ref arg-regs i) arg stack-env)
-      (with-args ([new-arg (draft/arg arg #f stack-env)])
+      (with-stmts ([new-arg (draft/arg arg #f stack-env)])
         `(,(StrA new-arg (StackLoc 'arg i))))))
 
 ;;
@@ -246,13 +246,3 @@
         block))
 
   remove-phis)
-
-
-;;--------------------------------------------
-
-(define-syntax (with-args syntax-object)
-  (syntax-case syntax-object ()
-    [(_ ([arg exp] ...) body ...)
-     (with-syntax ([(stmts ...) (generate-temporaries #'(arg ...))])
-       #'(let-values ([(arg stmts) exp] ...)
-           (append stmts ... (begin body ...))))]))
