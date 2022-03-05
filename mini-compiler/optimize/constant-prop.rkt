@@ -1,20 +1,22 @@
 #lang racket
 
-(require "optimize-common.rkt")
 (provide constant-prop)
 
-(define op-procs (hash 'add +
-                       'mul *
-                       'sub -
-                       'sdiv quotient
-                       'and (lambda (a b) (and a b))
-                       'or (lambda (a b) (or a b))
-                       'eq equal?
-                       'sle <=
-                       'sgt >
-                       'sge >=
-                       'slt <
-                       'ne (negate equal?)))
+(require "common.rkt")
+
+(define op-procs
+  (hash 'add  +
+        'mul  *
+        'sub  -
+        'sdiv quotient
+        'and  (λ (a b) (and a b))
+        'or   (λ (a b) (or a b))
+        'eq   equal?
+        'sle  <=
+        'sgt  >
+        'sge  >=
+        'slt  <
+        'ne   (negate equal?)))
 
 (define+ (constant-prop (LLVM tys decs funs))
   (LLVM tys decs (map prop/fun funs)))
@@ -26,40 +28,38 @@
   (define vals (initial-vals blocks))
   (define worklist
     (filter identity
-            (hash-map vals (lambda (id v) (if (not (equal? v 'T)) id #f)))))
-  (define use-graph (get-uses blocks))
-  (define final-values (get-vals worklist vals use-graph))
+            (hash-map vals (λ (id v) (if (equal? v 'T) #f id)))))
+  (define final-values (update-vals worklist vals (get-uses blocks)))
   (displayln "final vals")
   (pretty-display final-values)
   blocks)
 
-(define (get-vals worklist vals use-graph)
+(define (update-vals worklist vals use-graph)
   (displayln "getvals")
   (pretty-display worklist)
-  (if (empty? worklist)
-      vals
-      (let ([new-worklist (update-vals (first worklist) (rest worklist) vals use-graph)])
-        (get-vals new-worklist vals use-graph))))
+  (match worklist
+    ['() vals]
+    [(cons r remaining-work)
+     (let ([new-work (update-vals/reg r vals use-graph)])
+       (update-vals (set-union remaining-work new-work) vals use-graph))]))
 
-(define (update-vals r worklist vals use-graph)
+(define (update-vals/reg r vals use-graph)
   (define ops (hash-ref use-graph r '()))
   (pretty-display ops)
-  (define update-worklist
-    (filter-map
-     (lambda (op)
-       (match (stmt-writes op)
-         ['() #f]
-         [(list m)
-          (define val-m (hash-ref vals m))
-          (cond
-            [(equal? val-m 'L) #f]
-            [else
-             (let ([m-eval (evaluate op vals)])
-               (pretty-display m-eval)
-               (hash-set! vals m m-eval)
-               (if (equal? m-eval val-m) #f m))])]))
-     ops))
-  (set-union worklist update-worklist))
+  (filter-map
+   (λ (op)
+     (match (stmt-writes op)
+       ['() #f]
+       [(list m)
+        (define m-val (hash-ref vals m))
+        (cond
+          [(equal? m-val 'L) #f]
+          [else
+           (let ([m-eval (evaluate op vals)])
+             (pretty-display m-eval)
+             (hash-set! vals m m-eval)
+             (if (equal? m-eval m-val) #f m))])]))
+   ops))
 
 (define (evaluate op vals)
   (match op
@@ -84,9 +84,7 @@
   (make-immutable-hash* (get-all uses/stmt blocks)))
 
 (define (uses/stmt stmt)
-  (map (lambda (var) (cons var stmt))
-       (filter ssa-reg? (stmt-reads stmt))))
-
+  (map (λ (var) (cons var stmt)) (filter ssa-reg? (stmt-reads stmt))))
                 
 (define (initial-vals blocks)
   (make-hash (get-all initial-vals/stmt blocks)))
@@ -96,7 +94,6 @@
     [(PhiLL id _ _) (list (cons id (evaluate stmt #hash())))]
     [(AssignLL id _) (list (cons id (evaluate stmt #hash())))]
     [_ '()]))    
-
 
 (define (make-immutable-hash* assocs)
   (make-immutable-hash (map make-hash-entry (group-by car assocs))))

@@ -1,20 +1,23 @@
 #lang racket
-(require "util.rkt" "ast/llvm.rkt")
-(provide (all-defined-out) (all-from-out "util.rkt" "ast/llvm.rkt"))
 
+(provide (all-defined-out) (all-from-out "../util.rkt" "../ast/llvm.rkt"))
 
+(require "../util.rkt" "../ast/llvm.rkt")
+
+;;
 (define (get-all proc blocks)
   (append-map
    (λ+ ((Block _ stmts)) (append-map proc stmts))
    blocks))
 
-
+;;
 (define (stmt-writes stmt)
   (match stmt
     [(AssignLL res _) (list res)]
     [(PhiLL id _ _) (list id)]
     [_ '()]))
 
+;;
 (define (stmt-reads stmt)
   (match stmt
     [(AssignLL _ src) (stmt-reads src)]
@@ -30,6 +33,7 @@
     [(PhiLL _ _ (list (cons label (cons ids _)) ...)) ids]
     [_ '()]))
 
+;;
 (define (ssa-reg? v)
   (match v
     [(IdLL _ #f) #t]

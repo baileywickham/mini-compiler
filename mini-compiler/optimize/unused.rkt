@@ -1,6 +1,9 @@
 #lang racket
-(require "optimize-common.rkt")
+
 (provide remove-unused)
+
+(require "common.rkt")
+
 
 (define+ (remove-unused (LLVM tys decs funs))
   (LLVM tys decs (map remove-unused/fun funs)))

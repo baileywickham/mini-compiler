@@ -11,7 +11,7 @@
          "format-llvm.rkt"
          "translate-arm.rkt"
          "format-arm.rkt"
-         "optimize.rkt")
+         "optimize/optimize.rkt")
 
 ;; Main
 (define (compile path stack? llvm? debug?)
