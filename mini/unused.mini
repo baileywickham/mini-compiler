@@ -1,0 +1,15 @@
+fun main() int {
+int a;
+int b;
+a = 1;
+b = 2;
+a = b + 1;
+a = read;
+b = read;
+b = b + a;
+return 0;
+}
+
+fun f(int a, int b) int {
+    return 0;
+}

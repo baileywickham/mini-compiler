@@ -1,0 +1,10 @@
+fun main() int {
+    int a;
+    int b;
+    int c;
+
+    a = 1 + 2 + 3;
+    b = a * 4;
+    c = a - b;
+    return a;
+}
