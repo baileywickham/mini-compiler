@@ -15,25 +15,23 @@
 (define (all-writes blocks)
   (get-all stmt-writes blocks))
 
+(define (all-reads blocks)
+  (get-all stmt-reads blocks))
 
 (define (stmt-writes stmt)
   (match stmt
     [(AssignLL res _) (list res)]
     [(PhiLL id _ _) (list id)]
-    [o '()]))
+    [_ '()]))
 
 (define (stmt-reads stmt)
     (match stmt
-    [(AssignLL _ src)
-     (stmt-reads src)]
-    [(BinaryLL _ _ op1 op2)
-     (list op1 op2)]
-    [(BrCondLL cond _ _)
-     (list cond)]
-    [(AllocLL ty)
-     (error 'optimize "unused values only supported in ssa")]
+    [(AssignLL _ src) (stmt-reads src)]
+    [(BinaryLL _ _ op1 op2) (list op1 op2)]
+    [(BrCondLL cond _ _) (list cond)]
+    [(AllocLL _) (error 'optimize "unused values only supported in ssa")]
 
-      
+
     [(StoreLL ty val ptr)
      (format "store ~a ~a, ~a ~a"
              (format-ty ty) (format-arg val) (format-ty (PtrLL ty)) (format-id ptr))]
@@ -59,4 +57,3 @@
   (append-map
    (λ+ ((Block _ stmts)) (append-map proc stmts))
    blocks))
-  
