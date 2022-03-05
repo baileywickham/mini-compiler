@@ -46,20 +46,20 @@
 (define (update-vals/reg r vals use-graph)
   (define ops (hash-ref use-graph r '()))
   (pretty-display ops)
-  (filter-map
-   (λ (op)
-     (match (stmt-writes op)
-       ['() #f]
-       [(list m)
-        (define m-val (hash-ref vals m))
-        (cond
-          [(equal? m-val 'L) #f]
-          [else
-           (let ([m-eval (evaluate op vals)])
-             (pretty-display m-eval)
-             (hash-set! vals m m-eval)
-             (if (equal? m-eval m-val) #f m))])]))
-   ops))
+  (filter-map (lambda (op) (update-vals/op op vals)) ops))
+
+(define (update-vals/op op vals)
+  (match (stmt-writes op)
+    ['() #f]
+    [(list m)
+     (define m-val (hash-ref vals m))
+     (cond
+       [(equal? m-val 'L) #f]
+       [else
+        (let ([m-eval (evaluate op vals)])
+          (pretty-display m-eval)
+          (hash-set! vals m m-eval)
+          (if (equal? m-eval m-val) #f m))])]))
 
 (define (evaluate op vals)
   (match op
