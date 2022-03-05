@@ -5,18 +5,38 @@
 (define+ (remove-unused (LLVM tys decs funs))
   (LLVM tys decs (map remove-unused/fun funs)))
 
-(define+ (remove-unused/funs (FunLL id params ret-ty body))
-  (FunLL id params ret-ty (remove-unused/body body)))
+(define+ (remove-unused/fun (FunLL id params ret-ty body))
+  (FunLL id params ret-ty (remove-unused/body body (map car params))))
 
-(define (remove-unused/body blocks)
-  (define unused (set-subtract (all-writes blocks) (all-reads blocks))))
+(define (remove-unused/body blocks params)
+  (define unused (set-subtract (set-subtract (all-writes blocks) (all-reads blocks)) params))
+  (if (empty? unused)
+      blocks
+      (remove-unused/body ((remove-stmts* unused) blocks) params)))
 
+(define (remove-stmts* unused)
+  (define (remove-stmts/blocks blocks)
+    (map remove-stmts/block blocks))
+  
+  (define+ (remove-stmts/block (Block id stmts))
+    (Block id (filter-map remove-stmts/stmt stmts)))
+
+  (define (remove-stmts/stmt stmt)
+    (match stmt
+      [(AssignLL (? unused?) (? CallLL? call)) call]
+      [(AssignLL (? unused?) _) #f]
+      [(PhiLL (? unused?) _ _) #f]
+      [_ stmt]))
+  (define (unused? v)
+    (member v unused))
+  remove-stmts/blocks)
+  
 
 (define (all-writes blocks)
-  (get-all stmt-writes blocks))
+  (filter ssa-reg? (get-all stmt-writes blocks)))
 
 (define (all-reads blocks)
-  (get-all stmt-reads blocks))
+  (filter ssa-reg? (get-all stmt-reads blocks)))
 
 (define (stmt-writes stmt)
   (match stmt
@@ -25,33 +45,24 @@
     [_ '()]))
 
 (define (stmt-reads stmt)
-    (match stmt
+  (match stmt
     [(AssignLL _ src) (stmt-reads src)]
     [(BinaryLL _ _ op1 op2) (list op1 op2)]
     [(BrCondLL cond _ _) (list cond)]
     [(AllocLL _) (error 'optimize "unused values only supported in ssa")]
+    [(StoreLL _ val ptr) (list val ptr)]
+    [(LoadLL _ ptr) (list ptr)]
+    [(ReturnLL _ arg) (list arg)]
+    [(GetEltLL _ ptr _) (list ptr)]
+    [(CallLL _ _ (list (cons ids _) ...) _) ids]
+    [(CastLL _ _ value _) (list value)]
+    [(PhiLL _ _ (list (cons label (cons ids _)) ...)) ids]
+    [_ '()]))
 
-
-    [(StoreLL ty val ptr)
-     (format "store ~a ~a, ~a ~a"
-             (format-ty ty) (format-arg val) (format-ty (PtrLL ty)) (format-id ptr))]
-    [(LoadLL ty ptr)
-     (format "load ~a, ~a ~a" (format-ty ty) (format-ty (PtrLL ty)) (format-id ptr))]
-    [(ReturnLL _ (? void?)) "ret void"]
-    [(ReturnLL ty arg)
-     (format "ret ~a ~a" (format-ty ty) (format-arg arg))]
-    [(GetEltLL ty ptr index)
-     (format "getelementptr ~a, ~a ~a, i1 0, i32 ~a"
-             (format-ty ty) (format-ty (PtrLL ty)) (format-arg ptr) index)]
-    [(CallLL ty fn args var-args?)
-     (format "call ~a~a ~a(~a)"
-             (format-ty ty) (if var-args? " (i8*, ... )" "")  (format-id fn) (format-args args))]
-    [(CastLL op ty value ty2)
-     (format "~a ~a ~a to ~a" op (format-ty ty) (format-arg value) (format-ty ty2))]
-    [(PhiLL id ty args)
-     (format "~a = phi ~a ~a" (format-id id) (format-ty ty)
-             (string-join (map (λ+ ((cons label (cons id _)))
-                                   (format "[~a, %~a]" (format-arg id) label)) args) ", "))])
+(define (ssa-reg? v)
+  (match v
+    [(IdLL _ #f) #t]
+    [_ #f]))
 
 (define (get-all proc blocks)
   (append-map

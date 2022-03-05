@@ -10,7 +10,8 @@
          "register-llvm.rkt"
          "format-llvm.rkt"
          "translate-arm.rkt"
-         "format-arm.rkt")
+         "format-arm.rkt"
+         "optimize.rkt")
 
 ;; Main
 (define (compile path stack? llvm? debug?)
@@ -19,7 +20,7 @@
   (define llvm-ir
     (if stack?
         (stack-llvm (control-flow mini))
-        (register-llvm typed-mini)))
+        (optimize-llvm (register-llvm typed-mini))))
   (when debug?
     (displayln (format-llvm llvm-ir)))
   (define (write-file content ext)
