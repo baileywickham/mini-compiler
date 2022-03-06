@@ -14,10 +14,10 @@ for dir in ../benchmarks/*; do
     for opt in $dir/*.opt.s; do
         clang -m32 $opt -o $opt.out &>/dev/null
     done
-    for reg in $dir/*.opt.s; do
+    for reg in $dir/*.reg.s; do
         clang -m32 $reg -o $reg.out &>/dev/null
     done
-    for stack in $dir/*.opt.s; do
+    for stack in $dir/*.stack.s; do
         clang -m32 $stack -o $stack.out &>/dev/null
     done
 
