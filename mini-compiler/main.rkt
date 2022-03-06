@@ -14,17 +14,17 @@
          "optimize/optimize.rkt")
 
 ;; Main
-(define (compile path stack? llvm? debug?)
+(define (compile path stack? llvm? optimize? debug? [outpath #f])
   (define mini (parse (java-parse path)))
   (define typed-mini (type-check mini))
   (define llvm-ir
     (if stack?
         (stack-llvm (control-flow mini))
-        (optimize-llvm (register-llvm typed-mini))))
+        (optimize-llvm (register-llvm typed-mini) optimize?)))
   (when debug?
     (displayln (format-llvm llvm-ir)))
   (define (write-file content ext)
-    (let ([new-path (path-replace-extension path ext)])
+    (let ([new-path (or outpath (path-replace-extension path ext))])
       (when debug? (display content))
       (with-output-to-file new-path (λ () (display content)) #:exists 'replace)))
 
@@ -62,13 +62,12 @@
                         (path-replace-extension path ".compiled")
                         .o)))))
         
-
-
 ;; Command line argument parser
 (module* main #f
   (define stack? (make-parameter #f))
   (define llvm? (make-parameter #f))
   (define debug? (make-parameter #f))
+  (define optimize? (make-parameter #f))
 
   (define mini-file
     (command-line
@@ -77,7 +76,8 @@
      [("--stack") "Compile with stack allocation" (stack? #t)]
      [("--llvm") "Compile with LLVM output" (llvm? #t)]
      [("--debug") "Compile with debugging on" (debug? #t)]
+     [("--optimize") "Compile with optimizations on" (optimize? #t)]
      #:args (filename) filename))
 
-  (compile (string->path mini-file) (stack?) (llvm?) (debug?)))
+  (compile (string->path mini-file) (stack?) (llvm?) (optimize?) (debug?)))
 

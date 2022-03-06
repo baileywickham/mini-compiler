@@ -5,7 +5,9 @@
          threading)
 (provide optimize-llvm)
 
-(define (optimize-llvm llvm)
-  (~> llvm
-      constant-prop
-      remove-unused))
+(define (optimize-llvm llvm optimize?)
+  (if optimize?
+      (~> llvm
+          constant-prop
+          remove-unused)
+      llvm))
