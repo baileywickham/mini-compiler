@@ -8,4 +8,4 @@
 (define (optimize-llvm llvm)
   (~> llvm
       constant-prop
-      #;remove-unused))
+      remove-unused))

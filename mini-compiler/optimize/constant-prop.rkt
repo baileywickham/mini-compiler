@@ -16,6 +16,7 @@
         'sgt  >
         'sge  >=
         'slt  <
+        'xor xor
         'ne   (negate equal?)))
 
 (define+ (constant-prop (LLVM tys decs funs))
@@ -30,13 +31,39 @@
     (filter identity
             (hash-map vals (λ (id v) (if (equal? v 'T) #f id)))))
   (define final-values (update-vals worklist vals (get-uses blocks)))
-  (displayln "final vals")
-  (pretty-display final-values)
-  blocks)
+  ((subst-vals* vals) blocks))
+
+(define (subst-vals* vals)
+
+  (define (subst-vals/blocks blocks)
+    (map subst-vals/block blocks))
+  
+  (define+ (subst-vals/block (Block id stmts))
+    (Block id (map subst-vals/stmt stmts)))
+
+  (define (subst-vals/stmt stmt)
+    (match stmt
+      [(AssignLL target src) (AssignLL target (subst-vals/stmt src))]
+      [(BinaryLL op ty op1 op2) (BinaryLL op ty (get-val op1) (get-val op2))]
+      [(CallLL ty fn args var-args?)
+       (CallLL ty fn (map (λ+ ((cons id ty)) (cons (get-val id) ty)) args) var-args?)]
+      [(PhiLL id ty args)
+       (PhiLL id ty (map (λ+ ((cons label (cons id ty))) (cons label (cons (get-val id) ty))) args))]
+      [(StoreLL ty val ptr) (StoreLL ty (get-val val) (get-val ptr))]
+      [(LoadLL ty ptr) (LoadLL ty (get-val ptr))]
+      [(CastLL op ty val ty2) (CastLL op ty (get-val val) ty2)]
+      [(BrCondLL c iftrue iffalse) (BrCondLL (get-val c) iftrue iffalse)]
+      [(ReturnLL ty val) (ReturnLL ty (get-val val))]
+      [_ stmt]))
+  
+  (define (get-val arg)
+    (let ([v (hash-ref vals arg arg)])
+      (if (const? v) v arg)))
+  
+  subst-vals/blocks)
+    
 
 (define (update-vals worklist vals use-graph)
-  (displayln "getvals")
-  (pretty-display worklist)
   (match worklist
     ['() vals]
     [(cons r remaining-work)
@@ -45,7 +72,6 @@
 
 (define (update-vals/reg r vals use-graph)
   (define ops (hash-ref use-graph r '()))
-  (pretty-display ops)
   (filter-map (lambda (op) (update-vals/op op vals)) ops))
 
 (define (update-vals/op op vals)
@@ -57,7 +83,7 @@
        [(equal? m-val 'L) #f]
        [else
         (let ([m-eval (evaluate op vals)])
-          (pretty-display m-eval)
+          
           (hash-set! vals m m-eval)
           (if (equal? m-eval m-val) #f m))])]))
 
@@ -67,18 +93,17 @@
     [(? PhiLL?) 'L]))
 
 (define (evaluate/src src vals)
-  (displayln "src")
-  (pretty-display src)
   (match src
     [(BinaryLL op _ op1 op2)
      (let ([val1 (hash-ref vals op1 op1)]
            [val2 (hash-ref vals op2 op2)])
        (if (and (const? val1) (const? val2))
-           (begin (displayln "eval-m") (displayln ((get-op op) val1 val2)) ((get-op op) val1 val2))
+           ((get-op op) val1 val2)
            'T))]
     [(? CallLL?) 'L]
     [(? LoadLL?) 'L]
-    [(? CastLL?) 'T]))
+    [(? CastLL?) 'T]
+    [(? GetEltLL?) 'T]))
 
 (define (get-uses blocks)
   (make-immutable-hash* (get-all uses/stmt blocks)))
