@@ -40,7 +40,7 @@ _mini_i = (_mini_i+1L);
 _mini_result = _mini_calcPower(_mini_power->_mini_base, _mini_power->_mini_exp);
 }
 printf("%ld\n", _mini_result);
-return 1L;
+return 0L;
 }
 int main(void)
 {

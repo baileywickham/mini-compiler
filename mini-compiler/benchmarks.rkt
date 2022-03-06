@@ -34,8 +34,8 @@
     (error "compilation failed"))
 
   (when (file-exists? executable)
-    (for ([input  (filter (λ (file) (name-incules? file "input"))  benchmark-content)]
-          [output (filter (λ (file) (name-incules? file "output")) benchmark-content)])
+    (for ([input  (filter (λ (file) (name-includes? file "input"))  benchmark-content)]
+          [output (filter (λ (file) (name-includes? file "output")) benchmark-content)])
       (printf "\tinput: ~a~n\toutput:  ~a~n" input output)
       (define diff
         (with-output-to-string
@@ -63,7 +63,7 @@
   (string-suffix? (path->string path) ext))
 
 ;;
-(define (name-incules? path str)
+(define (name-includes? path str)
   (let-values ([(_ name _b) (split-path path)])
     (string-contains? (path->string name) str)))
 

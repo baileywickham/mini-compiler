@@ -51,6 +51,8 @@ fun domath(int num) void
         num = num - 1;
     }
 
+      delete math1.simp;
+      delete math2.simp;
       delete math1;
       delete math2;
 }

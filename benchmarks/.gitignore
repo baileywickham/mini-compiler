@@ -4,6 +4,7 @@
 *.compiled
 
 
+
 BenchMarkishTopics/BenchMarkishTopics
 CompatibilityTest/compat
 Fibonacci/Fibonacci
@@ -25,3 +26,25 @@ primes/primes
 programBreaker/programBreaker
 stats/stats
 wasteOfCycles/wasteOfCycles
+
+BenchMarkishTopics/BenchMarkishTopics.s
+CompatibilityTest/compat.s
+Fibonacci/Fibonacci.s
+GeneralFunctAndOptimize/GeneralFunctAndOptimize.s
+OptimizationBenchmark/OptimizationBenchmark.s
+TicTac/TicTac.s
+bert/bert.s
+biggest/biggest.s
+binaryConverter/binaryConverter.s
+brett/brett.s
+creativeBenchMarkName/creativeBenchMarkName.s
+fact_sum/fact_sum.s
+hailstone/hailstone.s
+hanoi_benchmark/hanoi_benchmark.s
+killerBubbles/killerBubbles.s
+mile1/mile1.s
+mixed/mixed.s
+primes/primes.s
+programBreaker/programBreaker.s
+stats/stats.s
+wasteOfCycles/wasteOfCycles.s

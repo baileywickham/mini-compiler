@@ -1,5 +1,5 @@
 	.arch armv7-a
-	.comm	.read_scratch,4,4
+
 
 	.text
 	.align 2
@@ -8,34 +8,43 @@ calcPower:
 .LU1:
 	push {fp, lr}
 	add fp, sp, #4
-	push {r4}
-	mov r3, r0
+	sub sp, sp, #16
+	mov r2, r0
 	mov r0, r1
-	mov r2, #0
-	cmp r0, #0
-	movgt r2, #1
-	movw r4, #1
-	movw r1, #1
-	cmp r2, #1
+	str r2, [sp, #0]
+	str r0, [sp, #4]
+	movw r2, #1
+	str r2, [sp, #12]
+	ldr r2, [sp, #4]
+	mov r0, #0
+	cmp r2, #0
+	movgt r0, #1
+	cmp r0, #1
 	beq .LU2
 	b .LU3
 .LU2:
-	mov r2, r0
-	mul r1, r1, r3
-	sub r0, r2, #1
-	mov r2, #0
-	cmp r0, #0
-	movgt r2, #1
-	mov r4, r1
-	cmp r2, #1
+	ldr r0, [sp, #12]
+	ldr r2, [sp, #0]
+	mul r2, r0, r2
+	str r2, [sp, #12]
+	ldr r2, [sp, #4]
+	sub r2, r2, #1
+	str r2, [sp, #4]
+	ldr r2, [sp, #4]
+	mov r0, #0
+	cmp r2, #0
+	movgt r0, #1
+	cmp r0, #1
 	beq .LU2
 	b .LU3
 .LU3:
-	mov r1, r4
+	ldr r2, [sp, #12]
+	str r2, [sp, #8]
 	b .LU0
 .LU0:
-	mov r0, r1
-	pop {r4}
+	ldr r2, [sp, #8]
+	mov r0, r2
+	add sp, sp, #16
 	pop {fp, pc}
 	.size calcPower, .-calcPower
 	.align 2
@@ -44,79 +53,88 @@ main:
 .LU5:
 	push {fp, lr}
 	add fp, sp, #4
-	push {r4, r5}
+	sub sp, sp, #20
+	movw r2, #0
+	str r2, [sp, #12]
 	movw r0, #8
 	bl malloc
-	mov r3, r0
-	mov r4, r3
-	movw r1, #:lower16:.read_scratch
-	movt r1, #:upper16:.read_scratch
+	mov r2, r0
+	str r2, [sp, #4]
+	add r1, sp, #8
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw r3, #:lower16:.read_scratch
-	movt r3, #:upper16:.read_scratch
-	ldr r3, [r3]
-	mov r0, r4
-	str r3, [r0]
-	movw r1, #:lower16:.read_scratch
-	movt r1, #:upper16:.read_scratch
+	ldr r0, [sp, #8]
+	ldr r2, [sp, #4]
+	str r0, [r2]
+	add r1, sp, #8
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw r3, #:lower16:.read_scratch
-	movt r3, #:upper16:.read_scratch
-	ldr r0, [r3]
-	mov r3, #0
+	ldr r0, [sp, #8]
+	mov r2, #0
 	cmp r0, #0
-	movlt r3, #1
-	cmp r3, #1
+	movlt r2, #1
+	cmp r2, #1
 	beq .LU6
 	b .LU7
 .LU6:
-	movw r3, #:lower16:-1
-	movt r3, #:upper16:-1
+	movw r2, #0
+	sub r2, r2, #1
+	str r2, [sp, #0]
 	b .LU4
 .LU7:
-	b .LU8
+	ldr r0, [sp, #8]
+	ldr r2, [sp, #4]
+	add r2, r2, #4
+	str r0, [r2]
+	movw r2, #0
+	str r2, [sp, #16]
+	ldr r3, [sp, #16]
+	movw r0, #:lower16:1000000
+	movt r0, #:upper16:1000000
+	mov r2, #0
+	cmp r3, r0
+	movlt r2, #1
+	cmp r2, #1
+	beq .LU8
+	b .LU9
 .LU8:
-	add r3, r4, #4
-	str r0, [r3]
-	movw r0, #0
-	movw r5, #0
-	movw r3, #1
-	cmp r3, #1
-	beq .LU9
-	b .LU10
-.LU9:
-	mov r3, r5
-	add r5, r3, #1
-	mov r3, r4
-	ldr r3, [r3]
-	add r0, r4, #4
+	ldr r2, [sp, #16]
+	add r2, r2, #1
+	str r2, [sp, #16]
+	ldr r2, [sp, #4]
+	ldr r2, [r2]
+	ldr r0, [sp, #4]
+	add r0, r0, #4
 	ldr r0, [r0]
 	mov r1, r0
-	mov r0, r3
+	mov r0, r2
 	bl calcPower
-	movw r1, #:lower16:1000000
-	movt r1, #:upper16:1000000
-	mov r3, #0
-	cmp r5, r1
-	movlt r3, #1
-	cmp r3, #1
-	beq .LU9
-	b .LU10
-.LU10:
-	mov r3, r0
-	mov r1, r3
+	mov r2, r0
+	str r2, [sp, #12]
+	ldr r0, [sp, #16]
+	movw r3, #:lower16:1000000
+	movt r3, #:upper16:1000000
+	mov r2, #0
+	cmp r0, r3
+	movlt r2, #1
+	cmp r2, #1
+	beq .LU8
+	b .LU9
+.LU9:
+	ldr r2, [sp, #12]
+	mov r1, r2
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	movw r3, #1
+	movw r2, #0
+	str r2, [sp, #0]
 	b .LU4
 .LU4:
-	mov r0, r3
-	pop {r4, r5}
+	ldr r2, [sp, #0]
+	mov r0, r2
+	add sp, sp, #20
 	pop {fp, pc}
 	.size main, .-main
 	.section	.rodata
