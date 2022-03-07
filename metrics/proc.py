@@ -15,7 +15,7 @@ def main():
 
     with open('time.py.csv', 'w+') as f:
         w = csv.writer(f)
-        w.writerows(data)
+        w.writerows([('Benchmark', 'Compilation', 'Seconds')] + data)
 
 def parseTime(t):
     m = re.match(r'(.*)m(.*)s', t)
