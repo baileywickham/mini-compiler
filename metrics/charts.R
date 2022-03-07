@@ -26,9 +26,10 @@ f <- function(name) {
     scale_color_brewer(palette = "Dark2") +
     scale_x_discrete(labels = c("clang -O0", "clang -O3", "Optimizations", "Registers", "Stack")) +
     guides(color = FALSE) +
-    theme_minimal()
+    theme_minimal() +
+    ylim(0, NA)
 
-  #ggsave(file=paste("charts/",name,".png", sep=''), plot=plot, width=10, height=8)
+  ggsave(file=paste("charts/images/",name,".png", sep=''), plot=plot, width=10, height=8)
 
 
   plot
