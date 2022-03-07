@@ -13,9 +13,9 @@ def main():
             secs = parseTime(t)
             data.append((name, options, secs))
 
-    with open('time.py.csv', 'w+') as f:
+    with open('time.py.csv', 'w+', newline='') as f:
         w = csv.writer(f)
-        w.writerows(data)
+        w.writerows([('Benchmark', 'Compilation', 'Seconds')] + data)
 
 def parseTime(t):
     m = re.match(r'(.*)m(.*)s', t)
@@ -25,7 +25,7 @@ def parseTime(t):
         print(f'ERROR {t}')
 
 def parseFilename(n):
-    m = re.match(r'../benchmarks/(.*)/[^.]*[.](.*)[.]out', n)
+    m = re.match(r'[.][.]/benchmarks/(.*)/[^.]*[.](.*)[.]out', n)
     return m.groups()
 
 main()
