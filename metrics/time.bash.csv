@@ -418,43 +418,33 @@
 ../benchmarks/mixed/mixed.c.o0.out ,  real 0m8.386s user 0m8.372s sys 0m0.010s
 ../benchmarks/mixed/mixed.c.o3.out ,  real 0m0.010s user 0m0.008s sys 0m0.000s
 ../benchmarks/mixed/mixed.opt.s.out ,  real 0m3.033s user 0m3.032s sys 0m0.000s
-../benchmarks/OptimizationBenchmark/c.out ,  ./run_benchmarks.sh: line 26: ../benchmarks/OptimizationBenchmark/c.out: Permission denied real 0m0.006s user 0m0.003s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o0.out ,  real 0m0.121s user 0m0.108s sys 0m0.010s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o3.out ,  real 0m0.006s user 0m0.001s sys 0m0.003s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.opt.s.out ,  real 0m0.069s user 0m0.067s sys 0m0.000s
-../benchmarks/OptimizationBenchmark/c.out ,  ./run_benchmarks.sh: line 26: ../benchmarks/OptimizationBenchmark/c.out: Permission denied real 0m0.004s user 0m0.003s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o0.out ,  real 0m0.119s user 0m0.118s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o3.out ,  real 0m0.005s user 0m0.004s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.opt.s.out ,  real 0m0.068s user 0m0.067s sys 0m0.000s
-../benchmarks/OptimizationBenchmark/c.out ,  ./run_benchmarks.sh: line 26: ../benchmarks/OptimizationBenchmark/c.out: Permission denied real 0m0.007s user 0m0.006s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o0.out ,  real 0m0.158s user 0m0.147s sys 0m0.010s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o3.out ,  real 0m0.005s user 0m0.004s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.opt.s.out ,  real 0m0.068s user 0m0.067s sys 0m0.000s
-../benchmarks/OptimizationBenchmark/c.out ,  ./run_benchmarks.sh: line 26: ../benchmarks/OptimizationBenchmark/c.out: Permission denied real 0m0.004s user 0m0.003s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o0.out ,  real 0m0.119s user 0m0.118s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o3.out ,  real 0m0.005s user 0m0.001s sys 0m0.003s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.opt.s.out ,  real 0m0.068s user 0m0.057s sys 0m0.010s
-../benchmarks/OptimizationBenchmark/c.out ,  ./run_benchmarks.sh: line 26: ../benchmarks/OptimizationBenchmark/c.out: Permission denied real 0m0.004s user 0m0.003s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o0.out ,  real 0m0.119s user 0m0.117s sys 0m0.001s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o3.out ,  real 0m0.005s user 0m0.004s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.opt.s.out ,  real 0m0.068s user 0m0.067s sys 0m0.000s
-../benchmarks/OptimizationBenchmark/c.out ,  ./run_benchmarks.sh: line 26: ../benchmarks/OptimizationBenchmark/c.out: Permission denied real 0m0.004s user 0m0.002s sys 0m0.001s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o0.out ,  real 0m0.120s user 0m0.117s sys 0m0.001s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o3.out ,  real 0m0.005s user 0m0.004s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.opt.s.out ,  real 0m0.068s user 0m0.057s sys 0m0.009s
-../benchmarks/OptimizationBenchmark/c.out ,  ./run_benchmarks.sh: line 26: ../benchmarks/OptimizationBenchmark/c.out: Permission denied real 0m0.004s user 0m0.003s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o0.out ,  real 0m0.119s user 0m0.118s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o3.out ,  real 0m0.005s user 0m0.001s sys 0m0.003s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.opt.s.out ,  real 0m0.068s user 0m0.067s sys 0m0.000s
-../benchmarks/OptimizationBenchmark/c.out ,  ./run_benchmarks.sh: line 26: ../benchmarks/OptimizationBenchmark/c.out: Permission denied real 0m0.004s user 0m0.003s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o0.out ,  real 0m0.119s user 0m0.118s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o3.out ,  real 0m0.005s user 0m0.004s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.opt.s.out ,  real 0m0.068s user 0m0.067s sys 0m0.000s
-../benchmarks/OptimizationBenchmark/c.out ,  ./run_benchmarks.sh: line 26: ../benchmarks/OptimizationBenchmark/c.out: Permission denied real 0m0.004s user 0m0.003s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o0.out ,  real 0m0.120s user 0m0.119s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o3.out ,  real 0m0.005s user 0m0.004s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.opt.s.out ,  real 0m0.068s user 0m0.067s sys 0m0.000s
-../benchmarks/OptimizationBenchmark/c.out ,  ./run_benchmarks.sh: line 26: ../benchmarks/OptimizationBenchmark/c.out: Permission denied real 0m0.004s user 0m0.001s sys 0m0.002s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o0.out ,  real 0m0.119s user 0m0.108s sys 0m0.010s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.c.o3.out ,  real 0m0.005s user 0m0.004s sys 0m0.000s
 ../benchmarks/OptimizationBenchmark/OptimizationBenchmark.opt.s.out ,  real 0m0.067s user 0m0.066s sys 0m0.000s
