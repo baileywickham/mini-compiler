@@ -15,26 +15,26 @@ texEscape <- function(s) {
 
 f <- function(name) {
   benchmarkTimes <- times[times$Benchmark == name,]
-  
-  tikz(file = paste('charts/', name ,'.tex', sep=''), width = 4.5, height = 4.5)
 
-  plot = ggplot(benchmarkTimes, aes(x=Compilation, y=Seconds, color=Compilation)) + 
+  tikz(file = paste('charts/', name ,'.tex', sep=''), width = 6, height = 5)
+
+  plot = ggplot(benchmarkTimes, aes(x=Compilation, y=Seconds, color=Compilation)) +
     theme(legend.position = "none") +
     geom_violin(trim = FALSE) +
     geom_jitter(position=position_jitter(0.2)) +
-    labs(title=texEscape(name), x = "", y = "Time (s)") + 
+    labs(title=texEscape(name), x = "", y = "Time (s)") +
     scale_color_brewer(palette = "Dark2") +
     scale_x_discrete(labels = c("clang -O0", "clang -O3", "Optimizations", "Registers", "Stack")) +
     guides(color = FALSE) +
     theme_minimal()
-  
-  ggsave(file=paste("charts/",name,".png", sep=''), plot=plot, width=10, height=8)
-  
+
+  #ggsave(file=paste("charts/",name,".png", sep=''), plot=plot, width=10, height=8)
+
 
   plot
   print(plot)
   dev.off()
-  
+
 }
 
 benchmarks <- unique(times$Benchmark)
