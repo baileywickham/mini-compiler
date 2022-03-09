@@ -4,7 +4,7 @@
 
 (require "ast/llvm.rkt" "ast/mini.rkt" "util.rkt" "symbol.rkt" "common-llvm.rkt")
 
-(define return-var '_retval_)
+
 (define label-prefix 'LU)
 (define read-scratch (@ '.read_scratch))
 

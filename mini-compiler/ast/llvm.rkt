@@ -43,3 +43,4 @@
 (define byte (IntLL byte-size))
 (define i32  (IntLL 32))
 (define int  (IntLL int-size))
+(define return-var '_retval_)
