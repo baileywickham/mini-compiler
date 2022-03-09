@@ -6,9 +6,9 @@ tex = r"""
 \subsection{|BENCHMARK|}
     \begin{figure}[h]
 	    \centering
-		\input{|BENCHMARK_F|}
+		\input{charts/|BENCHMARK_F|}
 	\end{figure}
-    \input{|BENCHMARK_F|Table}
+    \input{charts/|BENCHMARK_F|Table}
 """
 
 def cleanup_table(benchmark):

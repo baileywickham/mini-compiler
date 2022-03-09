@@ -23,21 +23,21 @@ statsForBenchmark <- function(name) {
   plot = ggplot(benchmarkTimes, aes(x = Compilation, y = Seconds, color = Compilation)) +
     theme(legend.position = "none") +
     geom_violin(trim = FALSE) +
-    geom_jitter(position = position_jitter(0.2)) +
-    labs(title = texEscape(name), x = "", y = "Time (s)") +
+    geom_jitter(position = position_jitter(0.3)) +
+    labs(title = "Real Execution time on \\texttt{input.longer}", x = "", y = "Time (s)") +
     scale_color_manual(values = c("#8c96c6", "#8856a7", "#810f7c", "#2ca25f", "#006d2c")) +
     guides(color = FALSE) +
     theme_minimal() +
     ylim(0, NA)
 
-  ggsave(file = paste("charts/images/", name, ".png", sep = ''), 
+  ggsave(file = paste("charts/images/", name, ".png", sep = ''),
          plot = plot, width = 10, height = 8)
 
   plot
   print(plot)
   dev.off()
-  
-  rawTable = aggregate(benchmarkTimes$Seconds, 
+
+  rawTable = aggregate(benchmarkTimes$Seconds,
                        list(benchmarkTimes$Compilation), FUN = summary)
   print(rawTable)
   summaryTable = rawTable[[2]]
