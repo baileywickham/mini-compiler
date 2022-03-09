@@ -1,0 +1,25 @@
+
+fun a(int x, int y) int {
+    int z;
+    z = x + y;
+    return z;
+}
+
+fun b(int x, int y) int {
+    return 0;
+}
+
+fun c(int x, int y) int {
+    if (x > 0) {
+        return 1;
+    } else {
+        return x;
+    }
+}
+
+fun main() int {
+    a(1, 2);
+    b(2,3);
+    c(3,4);
+    return 0;
+}

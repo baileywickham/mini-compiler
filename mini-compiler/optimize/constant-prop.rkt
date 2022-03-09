@@ -72,7 +72,7 @@
 
 (define (update-vals/reg r vals use-graph)
   (define ops (hash-ref use-graph r '()))
-  (filter-map (lambda (op) (update-vals/op op vals)) ops))
+  (filter-map (λ (op) (update-vals/op op vals)) ops))
 
 (define (update-vals/op op vals)
   (match (stmt-writes op)
@@ -83,7 +83,6 @@
        [(equal? m-val 'L) #f]
        [else
         (let ([m-eval (evaluate op vals)])
-          
           (hash-set! vals m m-eval)
           (if (equal? m-eval m-val) #f m))])]))
 
@@ -102,7 +101,10 @@
            'T))]
     [(? CallLL?) 'L]
     [(? LoadLL?) 'L]
-    [(? CastLL?) 'T]
+    [(CastLL op ty val ty2)
+     (let ([new-val (hash-ref vals val val)])
+       (if (const? new-val)
+           new-val 'T))]
     [(? GetEltLL?) 'T]))
 
 (define (get-uses blocks)
