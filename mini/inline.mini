@@ -18,8 +18,14 @@ fun c(int x, int y) int {
 }
 
 fun main() int {
-    a(1, 2);
-    b(2,3);
-    c(3,4);
+    int x;
+    int y;
+    int z;
+    x = a(1, 2);
+    y = b(2,3);
+    z = c(x,y);
+    print x endl;
+    print y endl;
+    print z endl;
     return 0;
 }
