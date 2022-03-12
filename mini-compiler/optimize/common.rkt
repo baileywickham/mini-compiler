@@ -38,3 +38,20 @@
   (match v
     [(IdLL _ #f) #t]
     [_ #f]))
+
+(define (subst-vars s proc)
+    (match s
+      [(AssignLL result src) (AssignLL (proc result) (subst-vars src proc))]
+      [(BinaryLL op ty op1 op2) (BinaryLL op ty (proc op1) (proc op2))]
+      [(BrLL label) (BrLL (proc label))]
+      [(BrCondLL cond iftrue iffalse) (BrCondLL (proc cond) (proc iftrue) (proc iffalse))]
+      [(StoreLL ty val ptr) (StoreLL ty (proc val) (proc ptr))]
+      [(LoadLL ty ptr) (LoadLL ty (proc ptr))]
+      [(ReturnLL ty arg) (ReturnLL ty (proc arg))]
+      [(GetEltLL ty ptr index) (GetEltLL ty (proc ptr) index)]
+      [(CallLL ty fn args var-args?) (CallLL ty fn (map (λ+ ((cons id ty)) (cons (proc id) ty)) args) var-args?)]
+      [(CastLL op ty value ty2) (CastLL op ty (proc value) ty2)]
+      [(PhiLL id ty args)
+       (PhiLL (proc id) ty
+              (map (λ+ ((cons label (cons id ty)))
+                       (cons (proc label) (cons (proc id) ty))) args))]))

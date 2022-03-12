@@ -61,70 +61,58 @@
 (define (draft-inline* inlineable)
 
   (define (draft/funs funs)
-    (map draft/fun (filter (λ (fun) (not (inlineable-id? (FunLL-id fun)))) funs)))
+    (map (lambda (fun) ((draft/fun*) fun))
+         (filter (λ (fun) (not (inlineable-id? (FunLL-id fun)))) funs)))
 
-  (define+ (draft/fun (FunLL id params ret-ty body))
-    (FunLL id params ret-ty (map draft/block body)))
+  (define (draft/fun*)
+    (define ret-table (make-hash))
+    
+    (define+ (draft/fun (FunLL id params ret-ty body))
+      (FunLL id params ret-ty (map draft/block body)))
 
-  (define+ (draft/block (Block id stmts))
-    (Block id (map draft/stmt stmts)))
+    (define+ (draft/block (Block id stmts))
+      (Block id (map draft/stmt stmts)))
 
-  (define (draft/stmt stmt)
-    (match stmt
-      [(CallLL _ id args _)
-       (if (inlineable-id? id)
-           (make-inline args (hash-ref inlineable id) #f)
-           stmt)]
-      [(AssignLL target (CallLL _ id args _))
-       (if (inlineable-id? id)
-           (make-inline args (hash-ref inlineable id) target)
-           stmt)]
-      [_ stmt]))
+    (define (draft/stmt stmt)
+      (define new-stmt (subst-vars stmt get-var))
+      (match new-stmt
+        [(CallLL _ id args _)
+         (if (inlineable-id? id)
+             (make-inline args (hash-ref inlineable id) #f ret-table)
+             new-stmt)]
+        [(AssignLL target (CallLL _ id args _))
+         (if (inlineable-id? id)
+             (make-inline args (hash-ref inlineable id) target ret-table)
+             new-stmt)]
+        [_ new-stmt]))
+    
+    (define (get-var var)
+      (hash-ref ret-table var var))
+
+    draft/fun)
 
   (define (inlineable-id? id)
     (hash-has-key? inlineable id))
 
   draft/funs)
 
-(define+ (make-inline args (FunLL id params _ body) target)
-  (define new-args (make-immutable-hash
-                    (cons (cons (IdLL return-var #f) (or target (make-label 'unused)))
-                          (map cons (map car params) (map car args)))))
+(define+ (make-inline args (FunLL id params _ body) target ret-table)
+  (define new-args (make-immutable-hash (map cons (map car params) (map car args))))
   (define inline-prefix (make-label 'inline))
-  (InlineFun ((inline-body* new-args inline-prefix target) body)))
+  (InlineFun ((inline-body* new-args inline-prefix target ret-table) body)))
 
-(define (inline-body* new-args inline-prefix target)
+(define (inline-body* new-args inline-prefix target ret-table)
   (define (inline-body blocks)
     (map inline/block blocks))
 
   (define+ (inline/block (Block id stmts))
     (Block (prefix-id id) (filter-map inline/stmt stmts)))
 
+  
   (define (inline/stmt s)
     (match s
-      [(AssignLL result src)
-       (AssignLL (inline/arg result) (inline/stmt src))]
-      [(BinaryLL op ty op1 op2)
-       (BinaryLL op ty (inline/arg op1) (inline/arg op2))]
-      [(BrLL label)
-       (BrLL (inline/arg label))]
-      [(BrCondLL cond iftrue iffalse)
-       (BrCondLL (inline/arg cond) (inline/arg iftrue) (inline/arg iffalse))]
-      [(StoreLL ty val ptr)
-       (StoreLL ty (inline/arg val) (inline/arg ptr))]
-      [(LoadLL ty ptr)
-       (LoadLL ty (inline/arg ptr))]
-      [(? ReturnLL?) #f]
-      [(GetEltLL ty ptr index)
-       (GetEltLL ty (inline/arg ptr) index)]
-      [(CallLL ty fn args var-args?)
-       (CallLL ty fn (map (λ+ ((cons id ty)) (cons (inline/arg id) ty)) args) var-args?)]
-      [(CastLL op ty value ty2)
-       (CastLL op ty (inline/arg value) ty2)]
-      [(PhiLL id ty args)
-       (PhiLL (inline/arg id) ty
-              (map (λ+ ((cons label (cons id ty)))
-                       (cons (inline/arg label) (cons (inline/arg id) ty))) args))]))
+      [(ReturnLL ty arg) (hash-set! ret-table target (inline/arg arg)) #f]
+      [_ (subst-vars s inline/arg)]))
   
   (define (inline/arg arg)
     (if (IdLL? arg)
@@ -137,6 +125,7 @@
       [(? symbol?) (format "~a_~a" inline-prefix id)]))
 
   inline-body)
+
 
 ;; --------------------------------------------------------------------
 
@@ -164,4 +153,3 @@
    blocks (sub1 (length blocks))
    (λ+ ((Block id block-stmts))
        (Block id (append block-stmts stmts)))))
-
