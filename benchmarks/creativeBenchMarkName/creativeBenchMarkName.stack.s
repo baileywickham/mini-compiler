@@ -63,30 +63,30 @@ buildList:
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	ldr r3, [sp, #8]
+	ldr r0, [sp, #8]
 	ldr r2, [sp, #4]
 	add r2, r2, #4
-	str r3, [r2]
-	ldr r3, [sp, #12]
-	ldr r2, [sp, #8]
-	add r2, r2, #4
-	str r3, [r2]
-	ldr r3, [sp, #16]
+	str r0, [r2]
+	ldr r2, [sp, #12]
+	ldr r0, [sp, #8]
+	add r0, r0, #4
+	str r2, [r0]
+	ldr r0, [sp, #16]
 	ldr r2, [sp, #12]
 	add r2, r2, #4
-	str r3, [r2]
-	ldr r3, [sp, #20]
+	str r0, [r2]
+	ldr r0, [sp, #20]
 	ldr r2, [sp, #16]
 	add r2, r2, #4
-	str r3, [r2]
-	ldr r3, [sp, #24]
-	ldr r2, [sp, #20]
-	add r2, r2, #4
-	str r3, [r2]
+	str r0, [r2]
 	ldr r2, [sp, #24]
-	add r3, r2, #4
+	ldr r0, [sp, #20]
+	add r0, r0, #4
+	str r2, [r0]
+	ldr r2, [sp, #24]
+	add r0, r2, #4
 	movw r2, #0
-	str r2, [r3]
+	str r2, [r0]
 	ldr r2, [sp, #4]
 	str r2, [sp, #0]
 	b .LU0
@@ -103,58 +103,58 @@ multiple:
 	push {fp, lr}
 	add fp, sp, #4
 	sub sp, sp, #20
-	mov r3, r0
-	str r3, [sp, #0]
-	movw r3, #0
-	str r3, [sp, #8]
-	ldr r3, [sp, #0]
-	str r3, [sp, #16]
-	ldr r3, [sp, #16]
-	ldr r3, [r3]
-	str r3, [sp, #12]
-	ldr r3, [sp, #16]
-	add r3, r3, #4
-	ldr r3, [r3]
-	str r3, [sp, #16]
-	ldr r3, [sp, #8]
-	mov r0, #0
-	cmp r3, #5
-	movlt r0, #1
-	cmp r0, #1
+	mov r2, r0
+	str r2, [sp, #0]
+	movw r2, #0
+	str r2, [sp, #8]
+	ldr r2, [sp, #0]
+	str r2, [sp, #16]
+	ldr r2, [sp, #16]
+	ldr r2, [r2]
+	str r2, [sp, #12]
+	ldr r2, [sp, #16]
+	add r2, r2, #4
+	ldr r2, [r2]
+	str r2, [sp, #16]
+	ldr r0, [sp, #8]
+	mov r2, #0
+	cmp r0, #5
+	movlt r2, #1
+	cmp r2, #1
 	beq .LU4
 	b .LU5
 .LU4:
 	ldr r0, [sp, #12]
-	ldr r3, [sp, #16]
-	ldr r3, [r3]
-	mul r3, r0, r3
-	str r3, [sp, #12]
-	ldr r3, [sp, #16]
-	add r3, r3, #4
-	ldr r3, [r3]
-	str r3, [sp, #16]
-	ldr r3, [sp, #12]
-	mov r1, r3
+	ldr r2, [sp, #16]
+	ldr r2, [r2]
+	mul r2, r0, r2
+	str r2, [sp, #12]
+	ldr r2, [sp, #16]
+	add r2, r2, #4
+	ldr r2, [r2]
+	str r2, [sp, #16]
+	ldr r2, [sp, #12]
+	mov r1, r2
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	ldr r3, [sp, #8]
-	add r3, r3, #1
-	str r3, [sp, #8]
-	ldr r3, [sp, #8]
+	ldr r2, [sp, #8]
+	add r2, r2, #1
+	str r2, [sp, #8]
+	ldr r2, [sp, #8]
 	mov r0, #0
-	cmp r3, #5
+	cmp r2, #5
 	movlt r0, #1
 	cmp r0, #1
 	beq .LU4
 	b .LU5
 .LU5:
-	ldr r3, [sp, #12]
-	str r3, [sp, #4]
+	ldr r2, [sp, #12]
+	str r2, [sp, #4]
 	b .LU2
 .LU2:
-	ldr r3, [sp, #4]
-	mov r0, r3
+	ldr r2, [sp, #4]
+	mov r0, r2
 	add sp, sp, #20
 	pop {fp, pc}
 	.size multiple, .-multiple
@@ -291,11 +291,11 @@ main:
 	bl __aeabi_idiv
 	sub r0, r4, r0
 	str r0, [sp, #16]
-	ldr r3, [sp, #24]
-	mov r0, #0
-	cmp r3, #2
-	movlt r0, #1
-	cmp r0, #1
+	ldr r0, [sp, #24]
+	mov r3, #0
+	cmp r0, #2
+	movlt r3, #1
+	cmp r3, #1
 	beq .LU17
 	b .LU18
 .LU17:
@@ -307,11 +307,11 @@ main:
 	ldr r0, [sp, #24]
 	add r0, r0, #1
 	str r0, [sp, #24]
-	ldr r3, [sp, #24]
-	mov r0, #0
-	cmp r3, #2
-	movlt r0, #1
-	cmp r0, #1
+	ldr r0, [sp, #24]
+	mov r3, #0
+	cmp r0, #2
+	movlt r3, #1
+	cmp r3, #1
 	beq .LU17
 	b .LU18
 .LU18:
@@ -320,11 +320,11 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	ldr r0, [sp, #20]
-	mov r3, #0
-	cmp r0, #0
-	movne r3, #1
-	cmp r3, #1
+	ldr r3, [sp, #20]
+	mov r0, #0
+	cmp r3, #0
+	movne r0, #1
+	cmp r0, #1
 	beq .LU19
 	b .LU20
 .LU19:

@@ -13,14 +13,14 @@ move:
 	add fp, sp, #4
 	sub sp, sp, #12
 	mov r2, r0
-	mov r3, r1
+	mov r0, r1
 	str r2, [sp, #0]
-	str r3, [sp, #4]
+	str r0, [sp, #4]
 	ldr r2, [sp, #0]
-	mov r3, #0
+	mov r0, #0
 	cmp r2, #1
-	moveq r3, #1
-	cmp r3, #1
+	moveq r0, #1
+	cmp r0, #1
 	beq .LU2
 	b .LU3
 .LU2:
@@ -33,16 +33,16 @@ move:
 	ldr r2, [r2]
 	add r2, r2, #4
 	ldr r2, [r2]
-	movw r3, #:lower16:peg1
-	movt r3, #:upper16:peg1
-	str r2, [r3]
+	movw r0, #:lower16:peg1
+	movt r0, #:upper16:peg1
+	str r2, [r0]
 	b .LU4
 .LU3:
 	ldr r2, [sp, #0]
-	mov r3, #0
+	mov r0, #0
 	cmp r2, #2
-	moveq r3, #1
-	cmp r3, #1
+	moveq r0, #1
+	cmp r0, #1
 	beq .LU11
 	b .LU12
 .LU11:
@@ -54,10 +54,10 @@ move:
 	movt r2, #:upper16:peg2
 	ldr r2, [r2]
 	add r2, r2, #4
-	ldr r3, [r2]
-	movw r2, #:lower16:peg2
-	movt r2, #:upper16:peg2
-	str r3, [r2]
+	ldr r2, [r2]
+	movw r0, #:lower16:peg2
+	movt r0, #:upper16:peg2
+	str r2, [r0]
 	b .LU13
 .LU12:
 	movw r2, #:lower16:peg3
@@ -68,17 +68,17 @@ move:
 	movt r2, #:upper16:peg3
 	ldr r2, [r2]
 	add r2, r2, #4
-	ldr r3, [r2]
+	ldr r0, [r2]
 	movw r2, #:lower16:peg3
 	movt r2, #:upper16:peg3
-	str r3, [r2]
+	str r0, [r2]
 	b .LU13
 .LU13:
 	b .LU4
 .LU4:
-	ldr r3, [sp, #4]
+	ldr r0, [sp, #4]
 	mov r2, #0
-	cmp r3, #1
+	cmp r0, #1
 	moveq r2, #1
 	cmp r2, #1
 	beq .LU5
@@ -86,46 +86,46 @@ move:
 .LU5:
 	movw r2, #:lower16:peg1
 	movt r2, #:upper16:peg1
-	ldr r3, [r2]
+	ldr r0, [r2]
 	ldr r2, [sp, #8]
 	add r2, r2, #4
-	str r3, [r2]
-	ldr r3, [sp, #8]
-	movw r2, #:lower16:peg1
-	movt r2, #:upper16:peg1
-	str r3, [r2]
+	str r0, [r2]
+	ldr r2, [sp, #8]
+	movw r0, #:lower16:peg1
+	movt r0, #:upper16:peg1
+	str r2, [r0]
 	b .LU7
 .LU6:
 	ldr r2, [sp, #4]
-	mov r3, #0
+	mov r0, #0
 	cmp r2, #2
-	moveq r3, #1
-	cmp r3, #1
+	moveq r0, #1
+	cmp r0, #1
 	beq .LU8
 	b .LU9
 .LU8:
 	movw r2, #:lower16:peg2
 	movt r2, #:upper16:peg2
-	ldr r3, [r2]
+	ldr r0, [r2]
 	ldr r2, [sp, #8]
 	add r2, r2, #4
-	str r3, [r2]
-	ldr r3, [sp, #8]
+	str r0, [r2]
+	ldr r0, [sp, #8]
 	movw r2, #:lower16:peg2
 	movt r2, #:upper16:peg2
-	str r3, [r2]
+	str r0, [r2]
 	b .LU10
 .LU9:
 	movw r2, #:lower16:peg3
 	movt r2, #:upper16:peg3
-	ldr r3, [r2]
+	ldr r0, [r2]
 	ldr r2, [sp, #8]
 	add r2, r2, #4
-	str r3, [r2]
-	ldr r3, [sp, #8]
-	movw r2, #:lower16:peg3
-	movt r2, #:upper16:peg3
-	str r3, [r2]
+	str r0, [r2]
+	ldr r2, [sp, #8]
+	movw r0, #:lower16:peg3
+	movt r0, #:upper16:peg3
+	str r2, [r0]
 	b .LU10
 .LU10:
 	b .LU7
@@ -134,9 +134,9 @@ move:
 	movt r2, #:upper16:numMoves
 	ldr r2, [r2]
 	add r2, r2, #1
-	movw r3, #:lower16:numMoves
-	movt r3, #:upper16:numMoves
-	str r2, [r3]
+	movw r0, #:lower16:numMoves
+	movt r0, #:upper16:numMoves
+	str r2, [r0]
 	b .LU0
 .LU0:
 	add sp, sp, #12
@@ -242,28 +242,28 @@ main:
 	add fp, sp, #4
 	sub sp, sp, #16
 	movw r2, #0
-	movw r0, #:lower16:peg1
-	movt r0, #:upper16:peg1
-	str r2, [r0]
-	movw r0, #0
-	movw r2, #:lower16:peg2
-	movt r2, #:upper16:peg2
-	str r0, [r2]
+	movw r3, #:lower16:peg1
+	movt r3, #:upper16:peg1
+	str r2, [r3]
 	movw r2, #0
-	movw r0, #:lower16:peg3
-	movt r0, #:upper16:peg3
-	str r2, [r0]
+	movw r3, #:lower16:peg2
+	movt r3, #:upper16:peg2
+	str r2, [r3]
+	movw r3, #0
+	movw r2, #:lower16:peg3
+	movt r2, #:upper16:peg3
+	str r3, [r2]
 	movw r2, #0
-	movw r0, #:lower16:numMoves
-	movt r0, #:upper16:numMoves
-	str r2, [r0]
+	movw r3, #:lower16:numMoves
+	movt r3, #:upper16:numMoves
+	str r2, [r3]
 	add r1, sp, #8
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	ldr r0, [sp, #8]
+	ldr r3, [sp, #8]
 	mov r2, #0
-	cmp r0, #1
+	cmp r3, #1
 	movge r2, #1
 	cmp r2, #1
 	beq .LU25
@@ -271,11 +271,11 @@ main:
 .LU25:
 	ldr r2, [sp, #8]
 	str r2, [sp, #4]
-	ldr r0, [sp, #4]
-	mov r2, #0
-	cmp r0, #0
-	movne r2, #1
-	cmp r2, #1
+	ldr r2, [sp, #4]
+	mov r3, #0
+	cmp r2, #0
+	movne r3, #1
+	cmp r3, #1
 	beq .LU27
 	b .LU28
 .LU27:
@@ -283,27 +283,27 @@ main:
 	bl malloc
 	mov r2, r0
 	str r2, [sp, #12]
-	ldr r0, [sp, #4]
+	ldr r3, [sp, #4]
 	ldr r2, [sp, #12]
-	str r0, [r2]
+	str r3, [r2]
 	movw r2, #:lower16:peg1
 	movt r2, #:upper16:peg1
-	ldr r0, [r2]
+	ldr r3, [r2]
 	ldr r2, [sp, #12]
 	add r2, r2, #4
-	str r0, [r2]
+	str r3, [r2]
 	ldr r2, [sp, #12]
-	movw r0, #:lower16:peg1
-	movt r0, #:upper16:peg1
-	str r2, [r0]
+	movw r3, #:lower16:peg1
+	movt r3, #:upper16:peg1
+	str r2, [r3]
 	ldr r2, [sp, #4]
 	sub r2, r2, #1
 	str r2, [sp, #4]
 	ldr r2, [sp, #4]
-	mov r0, #0
+	mov r3, #0
 	cmp r2, #0
-	movne r0, #1
-	cmp r0, #1
+	movne r3, #1
+	cmp r3, #1
 	beq .LU27
 	b .LU28
 .LU28:
@@ -376,10 +376,10 @@ main:
 	movw r2, #:lower16:peg3
 	movt r2, #:upper16:peg3
 	ldr r2, [r2]
-	mov r0, #0
+	mov r3, #0
 	cmp r2, #0
-	movne r0, #1
-	cmp r0, #1
+	movne r3, #1
+	cmp r3, #1
 	beq .LU29
 	b .LU30
 .LU29:
@@ -391,20 +391,20 @@ main:
 	movt r2, #:upper16:peg3
 	ldr r2, [r2]
 	add r2, r2, #4
-	ldr r2, [r2]
-	movw r0, #:lower16:peg3
-	movt r0, #:upper16:peg3
-	str r2, [r0]
+	ldr r3, [r2]
+	movw r2, #:lower16:peg3
+	movt r2, #:upper16:peg3
+	str r3, [r2]
 	ldr r2, [sp, #12]
 	mov r0, r2
 	bl free
 	movw r2, #:lower16:peg3
 	movt r2, #:upper16:peg3
-	ldr r2, [r2]
-	mov r0, #0
-	cmp r2, #0
-	movne r0, #1
-	cmp r0, #1
+	ldr r3, [r2]
+	mov r2, #0
+	cmp r3, #0
+	movne r2, #1
+	cmp r2, #1
 	beq .LU29
 	b .LU30
 .LU30:

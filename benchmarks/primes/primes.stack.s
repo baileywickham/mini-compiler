@@ -64,11 +64,11 @@ prime:
 	sub sp, sp, #20
 	mov r3, r0
 	str r3, [sp, #0]
-	ldr r3, [sp, #0]
-	mov r0, #0
-	cmp r3, #2
-	movlt r0, #1
-	cmp r0, #1
+	ldr r0, [sp, #0]
+	mov r3, #0
+	cmp r0, #2
+	movlt r3, #1
+	cmp r3, #1
 	beq .LU6
 	b .LU7
 .LU6:
@@ -83,12 +83,12 @@ prime:
 	str r3, [sp, #8]
 	movw r3, #2
 	str r3, [sp, #12]
-	ldr r0, [sp, #12]
+	ldr r2, [sp, #12]
 	ldr r3, [sp, #8]
-	mov r2, #0
-	cmp r0, r3
-	movle r2, #1
-	cmp r2, #1
+	mov r0, #0
+	cmp r2, r3
+	movle r0, #1
+	cmp r0, #1
 	beq .LU9
 	b .LU10
 .LU9:
@@ -98,8 +98,9 @@ prime:
 	mov r1, r0
 	mov r0, r3
 	bl __aeabi_idiv
-	ldr r3, [sp, #12]
-	mul r3, r0, r3
+	mov r3, r0
+	ldr r0, [sp, #12]
+	mul r3, r3, r0
 	sub r3, r4, r3
 	str r3, [sp, #16]
 	ldr r3, [sp, #16]
@@ -152,9 +153,9 @@ main:
 	movw r2, #0
 	str r2, [sp, #8]
 	ldr r3, [sp, #8]
-	ldr r1, [sp, #4]
+	ldr r0, [sp, #4]
 	mov r2, #0
-	cmp r3, r1
+	cmp r3, r0
 	movle r2, #1
 	cmp r2, #1
 	beq .LU15
@@ -178,12 +179,12 @@ main:
 	ldr r2, [sp, #8]
 	add r2, r2, #1
 	str r2, [sp, #8]
-	ldr r3, [sp, #8]
-	ldr r1, [sp, #4]
-	mov r2, #0
-	cmp r3, r1
-	movle r2, #1
-	cmp r2, #1
+	ldr r2, [sp, #8]
+	ldr r3, [sp, #4]
+	mov r0, #0
+	cmp r2, r3
+	movle r0, #1
+	cmp r0, #1
 	beq .LU15
 	b .LU16
 .LU16:

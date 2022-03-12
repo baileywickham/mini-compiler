@@ -49,6 +49,10 @@
   (compile mini-file #t #f #f #f (path-replace-extension mini-file ".stack.s"))
   (compile mini-file #f #f #f #f (path-replace-extension mini-file ".reg.s"))
   (compile mini-file #f #f #t #f (path-replace-extension mini-file ".opt.s"))
+
+  (compile mini-file #t #t #f #f (path-replace-extension mini-file ".stack.ll"))
+  (compile mini-file #f #t #f #f (path-replace-extension mini-file ".reg.ll"))
+  (compile mini-file #f #t #t #f (path-replace-extension mini-file ".opt.ll"))
   (void))
 
 
@@ -86,5 +90,5 @@
    [("-s" "--stack") "Compile in stack mode" (stack? #t)]
    [("--llvm") "Execute LLVM-ir with clang" (llvm? #t)]
    [("--build") "Build benchmark for timing" (build? #t)])
-  
+
   (benchmark (regexp-pattern) (list?) (error?) (stack?) (llvm?) (build?)))

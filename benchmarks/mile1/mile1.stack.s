@@ -23,9 +23,9 @@ calcPower:
 	beq .LU2
 	b .LU3
 .LU2:
-	ldr r2, [sp, #12]
-	ldr r0, [sp, #0]
-	mul r2, r2, r0
+	ldr r0, [sp, #12]
+	ldr r2, [sp, #0]
+	mul r2, r0, r2
 	str r2, [sp, #12]
 	ldr r2, [sp, #4]
 	sub r2, r2, #1
@@ -64,9 +64,9 @@ main:
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	ldr r0, [sp, #8]
-	ldr r2, [sp, #4]
-	str r0, [r2]
+	ldr r2, [sp, #8]
+	ldr r0, [sp, #4]
+	str r2, [r0]
 	add r1, sp, #8
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
@@ -90,13 +90,13 @@ main:
 	str r0, [r2]
 	movw r2, #0
 	str r2, [sp, #16]
-	ldr r2, [sp, #16]
-	movw r3, #:lower16:1000000
-	movt r3, #:upper16:1000000
-	mov r0, #0
-	cmp r2, r3
-	movlt r0, #1
-	cmp r0, #1
+	ldr r3, [sp, #16]
+	movw r0, #:lower16:1000000
+	movt r0, #:upper16:1000000
+	mov r2, #0
+	cmp r3, r0
+	movlt r2, #1
+	cmp r2, #1
 	beq .LU8
 	b .LU9
 .LU8:
@@ -113,13 +113,13 @@ main:
 	bl calcPower
 	mov r2, r0
 	str r2, [sp, #12]
-	ldr r0, [sp, #16]
-	movw r3, #:lower16:1000000
-	movt r3, #:upper16:1000000
-	mov r2, #0
-	cmp r0, r3
-	movlt r2, #1
-	cmp r2, #1
+	ldr r2, [sp, #16]
+	movw r0, #:lower16:1000000
+	movt r0, #:upper16:1000000
+	mov r3, #0
+	cmp r2, r0
+	movlt r3, #1
+	cmp r3, #1
 	beq .LU8
 	b .LU9
 .LU9:
@@ -128,7 +128,7 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	movw r2, #1
+	movw r2, #0
 	str r2, [sp, #0]
 	b .LU4
 .LU4:

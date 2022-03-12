@@ -46,41 +46,41 @@ power:
 	push {fp, lr}
 	add fp, sp, #4
 	sub sp, sp, #16
-	mov r3, r0
+	mov r2, r0
 	mov r0, r1
-	str r3, [sp, #0]
+	str r2, [sp, #0]
 	str r0, [sp, #4]
-	movw r3, #1
-	str r3, [sp, #12]
-	ldr r3, [sp, #4]
+	movw r2, #1
+	str r2, [sp, #12]
+	ldr r2, [sp, #4]
 	mov r0, #0
-	cmp r3, #0
+	cmp r2, #0
 	movgt r0, #1
 	cmp r0, #1
 	beq .LU6
 	b .LU7
 .LU6:
-	ldr r3, [sp, #12]
+	ldr r2, [sp, #12]
 	ldr r0, [sp, #0]
-	mul r3, r3, r0
-	str r3, [sp, #12]
-	ldr r3, [sp, #4]
-	sub r3, r3, #1
-	str r3, [sp, #4]
+	mul r2, r2, r0
+	str r2, [sp, #12]
+	ldr r2, [sp, #4]
+	sub r2, r2, #1
+	str r2, [sp, #4]
 	ldr r0, [sp, #4]
-	mov r3, #0
+	mov r2, #0
 	cmp r0, #0
-	movgt r3, #1
-	cmp r3, #1
+	movgt r2, #1
+	cmp r2, #1
 	beq .LU6
 	b .LU7
 .LU7:
-	ldr r3, [sp, #12]
-	str r3, [sp, #8]
+	ldr r2, [sp, #12]
+	str r2, [sp, #8]
 	b .LU4
 .LU4:
-	ldr r3, [sp, #8]
-	mov r0, r3
+	ldr r2, [sp, #8]
+	mov r0, r2
 	add sp, sp, #16
 	pop {fp, pc}
 	.size power, .-power
@@ -94,10 +94,10 @@ recursiveDecimalSum:
 	sub sp, sp, #24
 	mov r3, r0
 	mov r0, r1
-	mov r1, r2
+	mov r4, r2
 	str r3, [sp, #0]
 	str r0, [sp, #4]
-	str r1, [sp, #8]
+	str r4, [sp, #8]
 	ldr r3, [sp, #0]
 	mov r0, #0
 	cmp r3, #0
@@ -122,11 +122,11 @@ recursiveDecimalSum:
 	ldr r3, [sp, #16]
 	sub r3, r0, r3
 	str r3, [sp, #16]
-	ldr r3, [sp, #16]
-	mov r0, #0
-	cmp r3, #1
-	moveq r0, #1
+	ldr r0, [sp, #16]
+	mov r3, #0
 	cmp r0, #1
+	moveq r3, #1
+	cmp r3, #1
 	beq .LU12
 	b .LU13
 .LU12:
@@ -147,9 +147,9 @@ recursiveDecimalSum:
 	bl __aeabi_idiv
 	mov r3, r0
 	ldr r0, [sp, #4]
-	ldr r1, [sp, #8]
-	add r1, r1, #1
-	mov r2, r1
+	ldr r4, [sp, #8]
+	add r4, r4, #1
+	mov r2, r4
 	mov r1, r0
 	mov r0, r3
 	bl recursiveDecimalSum
@@ -211,13 +211,13 @@ main:
 	bl convertToDecimal
 	mov r2, r0
 	str r2, [sp, #4]
-	ldr r3, [sp, #4]
+	ldr r0, [sp, #4]
 	ldr r2, [sp, #4]
-	mul r2, r3, r2
+	mul r2, r0, r2
 	str r2, [sp, #8]
-	ldr r3, [sp, #8]
+	ldr r0, [sp, #8]
 	mov r2, #0
-	cmp r3, #0
+	cmp r0, #0
 	movgt r2, #1
 	cmp r2, #1
 	beq .LU18
@@ -230,10 +230,10 @@ main:
 	sub r2, r2, #1
 	str r2, [sp, #8]
 	ldr r2, [sp, #8]
-	mov r3, #0
+	mov r0, #0
 	cmp r2, #0
-	movgt r3, #1
-	cmp r3, #1
+	movgt r0, #1
+	cmp r0, #1
 	beq .LU18
 	b .LU19
 .LU19:

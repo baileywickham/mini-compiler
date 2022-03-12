@@ -57,10 +57,9 @@ setcounter:
 	movw r2, #:lower16:counter
 	movt r2, #:upper16:counter
 	str r3, [r2]
-	movw r2, #1
 	b .LU2
 .LU2:
-	mov r0, r2
+	movw r0, #1
 	pop {fp, pc}
 	.size setcounter, .-setcounter
 	.align 2
@@ -306,8 +305,6 @@ main:
 	movw r0, #1
 	bl printgroup
 	movw r4, #0
-	movw r3, #0
-	and r4, r4, r3
 	cmp r4, #1
 	beq .LU37
 	b .LU38
@@ -324,9 +321,7 @@ main:
 	bl printf
 	b .LU39
 .LU39:
-	movw r3, #1
 	movw r4, #0
-	and r4, r3, r4
 	cmp r4, #1
 	beq .LU40
 	b .LU41
@@ -344,8 +339,6 @@ main:
 	b .LU42
 .LU42:
 	movw r4, #0
-	movw r3, #1
-	and r4, r4, r3
 	cmp r4, #1
 	beq .LU43
 	b .LU44
@@ -362,9 +355,7 @@ main:
 	bl printf
 	b .LU45
 .LU45:
-	movw r3, #1
 	movw r4, #1
-	and r4, r3, r4
 	cmp r4, #1
 	beq .LU46
 	b .LU47
@@ -381,15 +372,13 @@ main:
 	bl printf
 	b .LU48
 .LU48:
-	movw r3, #0
-	movw r4, #:lower16:counter
-	movt r4, #:upper16:counter
-	str r3, [r4]
+	movw r4, #0
+	movw r3, #:lower16:counter
+	movt r3, #:upper16:counter
+	str r4, [r3]
 	movw r0, #2
 	bl printgroup
 	movw r4, #1
-	movw r3, #1
-	orr r4, r4, r3
 	cmp r4, #1
 	beq .LU49
 	b .LU50
@@ -407,8 +396,6 @@ main:
 	b .LU51
 .LU51:
 	movw r4, #1
-	movw r3, #0
-	orr r4, r4, r3
 	cmp r4, #1
 	beq .LU52
 	b .LU53
@@ -425,9 +412,7 @@ main:
 	bl printf
 	b .LU54
 .LU54:
-	movw r4, #0
-	movw r3, #1
-	orr r4, r4, r3
+	movw r4, #1
 	cmp r4, #1
 	beq .LU55
 	b .LU56
@@ -444,9 +429,7 @@ main:
 	bl printf
 	b .LU57
 .LU57:
-	movw r3, #0
 	movw r4, #0
-	orr r4, r3, r4
 	cmp r4, #1
 	beq .LU58
 	b .LU59
@@ -792,8 +775,7 @@ main:
 	b .LU114
 .LU114:
 	movw r4, #1
-	mov r3, r4
-	cmp r3, #1
+	cmp r4, #1
 	beq .LU115
 	b .LU116
 .LU115:
@@ -801,12 +783,14 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
+	movw r4, #1
 	b .LU117
 .LU116:
 	movw r1, #0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
+	movw r4, #1
 	b .LU117
 .LU117:
 	mov r3, r4
@@ -829,8 +813,7 @@ main:
 	b .LU120
 .LU120:
 	movw r4, #0
-	mov r3, r4
-	cmp r3, #1
+	cmp r4, #1
 	beq .LU121
 	b .LU122
 .LU121:
@@ -838,17 +821,19 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
+	movw r4, #0
 	b .LU123
 .LU122:
 	movw r1, #1
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
+	movw r4, #0
 	b .LU123
 .LU123:
 	mov r3, r4
-	movw r2, #1
-	eor r3, r2, r3
+	movw r0, #1
+	eor r3, r0, r3
 	cmp r3, #1
 	beq .LU124
 	b .LU125
@@ -883,7 +868,7 @@ main:
 .LU129:
 	movw r0, #6
 	bl printgroup
-	movw r2, #0
+	movw r0, #0
 	movw r3, #0
 	movw r4, #1
 	cmp r4, #1
@@ -910,12 +895,12 @@ main:
 	mov r4, #0
 	cmp r3, #5
 	movlt r4, #1
-	mov r2, r3
+	mov r0, r3
 	cmp r4, #1
 	beq .LU130
 	b .LU131
 .LU131:
-	mov r4, r2
+	mov r4, r0
 	mov r3, #0
 	cmp r4, #5
 	moveq r3, #1
@@ -944,18 +929,18 @@ main:
 	movw r0, #12
 	bl malloc
 	mov r4, r0
-	mov r2, r4
-	movw r3, #42
-	str r3, [r2]
-	movw r3, #1
-	add r2, r4, #4
-	str r3, [r2]
+	mov r3, r4
+	movw r0, #42
+	str r0, [r3]
+	add r3, r4, #4
+	movw r0, #1
+	str r0, [r3]
 	mov r3, r4
 	ldr r3, [r3]
-	mov r2, #0
+	mov r0, #0
 	cmp r3, #42
-	moveq r2, #1
-	cmp r2, #1
+	moveq r0, #1
+	cmp r0, #1
 	beq .LU138
 	b .LU139
 .LU138:
@@ -998,25 +983,25 @@ main:
 	movw r0, #12
 	bl malloc
 	mov r3, r0
-	mov r2, r3
+	mov r0, r3
 	add r3, r4, #8
-	str r2, [r3]
-	add r3, r4, #8
-	ldr r3, [r3]
-	movw r2, #13
-	str r2, [r3]
-	movw r3, #0
-	add r2, r4, #8
-	ldr r2, [r2]
-	add r2, r2, #4
-	str r3, [r2]
+	str r0, [r3]
 	add r3, r4, #8
 	ldr r3, [r3]
+	movw r0, #13
+	str r0, [r3]
+	add r3, r4, #8
 	ldr r3, [r3]
-	mov r2, #0
+	add r3, r3, #4
+	movw r0, #0
+	str r0, [r3]
+	add r3, r4, #8
+	ldr r3, [r3]
+	ldr r3, [r3]
+	mov r0, #0
 	cmp r3, #13
-	moveq r2, #1
-	cmp r2, #1
+	moveq r0, #1
+	cmp r0, #1
 	beq .LU144
 	b .LU145
 .LU144:
@@ -1043,9 +1028,9 @@ main:
 	ldr r3, [r3]
 	add r3, r3, #4
 	ldr r3, [r3]
-	mov r2, r3
+	mov r0, r3
 	movw r3, #1
-	eor r3, r3, r2
+	eor r3, r3, r0
 	cmp r3, #1
 	beq .LU147
 	b .LU148
@@ -1082,11 +1067,11 @@ main:
 	b .LU152
 .LU152:
 	add r3, r4, #8
-	ldr r2, [r3]
-	mov r3, #0
-	cmp r4, r2
-	movne r3, #1
-	cmp r3, #1
+	ldr r3, [r3]
+	mov r0, #0
+	cmp r4, r3
+	movne r0, #1
+	cmp r0, #1
 	beq .LU153
 	b .LU154
 .LU153:
@@ -1110,17 +1095,17 @@ main:
 	bl free
 	movw r0, #8
 	bl printgroup
-	movw r3, #7
+	movw r4, #7
+	movw r3, #:lower16:gi1
+	movt r3, #:upper16:gi1
+	str r4, [r3]
 	movw r4, #:lower16:gi1
 	movt r4, #:upper16:gi1
-	str r3, [r4]
-	movw r4, #:lower16:gi1
-	movt r4, #:upper16:gi1
-	ldr r3, [r4]
-	mov r4, #0
-	cmp r3, #7
-	moveq r4, #1
-	cmp r4, #1
+	ldr r4, [r4]
+	mov r3, #0
+	cmp r4, #7
+	moveq r3, #1
+	cmp r3, #1
 	beq .LU156
 	b .LU157
 .LU156:
@@ -1169,30 +1154,29 @@ main:
 	movw r0, #12
 	bl malloc
 	mov r4, r0
-	mov r3, r4
-	movw r4, #:lower16:gs1
-	movt r4, #:upper16:gs1
-	str r3, [r4]
+	movw r3, #:lower16:gs1
+	movt r3, #:upper16:gs1
+	str r4, [r3]
 	movw r4, #:lower16:gs1
 	movt r4, #:upper16:gs1
 	ldr r4, [r4]
 	mov r3, r4
 	movw r4, #34
 	str r4, [r3]
-	movw r3, #0
 	movw r4, #:lower16:gs1
 	movt r4, #:upper16:gs1
 	ldr r4, [r4]
 	add r4, r4, #4
+	movw r3, #0
 	str r3, [r4]
 	movw r4, #:lower16:gs1
 	movt r4, #:upper16:gs1
 	ldr r4, [r4]
-	ldr r4, [r4]
-	mov r3, #0
-	cmp r4, #34
-	moveq r3, #1
-	cmp r3, #1
+	ldr r3, [r4]
+	mov r4, #0
+	cmp r3, #34
+	moveq r4, #1
+	cmp r4, #1
 	beq .LU162
 	b .LU163
 .LU162:
@@ -1243,12 +1227,11 @@ main:
 	movw r0, #12
 	bl malloc
 	mov r4, r0
-	mov r3, r4
-	movw r4, #:lower16:gs1
-	movt r4, #:upper16:gs1
-	ldr r4, [r4]
-	add r4, r4, #8
-	str r3, [r4]
+	movw r3, #:lower16:gs1
+	movt r3, #:upper16:gs1
+	ldr r3, [r3]
+	add r3, r3, #8
+	str r4, [r3]
 	movw r4, #:lower16:gs1
 	movt r4, #:upper16:gs1
 	ldr r4, [r4]
@@ -1256,24 +1239,24 @@ main:
 	ldr r4, [r4]
 	movw r3, #16
 	str r3, [r4]
-	movw r4, #1
-	movw r3, #:lower16:gs1
-	movt r3, #:upper16:gs1
-	ldr r3, [r3]
-	add r3, r3, #8
-	ldr r3, [r3]
-	add r3, r3, #4
-	str r4, [r3]
 	movw r4, #:lower16:gs1
 	movt r4, #:upper16:gs1
 	ldr r4, [r4]
 	add r4, r4, #8
 	ldr r4, [r4]
+	add r4, r4, #4
+	movw r3, #1
+	str r3, [r4]
+	movw r4, #:lower16:gs1
+	movt r4, #:upper16:gs1
 	ldr r4, [r4]
-	mov r3, #0
-	cmp r4, #16
-	moveq r3, #1
-	cmp r3, #1
+	add r4, r4, #8
+	ldr r4, [r4]
+	ldr r3, [r4]
+	mov r4, #0
+	cmp r3, #16
+	moveq r4, #1
+	cmp r4, #1
 	beq .LU168
 	b .LU169
 .LU168:
@@ -1339,13 +1322,12 @@ main:
 	movw r0, #12
 	bl malloc
 	mov r4, r0
-	mov r3, r4
-	movw r2, #1
-	add r4, r3, #4
-	str r2, [r4]
+	mov r0, r4
+	add r3, r0, #4
 	movw r4, #1
-	mov r2, r3
-	mov r1, r4
+	str r4, [r3]
+	mov r2, r0
+	movw r1, #1
 	movw r0, #3
 	bl takealltypes
 	movw r1, #2
@@ -1395,8 +1377,7 @@ main:
 	bl printf
 	b .LU176
 .LU176:
-	movw r4, #1
-	mov r0, r4
+	movw r0, #1
 	bl returnbool
 	mov r4, r0
 	cmp r4, #1
@@ -1420,11 +1401,10 @@ main:
 	mov r4, r0
 	mov r0, r4
 	bl returnstruct
-	mov r3, r0
-	mov r2, #0
-	cmp r4, r3
-	moveq r2, #1
-	cmp r2, #1
+	mov r3, #0
+	cmp r4, r0
+	moveq r3, #1
+	cmp r3, #1
 	beq .LU180
 	b .LU181
 .LU180:

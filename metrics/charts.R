@@ -24,7 +24,7 @@ statsForBenchmark <- function(name) {
     theme(legend.position = "none") +
     geom_violin(trim = FALSE) +
     geom_jitter(position = position_jitter(0.3)) +
-    labs(title = "Real Execution time on \\texttt{input.longer}", x = "", y = "Time (s)") +
+    labs(title = "real execution time on \\texttt{input.longer}", x = "", y = "Time (s)") +
     scale_color_manual(values = c("#8c96c6", "#8856a7", "#810f7c", "#2ca25f", "#006d2c")) +
     guides(color = FALSE) +
     theme_minimal() +

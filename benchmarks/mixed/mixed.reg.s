@@ -53,94 +53,105 @@ domath:
 	movw r0, #12
 	bl malloc
 	mov r3, r0
-	mov r6, r3
-	movw r0, #4
-	bl malloc
-	mov r3, r0
-	mov r2, r3
-	add r3, r6, #8
-	str r2, [r3]
-	movw r0, #12
-	bl malloc
-	mov r3, r0
 	mov r5, r3
 	movw r0, #4
 	bl malloc
 	mov r3, r0
-	mov r2, r3
+	mov r0, r3
 	add r3, r5, #8
-	str r2, [r3]
-	mov r3, r6
-	str r4, [r3]
+	str r0, [r3]
+	movw r0, #12
+	bl malloc
+	mov r3, r0
+	mov r6, r3
+	movw r0, #4
+	bl malloc
+	mov r3, r0
+	add r0, r6, #8
+	str r3, [r0]
 	mov r3, r5
-	movw r2, #3
-	str r2, [r3]
+	str r4, [r3]
+	mov r0, r6
+	movw r3, #3
+	str r3, [r0]
+	mov r3, r5
+	ldr r0, [r3]
+	add r3, r5, #8
+	ldr r3, [r3]
+	str r0, [r3]
 	mov r3, r6
-	ldr r2, [r3]
+	ldr r0, [r3]
 	add r3, r6, #8
 	ldr r3, [r3]
-	str r2, [r3]
-	mov r3, r5
-	ldr r2, [r3]
-	add r3, r5, #8
-	ldr r3, [r3]
-	str r2, [r3]
-	mov r0, #0
+	str r0, [r3]
+	mov r1, #0
 	cmp r4, #0
-	movgt r0, #1
+	movgt r1, #1
+	mov r0, r5
 	mov r3, r6
 	mov r2, r5
-	mov r1, r6
-	cmp r0, #1
+	mov r5, r6
+	cmp r1, #1
 	beq .LU9
 	b .LU10
 .LU9:
 	mov r6, r4
 	mov r4, r5
-	mov r5, r1
+	mov r5, r2
 	mov r3, r5
-	ldr r2, [r3]
+	ldr r0, [r3]
 	mov r3, r4
 	ldr r3, [r3]
-	mul r2, r2, r3
+	mul r0, r0, r3
 	add r3, r5, #8
 	ldr r3, [r3]
 	ldr r3, [r3]
-	mul r3, r2, r3
-	mov r2, r4
-	ldr r2, [r2]
-	mov r1, r2
+	mul r3, r0, r3
+	mov r0, r4
+	ldr r0, [r0]
+	mov r1, r0
 	mov r0, r3
 	bl __aeabi_idiv
 	add r3, r4, #8
 	ldr r3, [r3]
 	ldr r3, [r3]
-	mov r2, r5
-	ldr r2, [r2]
-	mov r1, r2
+	mov r0, r5
+	ldr r0, [r0]
+	mov r1, r0
 	mov r0, r3
 	bl add
 	mov r3, r4
-	ldr r2, [r3]
+	ldr r0, [r3]
 	mov r3, r5
 	ldr r3, [r3]
-	sub r0, r6, #1
-	mov r6, #0
-	cmp r0, #0
-	movgt r6, #1
-	mov r3, r5
-	mov r2, r4
-	mov r1, r5
+	sub r6, r6, #1
+	mov r1, #0
+	cmp r6, #0
+	movgt r1, #1
+	mov r0, r5
+	mov r3, r4
+	mov r2, r5
 	mov r5, r4
-	mov r4, r0
-	cmp r6, #1
+	mov r4, r6
+	cmp r1, #1
 	beq .LU9
 	b .LU10
 .LU10:
-	mov r4, r2
+	mov r4, r3
+	mov r5, r0
+	add r3, r5, #8
+	ldr r3, [r3]
 	mov r0, r3
 	bl free
-	mov r0, r4
+	add r3, r4, #8
+	ldr r3, [r3]
+	mov r0, r3
+	bl free
+	mov r3, r5
+	mov r0, r3
+	bl free
+	mov r3, r4
+	mov r0, r3
 	bl free
 	b .LU7
 .LU7:
@@ -188,47 +199,47 @@ ackermann:
 	push {fp, lr}
 	add fp, sp, #4
 	push {r4}
-	mov r3, r0
+	mov r2, r0
 	mov r0, r1
-	mov r2, #0
-	cmp r3, #0
-	moveq r2, #1
-	cmp r2, #1
+	mov r1, #0
+	cmp r2, #0
+	moveq r1, #1
+	cmp r1, #1
 	beq .LU17
 	b .LU18
 .LU17:
-	add r3, r0, #1
+	add r2, r0, #1
 	b .LU15
 .LU18:
 	b .LU19
 .LU19:
-	mov r2, #0
+	mov r1, #0
 	cmp r0, #0
-	moveq r2, #1
-	cmp r2, #1
+	moveq r1, #1
+	cmp r1, #1
 	beq .LU20
 	b .LU21
 .LU20:
-	sub r3, r3, #1
+	sub r2, r2, #1
 	movw r1, #1
-	mov r0, r3
+	mov r0, r2
 	bl ackermann
-	mov r3, r0
+	mov r2, r0
 	b .LU15
 .LU21:
-	sub r4, r3, #1
+	sub r4, r2, #1
 	sub r0, r0, #1
 	mov r1, r0
-	mov r0, r3
+	mov r0, r2
 	bl ackermann
-	mov r3, r0
-	mov r1, r3
+	mov r2, r0
+	mov r1, r2
 	mov r0, r4
 	bl ackermann
-	mov r3, r0
+	mov r2, r0
 	b .LU15
 .LU15:
-	mov r0, r3
+	mov r0, r2
 	pop {r4}
 	pop {fp, pc}
 	.size ackermann, .-ackermann
@@ -244,44 +255,44 @@ main:
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw r0, #:lower16:.read_scratch
-	movt r0, #:upper16:.read_scratch
-	ldr r5, [r0]
+	movw r2, #:lower16:.read_scratch
+	movt r2, #:upper16:.read_scratch
+	ldr r7, [r2]
 	movw r1, #:lower16:.read_scratch
 	movt r1, #:upper16:.read_scratch
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw r0, #:lower16:.read_scratch
-	movt r0, #:upper16:.read_scratch
-	ldr r8, [r0]
+	movw r2, #:lower16:.read_scratch
+	movt r2, #:upper16:.read_scratch
+	ldr r8, [r2]
 	movw r1, #:lower16:.read_scratch
 	movt r1, #:upper16:.read_scratch
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw r0, #:lower16:.read_scratch
-	movt r0, #:upper16:.read_scratch
-	ldr r4, [r0]
+	movw r2, #:lower16:.read_scratch
+	movt r2, #:upper16:.read_scratch
+	ldr r4, [r2]
 	movw r1, #:lower16:.read_scratch
 	movt r1, #:upper16:.read_scratch
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw r0, #:lower16:.read_scratch
-	movt r0, #:upper16:.read_scratch
-	ldr r6, [r0]
+	movw r2, #:lower16:.read_scratch
+	movt r2, #:upper16:.read_scratch
+	ldr r6, [r2]
 	movw r1, #:lower16:.read_scratch
 	movt r1, #:upper16:.read_scratch
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw r0, #:lower16:.read_scratch
-	movt r0, #:upper16:.read_scratch
-	ldr r7, [r0]
-	mov r0, r5
+	movw r2, #:lower16:.read_scratch
+	movt r2, #:upper16:.read_scratch
+	ldr r5, [r2]
+	mov r0, r7
 	bl tailrecursive
-	mov r1, r5
+	mov r1, r7
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
@@ -297,10 +308,11 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	mov r1, r7
+	mov r1, r5
 	mov r0, r6
 	bl ackermann
-	mov r1, r0
+	mov r2, r0
+	mov r1, r2
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf

@@ -12,32 +12,31 @@ constantFolding:
 	add fp, sp, #4
 	push {r4}
 	sub sp, sp, #8
-	movw r2, #8
-	movw r0, #9
-	mul r2, r2, r0
+	movw r0, #8
+	movw r2, #9
+	mul r2, r0, r2
 	movw r1, #4
 	mov r0, r2
 	bl __aeabi_idiv
 	mov r2, r0
 	add r2, r2, #2
-	movw r0, #5
-	movw r1, #8
-	mul r0, r0, r1
+	movw r1, #5
+	movw r0, #8
+	mul r0, r1, r0
 	sub r2, r2, r0
 	add r2, r2, #9
 	sub r2, r2, #12
 	add r2, r2, #6
 	sub r2, r2, #9
 	sub r4, r2, #18
-	movw r0, #23
-	movw r2, #3
-	mul r2, r0, r2
+	movw r2, #23
+	movw r0, #3
+	mul r2, r2, r0
 	movw r1, #23
 	mov r0, r2
 	bl __aeabi_idiv
-	mov r2, r0
-	movw r0, #90
-	mul r2, r2, r0
+	movw r2, #90
+	mul r2, r0, r2
 	add r2, r4, r2
 	str r2, [sp, #4]
 	ldr r2, [sp, #4]
@@ -78,31 +77,31 @@ constantPropagation:
 	ldr r2, [sp, #16]
 	add r2, r0, r2
 	str r2, [sp, #32]
-	ldr r2, [sp, #20]
-	ldr r0, [sp, #24]
-	add r2, r2, r0
+	ldr r0, [sp, #20]
+	ldr r2, [sp, #24]
+	add r2, r0, r2
 	str r2, [sp, #36]
 	ldr r2, [sp, #28]
 	ldr r0, [sp, #32]
 	add r2, r2, r0
 	str r2, [sp, #40]
-	ldr r0, [sp, #36]
-	ldr r2, [sp, #40]
-	mul r2, r0, r2
+	ldr r2, [sp, #36]
+	ldr r0, [sp, #40]
+	mul r2, r2, r0
 	str r2, [sp, #44]
 	ldr r2, [sp, #20]
 	ldr r0, [sp, #32]
 	ldr r3, [sp, #36]
 	mul r0, r0, r3
-	add r2, r2, r0
-	ldr r0, [sp, #44]
-	sub r2, r2, r0
+	add r0, r2, r0
+	ldr r2, [sp, #44]
+	sub r2, r0, r2
 	str r2, [sp, #48]
-	ldr r3, [sp, #32]
+	ldr r2, [sp, #32]
 	ldr r0, [sp, #36]
-	ldr r2, [sp, #40]
-	mul r2, r0, r2
-	sub r4, r3, r2
+	ldr r3, [sp, #40]
+	mul r0, r0, r3
+	sub r4, r2, r0
 	ldr r2, [sp, #44]
 	ldr r0, [sp, #48]
 	mov r1, r0
@@ -111,21 +110,21 @@ constantPropagation:
 	mov r2, r0
 	add r2, r4, r2
 	str r2, [sp, #52]
-	ldr r0, [sp, #20]
-	ldr r2, [sp, #24]
-	add r0, r0, r2
-	ldr r2, [sp, #28]
-	add r2, r0, r2
-	ldr r0, [sp, #32]
+	ldr r2, [sp, #20]
+	ldr r0, [sp, #24]
+	add r2, r2, r0
+	ldr r0, [sp, #28]
 	add r0, r2, r0
-	ldr r2, [sp, #36]
-	add r0, r0, r2
-	ldr r2, [sp, #40]
-	sub r2, r0, r2
+	ldr r2, [sp, #32]
+	add r2, r0, r2
+	ldr r0, [sp, #36]
+	add r2, r2, r0
+	ldr r0, [sp, #40]
+	sub r2, r2, r0
 	str r2, [sp, #56]
-	ldr r0, [sp, #56]
-	ldr r2, [sp, #52]
-	sub r2, r0, r2
+	ldr r2, [sp, #56]
+	ldr r0, [sp, #52]
+	sub r2, r2, r0
 	ldr r0, [sp, #32]
 	add r2, r2, r0
 	ldr r0, [sp, #4]
@@ -141,82 +140,81 @@ constantPropagation:
 	ldr r0, [sp, #32]
 	sub r2, r2, r0
 	str r2, [sp, #64]
-	ldr r0, [sp, #8]
-	ldr r2, [sp, #4]
-	sub r0, r0, r2
+	ldr r2, [sp, #8]
+	ldr r0, [sp, #4]
+	sub r0, r2, r0
 	ldr r2, [sp, #16]
 	mul r0, r0, r2
 	ldr r2, [sp, #36]
 	sub r2, r0, r2
 	str r2, [sp, #68]
-	ldr r2, [sp, #48]
-	ldr r0, [sp, #12]
+	ldr r0, [sp, #48]
+	ldr r2, [sp, #12]
+	mul r2, r0, r2
+	ldr r0, [sp, #16]
 	mul r0, r2, r0
-	ldr r2, [sp, #16]
-	mul r0, r0, r2
 	ldr r2, [sp, #60]
 	add r2, r0, r2
 	str r2, [sp, #72]
 	ldr r0, [sp, #8]
 	ldr r2, [sp, #4]
+	mul r0, r0, r2
+	ldr r2, [sp, #12]
 	mul r2, r0, r2
-	ldr r0, [sp, #12]
-	mul r2, r2, r0
 	ldr r0, [sp, #20]
 	mov r1, r0
 	mov r0, r2
 	bl __aeabi_idiv
-	mov r2, r0
-	ldr r0, [sp, #60]
-	sub r2, r2, r0
+	ldr r2, [sp, #60]
+	sub r2, r0, r2
 	str r2, [sp, #76]
 	ldr r2, [sp, #36]
 	ldr r0, [sp, #44]
-	add r0, r2, r0
-	ldr r2, [sp, #12]
-	add r2, r0, r2
+	add r2, r2, r0
+	ldr r0, [sp, #12]
+	add r2, r2, r0
 	ldr r0, [sp, #64]
 	sub r2, r2, r0
 	str r2, [sp, #80]
-	ldr r2, [sp, #56]
-	ldr r0, [sp, #60]
-	add r3, r2, r0
-	ldr r2, [sp, #24]
-	ldr r0, [sp, #4]
-	mul r2, r2, r0
+	ldr r0, [sp, #56]
+	ldr r2, [sp, #60]
+	add r3, r0, r2
+	ldr r0, [sp, #24]
+	ldr r2, [sp, #4]
+	mul r2, r0, r2
 	sub r2, r3, r2
 	str r2, [sp, #84]
-	ldr r0, [sp, #4]
-	ldr r2, [sp, #8]
-	mul r0, r0, r2
+	ldr r2, [sp, #4]
+	ldr r0, [sp, #8]
+	mul r0, r2, r0
 	ldr r2, [sp, #44]
-	sub r0, r0, r2
-	ldr r2, [sp, #48]
 	sub r2, r0, r2
+	ldr r0, [sp, #48]
+	sub r2, r2, r0
 	str r2, [sp, #88]
 	ldr r0, [sp, #88]
 	ldr r2, [sp, #76]
-	sub r0, r0, r2
-	ldr r2, [sp, #72]
-	ldr r3, [sp, #16]
-	mul r2, r2, r3
-	sub r2, r0, r2
+	sub r3, r0, r2
+	ldr r0, [sp, #72]
+	ldr r2, [sp, #16]
+	mul r2, r0, r2
+	sub r2, r3, r2
 	str r2, [sp, #92]
 	ldr r0, [sp, #60]
 	ldr r2, [sp, #92]
 	sub r0, r0, r2
 	ldr r2, [sp, #88]
-	sub r0, r0, r2
-	ldr r2, [sp, #56]
 	sub r2, r0, r2
+	ldr r0, [sp, #56]
+	sub r2, r2, r0
 	str r2, [sp, #96]
 	ldr r0, [sp, #64]
 	ldr r2, [sp, #96]
 	mul r2, r0, r2
 	ldr r0, [sp, #80]
-	add r0, r2, r0
-	ldr r2, [sp, #92]
-	sub r2, r0, r2
+	add r2, r2, r0
+	ldr r0, [sp, #92]
+	sub r2, r2, r0
 	str r2, [sp, #100]
 	ldr r2, [sp, #92]
 	ldr r0, [sp, #96]
@@ -243,64 +241,64 @@ deadCodeElimination:
 	push {fp, lr}
 	add fp, sp, #4
 	sub sp, sp, #24
-	movw r3, #4
-	str r3, [sp, #4]
-	movw r3, #5
-	str r3, [sp, #4]
-	movw r3, #7
-	str r3, [sp, #4]
-	movw r3, #8
-	str r3, [sp, #4]
-	movw r3, #6
-	str r3, [sp, #8]
-	movw r3, #9
-	str r3, [sp, #8]
-	movw r3, #12
-	str r3, [sp, #8]
-	movw r3, #8
-	str r3, [sp, #8]
-	movw r3, #10
-	str r3, [sp, #12]
-	movw r3, #13
-	str r3, [sp, #12]
-	movw r3, #9
-	str r3, [sp, #12]
-	movw r3, #45
-	str r3, [sp, #16]
-	movw r3, #12
-	str r3, [sp, #16]
-	movw r3, #3
-	str r3, [sp, #16]
-	movw r3, #23
-	str r3, [sp, #20]
-	movw r3, #10
-	str r3, [sp, #20]
-	movw r0, #11
-	movw r3, #:lower16:global1
-	movt r3, #:upper16:global1
-	str r0, [r3]
-	movw r0, #5
-	movw r3, #:lower16:global1
-	movt r3, #:upper16:global1
-	str r0, [r3]
-	movw r3, #9
+	movw r2, #4
+	str r2, [sp, #4]
+	movw r2, #5
+	str r2, [sp, #4]
+	movw r2, #7
+	str r2, [sp, #4]
+	movw r2, #8
+	str r2, [sp, #4]
+	movw r2, #6
+	str r2, [sp, #8]
+	movw r2, #9
+	str r2, [sp, #8]
+	movw r2, #12
+	str r2, [sp, #8]
+	movw r2, #8
+	str r2, [sp, #8]
+	movw r2, #10
+	str r2, [sp, #12]
+	movw r2, #13
+	str r2, [sp, #12]
+	movw r2, #9
+	str r2, [sp, #12]
+	movw r2, #45
+	str r2, [sp, #16]
+	movw r2, #12
+	str r2, [sp, #16]
+	movw r2, #3
+	str r2, [sp, #16]
+	movw r2, #23
+	str r2, [sp, #20]
+	movw r2, #10
+	str r2, [sp, #20]
+	movw r2, #11
 	movw r0, #:lower16:global1
 	movt r0, #:upper16:global1
-	str r3, [r0]
-	ldr r0, [sp, #4]
-	ldr r3, [sp, #8]
-	add r0, r0, r3
-	ldr r3, [sp, #12]
-	add r3, r0, r3
+	str r2, [r0]
+	movw r0, #5
+	movw r2, #:lower16:global1
+	movt r2, #:upper16:global1
+	str r0, [r2]
+	movw r2, #9
+	movw r0, #:lower16:global1
+	movt r0, #:upper16:global1
+	str r2, [r0]
+	ldr r2, [sp, #4]
+	ldr r0, [sp, #8]
+	add r0, r2, r0
+	ldr r2, [sp, #12]
+	add r2, r0, r2
 	ldr r0, [sp, #16]
-	add r3, r3, r0
+	add r2, r2, r0
 	ldr r0, [sp, #20]
-	add r3, r3, r0
-	str r3, [sp, #0]
+	add r2, r2, r0
+	str r2, [sp, #0]
 	b .LU4
 .LU4:
-	ldr r3, [sp, #0]
-	mov r0, r3
+	ldr r2, [sp, #0]
+	mov r0, r2
 	add sp, sp, #24
 	pop {fp, pc}
 	.size deadCodeElimination, .-deadCodeElimination
@@ -316,23 +314,23 @@ sum:
 	movw r2, #0
 	str r2, [sp, #8]
 	ldr r2, [sp, #0]
-	mov r3, #0
+	mov r0, #0
 	cmp r2, #0
-	movgt r3, #1
-	cmp r3, #1
+	movgt r0, #1
+	cmp r0, #1
 	beq .LU8
 	b .LU9
 .LU8:
-	ldr r3, [sp, #8]
+	ldr r0, [sp, #8]
 	ldr r2, [sp, #0]
-	add r2, r3, r2
+	add r2, r0, r2
 	str r2, [sp, #8]
 	ldr r2, [sp, #0]
 	sub r2, r2, #1
 	str r2, [sp, #0]
-	ldr r3, [sp, #0]
+	ldr r0, [sp, #0]
 	mov r2, #0
-	cmp r3, #0
+	cmp r0, #0
 	movgt r2, #1
 	cmp r2, #1
 	beq .LU8
@@ -380,10 +378,10 @@ interProceduralOptimization:
 	movw r0, #:lower16:global1
 	movt r0, #:upper16:global1
 	str r2, [r0]
-	movw r0, #0
-	movw r2, #:lower16:global2
-	movt r2, #:upper16:global2
-	str r0, [r2]
+	movw r2, #0
+	movw r0, #:lower16:global2
+	movt r0, #:upper16:global2
+	str r2, [r0]
 	movw r2, #0
 	movw r0, #:lower16:global3
 	movt r0, #:upper16:global3
@@ -394,11 +392,11 @@ interProceduralOptimization:
 	str r2, [sp, #4]
 	movw r2, #:lower16:global1
 	movt r2, #:upper16:global1
-	ldr r0, [r2]
-	mov r2, #0
-	cmp r0, #1
-	moveq r2, #1
+	ldr r2, [r2]
+	mov r0, #0
 	cmp r2, #1
+	moveq r0, #1
+	cmp r0, #1
 	beq .LU14
 	b .LU15
 .LU14:
@@ -426,11 +424,11 @@ interProceduralOptimization:
 .LU18:
 	movw r2, #:lower16:global3
 	movt r2, #:upper16:global3
-	ldr r0, [r2]
-	mov r2, #0
-	cmp r0, #3
-	moveq r2, #1
-	cmp r2, #1
+	ldr r2, [r2]
+	mov r0, #0
+	cmp r2, #3
+	moveq r0, #1
+	cmp r0, #1
 	beq .LU19
 	b .LU20
 .LU19:
@@ -459,363 +457,333 @@ commonSubexpressionElimination:
 	add fp, sp, #4
 	push {r4}
 	sub sp, sp, #108
-	movw r2, #11
-	str r2, [sp, #4]
-	movw r2, #22
-	str r2, [sp, #8]
-	movw r2, #33
-	str r2, [sp, #12]
-	movw r2, #44
-	str r2, [sp, #16]
-	movw r2, #55
-	str r2, [sp, #20]
-	movw r2, #66
-	str r2, [sp, #24]
-	movw r2, #77
-	str r2, [sp, #28]
-	ldr r3, [sp, #4]
-	ldr r2, [sp, #8]
-	mul r2, r3, r2
-	str r2, [sp, #32]
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	str r2, [sp, #36]
-	ldr r2, [sp, #20]
-	ldr r3, [sp, #24]
-	mul r2, r2, r3
-	str r2, [sp, #40]
-	ldr r3, [sp, #4]
-	ldr r2, [sp, #8]
-	mul r4, r3, r2
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r2, r4, r2
-	ldr r4, [sp, #20]
-	ldr r3, [sp, #24]
-	mul r3, r4, r3
-	sub r3, r2, r3
-	ldr r2, [sp, #28]
-	add r2, r3, r2
-	str r2, [sp, #44]
-	ldr r3, [sp, #4]
-	ldr r2, [sp, #8]
-	mul r4, r3, r2
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r3, r4, r2
-	ldr r2, [sp, #20]
-	ldr r4, [sp, #24]
-	mul r2, r2, r4
-	sub r2, r3, r2
-	ldr r3, [sp, #28]
-	add r2, r2, r3
-	str r2, [sp, #48]
-	ldr r2, [sp, #4]
-	ldr r3, [sp, #8]
-	mul r4, r2, r3
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r2, r4, r2
-	ldr r3, [sp, #20]
-	ldr r4, [sp, #24]
-	mul r3, r3, r4
-	sub r3, r2, r3
-	ldr r2, [sp, #28]
-	add r2, r3, r2
-	str r2, [sp, #52]
-	ldr r3, [sp, #4]
-	ldr r2, [sp, #8]
-	mul r4, r3, r2
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r4, r4, r2
-	ldr r2, [sp, #20]
-	ldr r3, [sp, #24]
-	mul r2, r2, r3
-	sub r3, r4, r2
-	ldr r2, [sp, #28]
-	add r2, r3, r2
-	str r2, [sp, #56]
-	ldr r3, [sp, #4]
-	ldr r2, [sp, #8]
-	mul r4, r3, r2
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r4, r4, r2
-	ldr r2, [sp, #20]
-	ldr r3, [sp, #24]
-	mul r2, r2, r3
-	sub r3, r4, r2
-	ldr r2, [sp, #28]
-	add r2, r3, r2
-	str r2, [sp, #60]
-	ldr r3, [sp, #4]
-	ldr r2, [sp, #8]
-	mul r4, r3, r2
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r2, r4, r2
-	ldr r3, [sp, #20]
-	ldr r4, [sp, #24]
-	mul r3, r3, r4
-	sub r3, r2, r3
-	ldr r2, [sp, #28]
-	add r2, r3, r2
-	str r2, [sp, #64]
-	ldr r3, [sp, #4]
-	ldr r2, [sp, #8]
-	mul r4, r3, r2
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r2, r4, r2
-	ldr r3, [sp, #20]
-	ldr r4, [sp, #24]
-	mul r3, r3, r4
-	sub r3, r2, r3
-	ldr r2, [sp, #28]
-	add r2, r3, r2
-	str r2, [sp, #68]
-	ldr r3, [sp, #4]
-	ldr r2, [sp, #8]
-	mul r4, r3, r2
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r4, r4, r2
-	ldr r3, [sp, #20]
-	ldr r2, [sp, #24]
-	mul r2, r3, r2
-	sub r2, r4, r2
-	ldr r3, [sp, #28]
-	add r2, r2, r3
-	str r2, [sp, #72]
-	ldr r3, [sp, #4]
-	ldr r2, [sp, #8]
-	mul r4, r3, r2
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r2, r4, r2
-	ldr r3, [sp, #20]
-	ldr r4, [sp, #24]
-	mul r3, r3, r4
-	sub r2, r2, r3
-	ldr r3, [sp, #28]
-	add r2, r2, r3
-	str r2, [sp, #76]
-	ldr r3, [sp, #4]
-	ldr r2, [sp, #8]
-	mul r4, r3, r2
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r4, r4, r2
-	ldr r2, [sp, #20]
-	ldr r3, [sp, #24]
-	mul r2, r2, r3
-	sub r3, r4, r2
-	ldr r2, [sp, #28]
-	add r2, r3, r2
-	str r2, [sp, #80]
-	ldr r3, [sp, #4]
-	ldr r2, [sp, #8]
-	mul r4, r3, r2
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r4, r4, r2
-	ldr r2, [sp, #20]
-	ldr r3, [sp, #24]
-	mul r2, r2, r3
-	sub r2, r4, r2
-	ldr r3, [sp, #28]
-	add r2, r2, r3
-	str r2, [sp, #84]
-	ldr r3, [sp, #8]
-	ldr r2, [sp, #4]
-	mul r4, r3, r2
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r3, r4, r2
-	ldr r2, [sp, #20]
-	ldr r4, [sp, #24]
-	mul r2, r2, r4
-	sub r3, r3, r2
-	ldr r2, [sp, #28]
-	add r2, r3, r2
-	str r2, [sp, #88]
-	ldr r3, [sp, #4]
-	ldr r2, [sp, #8]
-	mul r4, r3, r2
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r3, r4, r2
-	ldr r2, [sp, #24]
-	ldr r4, [sp, #20]
-	mul r2, r2, r4
-	sub r3, r3, r2
-	ldr r2, [sp, #28]
-	add r2, r3, r2
-	str r2, [sp, #92]
-	ldr r3, [sp, #28]
-	ldr r4, [sp, #4]
-	ldr r2, [sp, #8]
-	mul r2, r4, r2
-	add r4, r3, r2
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r4, r4, r2
-	ldr r3, [sp, #20]
-	ldr r2, [sp, #24]
-	mul r2, r3, r2
-	sub r2, r4, r2
-	str r2, [sp, #96]
-	ldr r2, [sp, #4]
-	ldr r3, [sp, #8]
-	mul r4, r2, r3
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r3, r4, r2
-	ldr r4, [sp, #20]
-	ldr r2, [sp, #24]
-	mul r2, r4, r2
-	sub r3, r3, r2
-	ldr r2, [sp, #28]
-	add r2, r3, r2
-	str r2, [sp, #100]
-	ldr r2, [sp, #12]
-	ldr r3, [sp, #16]
-	mov r1, r3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	ldr r3, [sp, #4]
+	movw r4, #11
+	str r4, [sp, #4]
+	movw r4, #22
+	str r4, [sp, #8]
+	movw r4, #33
+	str r4, [sp, #12]
+	movw r4, #44
+	str r4, [sp, #16]
+	movw r4, #55
+	str r4, [sp, #20]
+	movw r4, #66
+	str r4, [sp, #24]
+	movw r4, #77
+	str r4, [sp, #28]
+	ldr r0, [sp, #4]
 	ldr r4, [sp, #8]
-	mul r3, r3, r4
-	add r4, r2, r3
-	ldr r2, [sp, #20]
-	ldr r3, [sp, #24]
-	mul r2, r2, r3
-	sub r2, r4, r2
-	ldr r3, [sp, #28]
-	add r2, r2, r3
-	str r2, [sp, #104]
-	ldr r3, [sp, #4]
-	ldr r2, [sp, #8]
-	add r2, r3, r2
-	ldr r3, [sp, #12]
-	add r2, r2, r3
+	mul r4, r0, r4
+	str r4, [sp, #32]
+	ldr r4, [sp, #12]
+	ldr r0, [sp, #16]
+	mov r1, r0
+	mov r0, r4
+	bl __aeabi_idiv
+	mov r4, r0
+	str r4, [sp, #36]
+	ldr r4, [sp, #20]
+	ldr r0, [sp, #24]
+	mul r4, r4, r0
+	str r4, [sp, #40]
+	ldr r0, [sp, #4]
+	ldr r4, [sp, #8]
+	mul r4, r0, r4
+	ldr r0, [sp, #12]
 	ldr r3, [sp, #16]
-	add r3, r2, r3
-	ldr r2, [sp, #20]
-	add r2, r3, r2
+	mov r1, r3
+	bl __aeabi_idiv
+	add r3, r4, r0
+	ldr r4, [sp, #20]
+	ldr r0, [sp, #24]
+	mul r4, r4, r0
+	sub r0, r3, r4
+	ldr r4, [sp, #28]
+	add r4, r0, r4
+	str r4, [sp, #44]
+	ldr r0, [sp, #4]
+	ldr r4, [sp, #8]
+	mul r4, r0, r4
+	ldr r0, [sp, #12]
+	ldr r3, [sp, #16]
+	mov r1, r3
+	bl __aeabi_idiv
+	add r3, r4, r0
+	ldr r0, [sp, #20]
+	ldr r4, [sp, #24]
+	mul r4, r0, r4
+	sub r4, r3, r4
+	ldr r0, [sp, #28]
+	add r4, r4, r0
+	str r4, [sp, #48]
+	ldr r4, [sp, #4]
+	ldr r0, [sp, #8]
+	mul r4, r4, r0
+	ldr r0, [sp, #12]
+	ldr r3, [sp, #16]
+	mov r1, r3
+	bl __aeabi_idiv
+	add r4, r4, r0
+	ldr r0, [sp, #20]
 	ldr r3, [sp, #24]
-	add r3, r2, r3
-	ldr r2, [sp, #28]
-	add r2, r3, r2
-	ldr r3, [sp, #32]
-	add r3, r2, r3
-	ldr r2, [sp, #36]
-	add r2, r3, r2
-	ldr r3, [sp, #40]
-	add r3, r2, r3
-	ldr r2, [sp, #44]
-	add r3, r3, r2
-	ldr r2, [sp, #48]
-	add r2, r3, r2
-	ldr r3, [sp, #52]
-	add r3, r2, r3
-	ldr r2, [sp, #56]
-	add r2, r3, r2
-	ldr r3, [sp, #60]
-	add r2, r2, r3
-	ldr r3, [sp, #64]
-	add r2, r2, r3
-	ldr r3, [sp, #68]
-	add r3, r2, r3
-	ldr r2, [sp, #72]
-	add r2, r3, r2
-	ldr r3, [sp, #76]
-	add r2, r2, r3
-	ldr r3, [sp, #80]
-	add r2, r2, r3
-	ldr r3, [sp, #84]
-	add r3, r2, r3
-	ldr r2, [sp, #88]
-	add r2, r3, r2
-	ldr r3, [sp, #92]
-	add r2, r2, r3
-	ldr r3, [sp, #96]
-	add r2, r2, r3
-	ldr r3, [sp, #100]
-	add r3, r2, r3
-	ldr r2, [sp, #104]
-	add r2, r3, r2
-	str r2, [sp, #0]
+	mul r0, r0, r3
+	sub r0, r4, r0
+	ldr r4, [sp, #28]
+	add r4, r0, r4
+	str r4, [sp, #52]
+	ldr r0, [sp, #4]
+	ldr r4, [sp, #8]
+	mul r4, r0, r4
+	ldr r0, [sp, #12]
+	ldr r3, [sp, #16]
+	mov r1, r3
+	bl __aeabi_idiv
+	add r3, r4, r0
+	ldr r4, [sp, #20]
+	ldr r0, [sp, #24]
+	mul r4, r4, r0
+	sub r0, r3, r4
+	ldr r4, [sp, #28]
+	add r4, r0, r4
+	str r4, [sp, #56]
+	ldr r0, [sp, #4]
+	ldr r4, [sp, #8]
+	mul r4, r0, r4
+	ldr r0, [sp, #12]
+	ldr r3, [sp, #16]
+	mov r1, r3
+	bl __aeabi_idiv
+	add r3, r4, r0
+	ldr r0, [sp, #20]
+	ldr r4, [sp, #24]
+	mul r4, r0, r4
+	sub r0, r3, r4
+	ldr r4, [sp, #28]
+	add r4, r0, r4
+	str r4, [sp, #60]
+	ldr r0, [sp, #4]
+	ldr r4, [sp, #8]
+	mul r4, r0, r4
+	ldr r0, [sp, #12]
+	ldr r3, [sp, #16]
+	mov r1, r3
+	bl __aeabi_idiv
+	add r3, r4, r0
+	ldr r4, [sp, #20]
+	ldr r0, [sp, #24]
+	mul r4, r4, r0
+	sub r0, r3, r4
+	ldr r4, [sp, #28]
+	add r4, r0, r4
+	str r4, [sp, #64]
+	ldr r0, [sp, #4]
+	ldr r4, [sp, #8]
+	mul r4, r0, r4
+	ldr r0, [sp, #12]
+	ldr r3, [sp, #16]
+	mov r1, r3
+	bl __aeabi_idiv
+	add r3, r4, r0
+	ldr r4, [sp, #20]
+	ldr r0, [sp, #24]
+	mul r4, r4, r0
+	sub r0, r3, r4
+	ldr r4, [sp, #28]
+	add r4, r0, r4
+	str r4, [sp, #68]
+	ldr r0, [sp, #4]
+	ldr r4, [sp, #8]
+	mul r4, r0, r4
+	ldr r0, [sp, #12]
+	ldr r3, [sp, #16]
+	mov r1, r3
+	bl __aeabi_idiv
+	add r3, r4, r0
+	ldr r0, [sp, #20]
+	ldr r4, [sp, #24]
+	mul r4, r0, r4
+	sub r4, r3, r4
+	ldr r0, [sp, #28]
+	add r4, r4, r0
+	str r4, [sp, #72]
+	ldr r0, [sp, #4]
+	ldr r4, [sp, #8]
+	mul r4, r0, r4
+	ldr r0, [sp, #12]
+	ldr r3, [sp, #16]
+	mov r1, r3
+	bl __aeabi_idiv
+	add r0, r4, r0
+	ldr r4, [sp, #20]
+	ldr r3, [sp, #24]
+	mul r4, r4, r3
+	sub r4, r0, r4
+	ldr r0, [sp, #28]
+	add r4, r4, r0
+	str r4, [sp, #76]
+	ldr r0, [sp, #4]
+	ldr r4, [sp, #8]
+	mul r4, r0, r4
+	ldr r0, [sp, #12]
+	ldr r3, [sp, #16]
+	mov r1, r3
+	bl __aeabi_idiv
+	add r4, r4, r0
+	ldr r0, [sp, #20]
+	ldr r3, [sp, #24]
+	mul r0, r0, r3
+	sub r0, r4, r0
+	ldr r4, [sp, #28]
+	add r4, r0, r4
+	str r4, [sp, #80]
+	ldr r0, [sp, #4]
+	ldr r4, [sp, #8]
+	mul r4, r0, r4
+	ldr r0, [sp, #12]
+	ldr r3, [sp, #16]
+	mov r1, r3
+	bl __aeabi_idiv
+	add r3, r4, r0
+	ldr r4, [sp, #20]
+	ldr r0, [sp, #24]
+	mul r4, r4, r0
+	sub r0, r3, r4
+	ldr r4, [sp, #28]
+	add r4, r0, r4
+	str r4, [sp, #84]
+	ldr r0, [sp, #8]
+	ldr r4, [sp, #4]
+	mul r4, r0, r4
+	ldr r0, [sp, #12]
+	ldr r3, [sp, #16]
+	mov r1, r3
+	bl __aeabi_idiv
+	add r3, r4, r0
+	ldr r0, [sp, #20]
+	ldr r4, [sp, #24]
+	mul r4, r0, r4
+	sub r0, r3, r4
+	ldr r4, [sp, #28]
+	add r4, r0, r4
+	str r4, [sp, #88]
+	ldr r0, [sp, #4]
+	ldr r4, [sp, #8]
+	mul r4, r0, r4
+	ldr r0, [sp, #12]
+	ldr r3, [sp, #16]
+	mov r1, r3
+	bl __aeabi_idiv
+	add r3, r4, r0
+	ldr r0, [sp, #24]
+	ldr r4, [sp, #20]
+	mul r4, r0, r4
+	sub r0, r3, r4
+	ldr r4, [sp, #28]
+	add r4, r0, r4
+	str r4, [sp, #92]
+	ldr r3, [sp, #28]
+	ldr r0, [sp, #4]
+	ldr r4, [sp, #8]
+	mul r4, r0, r4
+	add r4, r3, r4
+	ldr r0, [sp, #12]
+	ldr r3, [sp, #16]
+	mov r1, r3
+	bl __aeabi_idiv
+	add r3, r4, r0
+	ldr r0, [sp, #20]
+	ldr r4, [sp, #24]
+	mul r4, r0, r4
+	sub r4, r3, r4
+	str r4, [sp, #96]
+	ldr r4, [sp, #4]
+	ldr r0, [sp, #8]
+	mul r4, r4, r0
+	ldr r0, [sp, #12]
+	ldr r3, [sp, #16]
+	mov r1, r3
+	bl __aeabi_idiv
+	add r0, r4, r0
+	ldr r4, [sp, #20]
+	ldr r3, [sp, #24]
+	mul r4, r4, r3
+	sub r0, r0, r4
+	ldr r4, [sp, #28]
+	add r4, r0, r4
+	str r4, [sp, #100]
+	ldr r4, [sp, #12]
+	ldr r0, [sp, #16]
+	mov r1, r0
+	mov r0, r4
+	bl __aeabi_idiv
+	mov r3, r0
+	ldr r0, [sp, #4]
+	ldr r4, [sp, #8]
+	mul r4, r0, r4
+	add r3, r3, r4
+	ldr r4, [sp, #20]
+	ldr r0, [sp, #24]
+	mul r4, r4, r0
+	sub r4, r3, r4
+	ldr r0, [sp, #28]
+	add r4, r4, r0
+	str r4, [sp, #104]
+	ldr r0, [sp, #4]
+	ldr r4, [sp, #8]
+	add r4, r0, r4
+	ldr r0, [sp, #12]
+	add r4, r4, r0
+	ldr r0, [sp, #16]
+	add r0, r4, r0
+	ldr r4, [sp, #20]
+	add r4, r0, r4
+	ldr r0, [sp, #24]
+	add r0, r4, r0
+	ldr r4, [sp, #28]
+	add r4, r0, r4
+	ldr r0, [sp, #32]
+	add r0, r4, r0
+	ldr r4, [sp, #36]
+	add r4, r0, r4
+	ldr r0, [sp, #40]
+	add r0, r4, r0
+	ldr r4, [sp, #44]
+	add r4, r0, r4
+	ldr r0, [sp, #48]
+	add r0, r4, r0
+	ldr r4, [sp, #52]
+	add r0, r0, r4
+	ldr r4, [sp, #56]
+	add r4, r0, r4
+	ldr r0, [sp, #60]
+	add r4, r4, r0
+	ldr r0, [sp, #64]
+	add r4, r4, r0
+	ldr r0, [sp, #68]
+	add r0, r4, r0
+	ldr r4, [sp, #72]
+	add r4, r0, r4
+	ldr r0, [sp, #76]
+	add r0, r4, r0
+	ldr r4, [sp, #80]
+	add r0, r0, r4
+	ldr r4, [sp, #84]
+	add r0, r0, r4
+	ldr r4, [sp, #88]
+	add r4, r0, r4
+	ldr r0, [sp, #92]
+	add r4, r4, r0
+	ldr r0, [sp, #96]
+	add r0, r4, r0
+	ldr r4, [sp, #100]
+	add r0, r0, r4
+	ldr r4, [sp, #104]
+	add r4, r0, r4
+	str r4, [sp, #0]
 	b .LU21
 .LU21:
-	ldr r2, [sp, #0]
-	mov r0, r2
+	ldr r4, [sp, #0]
+	mov r0, r4
 	add sp, sp, #108
 	pop {r4}
 	pop {fp, pc}
@@ -849,11 +817,11 @@ hoisting:
 .LU25:
 	movw r2, #5
 	str r2, [sp, #20]
-	ldr r3, [sp, #4]
-	ldr r2, [sp, #8]
+	ldr r2, [sp, #4]
+	ldr r3, [sp, #8]
+	add r3, r2, r3
+	ldr r2, [sp, #12]
 	add r2, r3, r2
-	ldr r3, [sp, #12]
-	add r2, r2, r3
 	str r2, [sp, #24]
 	ldr r2, [sp, #12]
 	ldr r3, [sp, #16]
@@ -865,12 +833,12 @@ hoisting:
 	add r2, r2, #1
 	str r2, [sp, #32]
 	ldr r3, [sp, #32]
-	movw r2, #:lower16:1000000
-	movt r2, #:upper16:1000000
-	mov r1, #0
-	cmp r3, r2
-	movlt r1, #1
-	cmp r1, #1
+	movw r1, #:lower16:1000000
+	movt r1, #:upper16:1000000
+	mov r2, #0
+	cmp r3, r1
+	movlt r2, #1
+	cmp r2, #1
 	beq .LU25
 	b .LU26
 .LU26:
@@ -898,21 +866,21 @@ doubleIf:
 	str r2, [sp, #12]
 	movw r2, #0
 	str r2, [sp, #16]
-	ldr r2, [sp, #4]
-	mov r0, #0
+	ldr r3, [sp, #4]
+	mov r2, #0
+	cmp r3, #1
+	moveq r2, #1
 	cmp r2, #1
-	moveq r0, #1
-	cmp r0, #1
 	beq .LU29
 	b .LU30
 .LU29:
 	movw r2, #20
 	str r2, [sp, #8]
-	ldr r0, [sp, #4]
-	mov r2, #0
-	cmp r0, #1
-	moveq r2, #1
+	ldr r2, [sp, #4]
+	mov r3, #0
 	cmp r2, #1
+	moveq r3, #1
+	cmp r3, #1
 	beq .LU31
 	b .LU32
 .LU31:
@@ -958,9 +926,9 @@ integerDivide:
 	bl __aeabi_idiv
 	mov r2, r0
 	str r2, [sp, #4]
-	ldr r2, [sp, #4]
-	movw r0, #4
-	mul r2, r2, r0
+	ldr r3, [sp, #4]
+	movw r2, #4
+	mul r2, r3, r2
 	str r2, [sp, #4]
 	ldr r2, [sp, #4]
 	movw r1, #8
@@ -975,8 +943,8 @@ integerDivide:
 	mov r2, r0
 	str r2, [sp, #4]
 	ldr r2, [sp, #4]
-	movw r0, #32
-	mul r2, r2, r0
+	movw r3, #32
+	mul r2, r2, r3
 	str r2, [sp, #4]
 	ldr r2, [sp, #4]
 	movw r1, #64
@@ -984,9 +952,9 @@ integerDivide:
 	bl __aeabi_idiv
 	mov r2, r0
 	str r2, [sp, #4]
-	ldr r2, [sp, #4]
-	movw r0, #128
-	mul r2, r2, r0
+	ldr r3, [sp, #4]
+	movw r2, #128
+	mul r2, r3, r2
 	str r2, [sp, #4]
 	ldr r2, [sp, #4]
 	movw r1, #4
@@ -1012,9 +980,9 @@ association:
 	sub sp, sp, #8
 	movw r2, #10
 	str r2, [sp, #4]
-	ldr r0, [sp, #4]
-	movw r2, #2
-	mul r2, r0, r2
+	ldr r2, [sp, #4]
+	movw r0, #2
+	mul r2, r2, r0
 	str r2, [sp, #4]
 	ldr r2, [sp, #4]
 	movw r1, #2
@@ -1022,9 +990,9 @@ association:
 	bl __aeabi_idiv
 	mov r2, r0
 	str r2, [sp, #4]
-	ldr r0, [sp, #4]
-	movw r2, #3
-	mul r2, r2, r0
+	ldr r2, [sp, #4]
+	movw r0, #3
+	mul r2, r0, r2
 	str r2, [sp, #4]
 	ldr r2, [sp, #4]
 	movw r1, #3
@@ -1138,54 +1106,54 @@ unswitching:
 	push {fp, lr}
 	add fp, sp, #4
 	sub sp, sp, #12
-	movw r3, #1
-	str r3, [sp, #4]
-	movw r3, #2
-	str r3, [sp, #8]
-	ldr r1, [sp, #4]
-	movw r3, #:lower16:1000000
-	movt r3, #:upper16:1000000
+	movw r2, #1
+	str r2, [sp, #4]
+	movw r2, #2
+	str r2, [sp, #8]
+	ldr r2, [sp, #4]
+	movw r1, #:lower16:1000000
+	movt r1, #:upper16:1000000
 	mov r0, #0
-	cmp r1, r3
+	cmp r2, r1
 	movlt r0, #1
 	cmp r0, #1
 	beq .LU47
 	b .LU48
 .LU47:
-	ldr r3, [sp, #8]
-	mov r0, #0
-	cmp r3, #2
-	moveq r0, #1
-	cmp r0, #1
+	ldr r0, [sp, #8]
+	mov r2, #0
+	cmp r0, #2
+	moveq r2, #1
+	cmp r2, #1
 	beq .LU49
 	b .LU50
 .LU49:
-	ldr r3, [sp, #4]
-	add r3, r3, #1
-	str r3, [sp, #4]
+	ldr r2, [sp, #4]
+	add r2, r2, #1
+	str r2, [sp, #4]
 	b .LU51
 .LU50:
-	ldr r3, [sp, #4]
-	add r3, r3, #2
-	str r3, [sp, #4]
+	ldr r2, [sp, #4]
+	add r2, r2, #2
+	str r2, [sp, #4]
 	b .LU51
 .LU51:
-	ldr r0, [sp, #4]
-	movw r3, #:lower16:1000000
-	movt r3, #:upper16:1000000
-	mov r1, #0
-	cmp r0, r3
-	movlt r1, #1
-	cmp r1, #1
+	ldr r1, [sp, #4]
+	movw r0, #:lower16:1000000
+	movt r0, #:upper16:1000000
+	mov r2, #0
+	cmp r1, r0
+	movlt r2, #1
+	cmp r2, #1
 	beq .LU47
 	b .LU48
 .LU48:
-	ldr r3, [sp, #4]
-	str r3, [sp, #0]
+	ldr r2, [sp, #4]
+	str r2, [sp, #0]
 	b .LU45
 .LU45:
-	ldr r3, [sp, #0]
-	mov r0, r3
+	ldr r2, [sp, #0]
+	mov r0, r2
 	add sp, sp, #12
 	pop {fp, pc}
 	.size unswitching, .-unswitching
@@ -1202,12 +1170,12 @@ randomCalculation:
 	str r2, [sp, #28]
 	movw r2, #0
 	str r2, [sp, #32]
-	ldr r3, [sp, #28]
-	ldr r1, [sp, #0]
-	mov r2, #0
-	cmp r3, r1
-	movlt r2, #1
-	cmp r2, #1
+	ldr r2, [sp, #28]
+	ldr r0, [sp, #0]
+	mov r3, #0
+	cmp r2, r0
+	movlt r3, #1
+	cmp r3, #1
 	beq .LU54
 	b .LU55
 .LU54:
@@ -1218,20 +1186,20 @@ randomCalculation:
 	movw r2, #8
 	str r2, [sp, #16]
 	ldr r2, [sp, #8]
-	ldr r3, [sp, #12]
-	add r2, r2, r3
+	ldr r0, [sp, #12]
+	add r2, r2, r0
 	str r2, [sp, #20]
-	ldr r3, [sp, #20]
-	ldr r2, [sp, #16]
-	add r2, r3, r2
+	ldr r2, [sp, #20]
+	ldr r0, [sp, #16]
+	add r2, r2, r0
 	str r2, [sp, #24]
-	ldr r2, [sp, #32]
-	ldr r3, [sp, #24]
-	add r2, r2, r3
+	ldr r0, [sp, #32]
+	ldr r2, [sp, #24]
+	add r2, r0, r2
 	str r2, [sp, #32]
-	ldr r2, [sp, #28]
-	movw r3, #2
-	mul r2, r2, r3
+	ldr r0, [sp, #28]
+	movw r2, #2
+	mul r2, r0, r2
 	str r2, [sp, #28]
 	ldr r2, [sp, #28]
 	movw r1, #2
@@ -1239,9 +1207,9 @@ randomCalculation:
 	bl __aeabi_idiv
 	mov r2, r0
 	str r2, [sp, #28]
-	ldr r3, [sp, #28]
+	ldr r0, [sp, #28]
 	movw r2, #3
-	mul r2, r2, r3
+	mul r2, r2, r0
 	str r2, [sp, #28]
 	ldr r2, [sp, #28]
 	movw r1, #3
@@ -1249,9 +1217,9 @@ randomCalculation:
 	bl __aeabi_idiv
 	mov r2, r0
 	str r2, [sp, #28]
-	ldr r3, [sp, #28]
+	ldr r0, [sp, #28]
 	movw r2, #4
-	mul r2, r3, r2
+	mul r2, r0, r2
 	str r2, [sp, #28]
 	ldr r2, [sp, #28]
 	movw r1, #4
@@ -1262,12 +1230,12 @@ randomCalculation:
 	ldr r2, [sp, #28]
 	add r2, r2, #1
 	str r2, [sp, #28]
-	ldr r1, [sp, #28]
-	ldr r2, [sp, #0]
-	mov r3, #0
-	cmp r1, r2
-	movlt r3, #1
-	cmp r3, #1
+	ldr r0, [sp, #28]
+	ldr r3, [sp, #0]
+	mov r2, #0
+	cmp r0, r3
+	movlt r2, #1
+	cmp r2, #1
 	beq .LU54
 	b .LU55
 .LU55:
@@ -1305,9 +1273,9 @@ iterativeFibonacci:
 	beq .LU58
 	b .LU59
 .LU58:
-	ldr r2, [sp, #12]
-	ldr r0, [sp, #8]
-	add r2, r2, r0
+	ldr r0, [sp, #12]
+	ldr r2, [sp, #8]
+	add r2, r0, r2
 	str r2, [sp, #20]
 	ldr r2, [sp, #12]
 	str r2, [sp, #8]
@@ -1316,12 +1284,12 @@ iterativeFibonacci:
 	ldr r2, [sp, #16]
 	add r2, r2, #1
 	str r2, [sp, #16]
-	ldr r2, [sp, #16]
-	ldr r1, [sp, #0]
-	mov r0, #0
-	cmp r2, r1
-	movlt r0, #1
-	cmp r0, #1
+	ldr r1, [sp, #16]
+	ldr r0, [sp, #0]
+	mov r2, #0
+	cmp r1, r0
+	movlt r2, #1
+	cmp r2, #1
 	beq .LU58
 	b .LU59
 .LU59:
@@ -1394,158 +1362,134 @@ main:
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw r2, #1
-	str r2, [sp, #12]
-	ldr r2, [sp, #12]
-	ldr r0, [sp, #4]
-	mov r3, #0
-	cmp r2, r0
-	movlt r3, #1
-	cmp r3, #1
+	movw r0, #1
+	str r0, [sp, #12]
+	ldr r0, [sp, #12]
+	ldr r1, [sp, #4]
+	mov r2, #0
+	cmp r0, r1
+	movlt r2, #1
+	cmp r2, #1
 	beq .LU67
 	b .LU68
 .LU67:
 	bl constantFolding
-	mov r2, r0
-	str r2, [sp, #8]
-	ldr r2, [sp, #8]
-	mov r1, r2
+	str r0, [sp, #8]
+	ldr r0, [sp, #8]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	bl constantPropagation
-	mov r2, r0
-	str r2, [sp, #8]
-	ldr r2, [sp, #8]
-	mov r1, r2
+	str r0, [sp, #8]
+	ldr r0, [sp, #8]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	bl deadCodeElimination
-	mov r2, r0
-	str r2, [sp, #8]
-	ldr r2, [sp, #8]
-	mov r1, r2
+	str r0, [sp, #8]
+	ldr r0, [sp, #8]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	bl interProceduralOptimization
-	mov r2, r0
-	str r2, [sp, #8]
-	ldr r2, [sp, #8]
-	mov r1, r2
+	str r0, [sp, #8]
+	ldr r0, [sp, #8]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	bl commonSubexpressionElimination
-	mov r2, r0
-	str r2, [sp, #8]
-	ldr r2, [sp, #8]
-	mov r1, r2
+	str r0, [sp, #8]
+	ldr r0, [sp, #8]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	bl hoisting
-	mov r2, r0
-	str r2, [sp, #8]
-	ldr r2, [sp, #8]
-	mov r1, r2
+	str r0, [sp, #8]
+	ldr r0, [sp, #8]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	bl doubleIf
-	mov r2, r0
-	str r2, [sp, #8]
-	ldr r2, [sp, #8]
-	mov r1, r2
+	str r0, [sp, #8]
+	ldr r0, [sp, #8]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	bl integerDivide
-	mov r2, r0
-	str r2, [sp, #8]
-	ldr r2, [sp, #8]
-	mov r1, r2
+	str r0, [sp, #8]
+	ldr r0, [sp, #8]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	bl association
-	mov r2, r0
-	str r2, [sp, #8]
-	ldr r2, [sp, #8]
-	mov r1, r2
+	str r0, [sp, #8]
+	ldr r0, [sp, #8]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	ldr r2, [sp, #4]
+	ldr r0, [sp, #4]
 	movw r1, #1000
-	mov r0, r2
 	bl __aeabi_idiv
-	mov r2, r0
-	mov r0, r2
 	bl tailRecursion
-	mov r2, r0
-	str r2, [sp, #8]
-	ldr r2, [sp, #8]
-	mov r1, r2
+	str r0, [sp, #8]
+	ldr r0, [sp, #8]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	bl unswitching
-	mov r2, r0
-	str r2, [sp, #8]
-	ldr r2, [sp, #8]
-	mov r1, r2
+	str r0, [sp, #8]
+	ldr r0, [sp, #8]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	ldr r2, [sp, #4]
-	mov r0, r2
+	ldr r0, [sp, #4]
 	bl randomCalculation
-	mov r2, r0
-	str r2, [sp, #8]
-	ldr r2, [sp, #8]
-	mov r1, r2
+	str r0, [sp, #8]
+	ldr r0, [sp, #8]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	ldr r2, [sp, #4]
+	ldr r0, [sp, #4]
 	movw r1, #5
-	mov r0, r2
 	bl __aeabi_idiv
-	mov r2, r0
-	mov r0, r2
 	bl iterativeFibonacci
-	mov r2, r0
-	str r2, [sp, #8]
-	ldr r2, [sp, #8]
-	mov r1, r2
+	str r0, [sp, #8]
+	ldr r0, [sp, #8]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	ldr r2, [sp, #4]
+	ldr r0, [sp, #4]
 	movw r1, #1000
-	mov r0, r2
 	bl __aeabi_idiv
-	mov r2, r0
-	mov r0, r2
 	bl recursiveFibonacci
-	mov r2, r0
-	str r2, [sp, #8]
-	ldr r2, [sp, #8]
-	mov r1, r2
+	str r0, [sp, #8]
+	ldr r0, [sp, #8]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	ldr r2, [sp, #12]
-	add r2, r2, #1
-	str r2, [sp, #12]
 	ldr r0, [sp, #12]
-	ldr r2, [sp, #4]
-	mov r3, #0
-	cmp r0, r2
-	movlt r3, #1
-	cmp r3, #1
+	add r0, r0, #1
+	str r0, [sp, #12]
+	ldr r2, [sp, #12]
+	ldr r0, [sp, #4]
+	mov r1, #0
+	cmp r2, r0
+	movlt r1, #1
+	cmp r1, #1
 	beq .LU67
 	b .LU68
 .LU68:
@@ -1553,12 +1497,11 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	movw r2, #0
-	str r2, [sp, #0]
+	movw r0, #0
+	str r0, [sp, #0]
 	b .LU65
 .LU65:
-	ldr r2, [sp, #0]
-	mov r0, r2
+	ldr r0, [sp, #0]
 	add sp, sp, #16
 	pop {fp, pc}
 	.size main, .-main
