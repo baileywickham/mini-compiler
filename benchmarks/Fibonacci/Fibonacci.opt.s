@@ -10,38 +10,38 @@ computeFib:
 	add fp, sp, #4
 	push {r4, r5}
 	mov r4, r0
-	mov r2, #0
+	mov r5, #0
 	cmp r4, #0
-	moveq r2, #1
-	cmp r2, #1
+	moveq r5, #1
+	cmp r5, #1
 	beq .LU2
 	b .LU3
 .LU2:
-	movw r2, #0
+	movw r4, #0
 	b .LU0
 .LU3:
-	mov r2, #0
+	mov r5, #0
 	cmp r4, #2
-	movle r2, #1
-	cmp r2, #1
+	movle r5, #1
+	cmp r5, #1
 	beq .LU5
 	b .LU6
 .LU5:
-	movw r2, #1
+	movw r4, #1
 	b .LU0
 .LU6:
-	sub r2, r4, #1
-	mov r0, r2
+	sub r5, r4, #1
+	mov r0, r5
 	bl computeFib
 	mov r5, r0
-	sub r2, r4, #2
-	mov r0, r2
+	sub r4, r4, #2
+	mov r0, r4
 	bl computeFib
-	mov r2, r0
-	add r2, r5, r2
+	mov r4, r0
+	add r4, r5, r4
 	b .LU0
 .LU0:
-	mov r0, r2
+	mov r0, r4
 	pop {r4, r5}
 	pop {fp, pc}
 	.size computeFib, .-computeFib

@@ -10,52 +10,52 @@ computeFib:
 	add fp, sp, #4
 	push {r4}
 	sub sp, sp, #8
-	mov r2, r0
-	str r2, [sp, #0]
-	ldr r0, [sp, #0]
-	mov r2, #0
-	cmp r0, #0
-	moveq r2, #1
-	cmp r2, #1
+	mov r4, r0
+	str r4, [sp, #0]
+	ldr r4, [sp, #0]
+	mov r1, #0
+	cmp r4, #0
+	moveq r1, #1
+	cmp r1, #1
 	beq .LU2
 	b .LU3
 .LU2:
-	movw r2, #0
-	str r2, [sp, #4]
+	movw r4, #0
+	str r4, [sp, #4]
 	b .LU0
 .LU3:
-	ldr r0, [sp, #0]
-	mov r2, #0
-	cmp r0, #2
-	movle r2, #1
-	cmp r2, #1
+	ldr r4, [sp, #0]
+	mov r1, #0
+	cmp r4, #2
+	movle r1, #1
+	cmp r1, #1
 	beq .LU5
 	b .LU6
 .LU5:
-	movw r2, #1
-	str r2, [sp, #4]
+	movw r4, #1
+	str r4, [sp, #4]
 	b .LU0
 .LU6:
-	ldr r2, [sp, #0]
-	sub r2, r2, #1
-	mov r0, r2
+	ldr r4, [sp, #0]
+	sub r4, r4, #1
+	mov r0, r4
 	bl computeFib
 	mov r4, r0
-	ldr r2, [sp, #0]
-	sub r2, r2, #2
-	mov r0, r2
+	ldr r1, [sp, #0]
+	sub r1, r1, #2
+	mov r0, r1
 	bl computeFib
-	mov r2, r0
-	add r2, r4, r2
-	str r2, [sp, #4]
+	mov r1, r0
+	add r4, r4, r1
+	str r4, [sp, #4]
 	b .LU0
 .LU7:
 	b .LU4
 .LU4:
 	b .LU0
 .LU0:
-	ldr r2, [sp, #4]
-	mov r0, r2
+	ldr r4, [sp, #4]
+	mov r0, r4
 	add sp, sp, #8
 	pop {r4}
 	pop {fp, pc}

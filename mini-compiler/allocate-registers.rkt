@@ -11,9 +11,9 @@
 ;;
 (define (allocate-registers blocks)
   (define g (build-conflict-graph (get-live/blocks blocks)))
-  (let*-values ([(num-colors coloring) (color-graph g)]
-                [(locations) (get-locations-mapping coloring (get-locations coloring num-colors))])
-    ;; (display-graph g coloring)
+  (let* ([coloring (color-graph g)]
+         [num-colors (add1 (apply max (hash-values coloring)))]
+         [locations (get-locations-mapping coloring (get-locations coloring num-colors))])
     (values num-colors locations)))
 
 ;;
@@ -34,7 +34,7 @@
 
 ;;
 #;(define (color-graph g)
-  (coloring/greedy g))
+    (coloring/greedy g))
 
 ;;
 (define (get-locations coloring num-colors)

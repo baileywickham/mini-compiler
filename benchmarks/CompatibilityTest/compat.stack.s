@@ -55,18 +55,16 @@ setcounter:
 	push {fp, lr}
 	add fp, sp, #4
 	sub sp, sp, #8
-	mov r2, r0
-	str r2, [sp, #0]
-	ldr r2, [sp, #0]
-	movw r3, #:lower16:counter
-	movt r3, #:upper16:counter
-	str r2, [r3]
-	movw r2, #1
-	str r2, [sp, #4]
+	str r0, [sp, #0]
+	ldr r0, [sp, #0]
+	movw r1, #:lower16:counter
+	movt r1, #:upper16:counter
+	str r0, [r1]
+	movw r0, #1
+	str r0, [sp, #4]
 	b .LU2
 .LU2:
-	ldr r2, [sp, #4]
-	mov r0, r2
+	ldr r0, [sp, #4]
 	add sp, sp, #8
 	pop {fp, pc}
 	.size setcounter, .-setcounter
@@ -77,15 +75,14 @@ takealltypes:
 	push {fp, lr}
 	add fp, sp, #4
 	sub sp, sp, #12
-	mov r3, r1
 	str r0, [sp, #0]
-	str r3, [sp, #4]
+	str r1, [sp, #4]
 	str r2, [sp, #8]
-	ldr r0, [sp, #0]
-	mov r3, #0
-	cmp r0, #3
-	moveq r3, #1
-	cmp r3, #1
+	ldr r2, [sp, #0]
+	mov r1, #0
+	cmp r2, #3
+	moveq r1, #1
+	cmp r1, #1
 	beq .LU6
 	b .LU7
 .LU6:
@@ -101,8 +98,8 @@ takealltypes:
 	bl printf
 	b .LU8
 .LU8:
-	ldr r0, [sp, #4]
-	cmp r0, #1
+	ldr r2, [sp, #4]
+	cmp r2, #1
 	beq .LU9
 	b .LU10
 .LU9:
@@ -118,10 +115,10 @@ takealltypes:
 	bl printf
 	b .LU11
 .LU11:
-	ldr r0, [sp, #8]
-	add r0, r0, #4
-	ldr r0, [r0]
-	cmp r0, #1
+	ldr r2, [sp, #8]
+	add r2, r2, #4
+	ldr r2, [r2]
+	cmp r2, #1
 	beq .LU12
 	b .LU13
 .LU12:
@@ -150,26 +147,23 @@ tonofargs:
 	add fp, sp, #4
 	push {r4, r5, r6, r7}
 	sub sp, sp, #32
-	mov r6, r1
-	mov r4, r2
-	mov r5, r3
 	ldr r7, [fp, #4]
-	ldr r1, [fp, #8]
-	ldr r3, [fp, #12]
-	ldr r2, [fp, #16]
+	ldr r4, [fp, #8]
+	ldr r6, [fp, #12]
+	ldr r5, [fp, #16]
 	str r0, [sp, #0]
-	str r6, [sp, #4]
-	str r4, [sp, #8]
-	str r5, [sp, #12]
+	str r1, [sp, #4]
+	str r2, [sp, #8]
+	str r3, [sp, #12]
 	str r7, [sp, #16]
-	str r1, [sp, #20]
-	str r3, [sp, #24]
-	str r2, [sp, #28]
-	ldr r2, [sp, #16]
-	mov r3, #0
-	cmp r2, #5
-	moveq r3, #1
-	cmp r3, #1
+	str r4, [sp, #20]
+	str r6, [sp, #24]
+	str r5, [sp, #28]
+	ldr r1, [sp, #16]
+	mov r0, #0
+	cmp r1, #5
+	moveq r0, #1
+	cmp r0, #1
 	beq .LU17
 	b .LU18
 .LU17:
@@ -183,18 +177,18 @@ tonofargs:
 	movw r0, #:lower16:.PRINT_FMT
 	movt r0, #:upper16:.PRINT_FMT
 	bl printf
-	ldr r3, [sp, #16]
-	mov r1, r3
+	ldr r0, [sp, #16]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	b .LU19
 .LU19:
-	ldr r2, [sp, #20]
-	mov r3, #0
-	cmp r2, #6
-	moveq r3, #1
-	cmp r3, #1
+	ldr r0, [sp, #20]
+	mov r1, #0
+	cmp r0, #6
+	moveq r1, #1
+	cmp r1, #1
 	beq .LU20
 	b .LU21
 .LU20:
@@ -208,18 +202,18 @@ tonofargs:
 	movw r0, #:lower16:.PRINT_FMT
 	movt r0, #:upper16:.PRINT_FMT
 	bl printf
-	ldr r3, [sp, #20]
-	mov r1, r3
+	ldr r0, [sp, #20]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	b .LU22
 .LU22:
-	ldr r3, [sp, #24]
-	mov r2, #0
-	cmp r3, #7
-	moveq r2, #1
-	cmp r2, #1
+	ldr r0, [sp, #24]
+	mov r1, #0
+	cmp r0, #7
+	moveq r1, #1
+	cmp r1, #1
 	beq .LU23
 	b .LU24
 .LU23:
@@ -233,18 +227,18 @@ tonofargs:
 	movw r0, #:lower16:.PRINT_FMT
 	movt r0, #:upper16:.PRINT_FMT
 	bl printf
-	ldr r3, [sp, #24]
-	mov r1, r3
+	ldr r0, [sp, #24]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	b .LU25
 .LU25:
-	ldr r2, [sp, #28]
-	mov r3, #0
-	cmp r2, #8
-	moveq r3, #1
-	cmp r3, #1
+	ldr r0, [sp, #28]
+	mov r1, #0
+	cmp r0, #8
+	moveq r1, #1
+	cmp r1, #1
 	beq .LU26
 	b .LU27
 .LU26:
@@ -258,8 +252,8 @@ tonofargs:
 	movw r0, #:lower16:.PRINT_FMT
 	movt r0, #:upper16:.PRINT_FMT
 	bl printf
-	ldr r3, [sp, #28]
-	mov r1, r3
+	ldr r0, [sp, #28]
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
@@ -296,14 +290,14 @@ returnbool:
 	push {fp, lr}
 	add fp, sp, #4
 	sub sp, sp, #8
-	mov r3, r0
-	str r3, [sp, #0]
-	ldr r3, [sp, #0]
-	str r3, [sp, #4]
+	mov r2, r0
+	str r2, [sp, #0]
+	ldr r2, [sp, #0]
+	str r2, [sp, #4]
 	b .LU31
 .LU31:
-	ldr r3, [sp, #4]
-	mov r0, r3
+	ldr r2, [sp, #4]
+	mov r0, r2
 	add sp, sp, #8
 	pop {fp, pc}
 	.size returnbool, .-returnbool
@@ -343,9 +337,8 @@ main:
 	movw r2, #0
 	str r2, [sp, #24]
 	ldr r2, [sp, #20]
-	mov r3, r2
-	ldr r2, [sp, #24]
-	and r2, r3, r2
+	ldr r3, [sp, #24]
+	and r2, r2, r3
 	cmp r2, #1
 	beq .LU37
 	b .LU38
@@ -367,9 +360,8 @@ main:
 	movw r2, #0
 	str r2, [sp, #24]
 	ldr r2, [sp, #20]
-	mov r3, r2
-	ldr r2, [sp, #24]
-	and r2, r3, r2
+	ldr r3, [sp, #24]
+	and r2, r2, r3
 	cmp r2, #1
 	beq .LU40
 	b .LU41
@@ -391,9 +383,8 @@ main:
 	movw r2, #1
 	str r2, [sp, #24]
 	ldr r2, [sp, #20]
-	mov r3, r2
-	ldr r2, [sp, #24]
-	and r2, r3, r2
+	ldr r3, [sp, #24]
+	and r2, r2, r3
 	cmp r2, #1
 	beq .LU43
 	b .LU44
@@ -415,9 +406,8 @@ main:
 	movw r2, #1
 	str r2, [sp, #24]
 	ldr r2, [sp, #20]
-	mov r3, r2
-	ldr r2, [sp, #24]
-	and r2, r3, r2
+	ldr r3, [sp, #24]
+	and r2, r2, r3
 	cmp r2, #1
 	beq .LU46
 	b .LU47
@@ -445,9 +435,8 @@ main:
 	movw r2, #1
 	str r2, [sp, #24]
 	ldr r2, [sp, #20]
-	mov r3, r2
-	ldr r2, [sp, #24]
-	orr r2, r3, r2
+	ldr r3, [sp, #24]
+	orr r2, r2, r3
 	cmp r2, #1
 	beq .LU49
 	b .LU50
@@ -469,9 +458,8 @@ main:
 	movw r2, #0
 	str r2, [sp, #24]
 	ldr r2, [sp, #20]
-	mov r3, r2
-	ldr r2, [sp, #24]
-	orr r2, r3, r2
+	ldr r3, [sp, #24]
+	orr r2, r2, r3
 	cmp r2, #1
 	beq .LU52
 	b .LU53
@@ -493,9 +481,8 @@ main:
 	movw r2, #1
 	str r2, [sp, #24]
 	ldr r2, [sp, #20]
-	mov r3, r2
-	ldr r2, [sp, #24]
-	orr r2, r3, r2
+	ldr r3, [sp, #24]
+	orr r2, r2, r3
 	cmp r2, #1
 	beq .LU55
 	b .LU56
@@ -517,9 +504,8 @@ main:
 	movw r2, #0
 	str r2, [sp, #24]
 	ldr r2, [sp, #20]
-	mov r3, r2
-	ldr r2, [sp, #24]
-	orr r2, r3, r2
+	ldr r3, [sp, #24]
+	orr r2, r2, r3
 	cmp r2, #1
 	beq .LU58
 	b .LU59
@@ -538,11 +524,11 @@ main:
 .LU60:
 	movw r0, #3
 	bl printgroup
-	movw r3, #42
-	mov r2, #0
-	cmp r3, #1
-	movgt r2, #1
+	movw r2, #42
+	mov r3, #0
 	cmp r2, #1
+	movgt r3, #1
+	cmp r3, #1
 	beq .LU61
 	b .LU62
 .LU61:
@@ -638,11 +624,11 @@ main:
 	bl printf
 	b .LU75
 .LU75:
-	movw r3, #42
-	mov r2, #0
-	cmp r3, #1
-	movne r2, #1
+	movw r2, #42
+	mov r3, #0
 	cmp r2, #1
+	movne r3, #1
+	cmp r3, #1
 	beq .LU76
 	b .LU77
 .LU76:
@@ -749,11 +735,11 @@ main:
 	movw r0, #4
 	bl printgroup
 	movw r2, #2
-	add r3, r2, #3
-	mov r2, #0
-	cmp r3, #5
-	moveq r2, #1
-	cmp r2, #1
+	add r2, r2, #3
+	mov r3, #0
+	cmp r2, #5
+	moveq r3, #1
+	cmp r3, #1
 	beq .LU94
 	b .LU95
 .LU94:
@@ -887,11 +873,11 @@ main:
 	bl printgroup
 	movw r2, #42
 	str r2, [sp, #28]
-	ldr r3, [sp, #28]
-	mov r2, #0
-	cmp r3, #42
-	moveq r2, #1
-	cmp r2, #1
+	ldr r2, [sp, #28]
+	mov r3, #0
+	cmp r2, #42
+	moveq r3, #1
+	cmp r3, #1
 	beq .LU109
 	b .LU110
 .LU109:
@@ -955,9 +941,8 @@ main:
 	b .LU117
 .LU117:
 	ldr r2, [sp, #20]
-	mov r3, r2
-	movw r2, #1
-	eor r2, r2, r3
+	movw r3, #1
+	eor r2, r3, r2
 	cmp r2, #1
 	beq .LU118
 	b .LU119
@@ -994,9 +979,8 @@ main:
 	b .LU123
 .LU123:
 	ldr r2, [sp, #20]
-	mov r3, r2
-	movw r2, #1
-	eor r2, r2, r3
+	movw r3, #1
+	eor r2, r3, r2
 	cmp r2, #1
 	beq .LU124
 	b .LU125
@@ -1099,19 +1083,18 @@ main:
 	mov r2, r0
 	str r2, [sp, #40]
 	ldr r2, [sp, #40]
-	mov r3, r2
-	movw r2, #42
-	str r2, [r3]
-	movw r3, #1
-	ldr r2, [sp, #40]
-	add r2, r2, #4
+	movw r3, #42
 	str r3, [r2]
+	movw r2, #1
+	ldr r3, [sp, #40]
+	add r3, r3, #4
+	str r2, [r3]
 	ldr r2, [sp, #40]
-	ldr r2, [r2]
-	mov r3, #0
-	cmp r2, #42
-	moveq r3, #1
-	cmp r3, #1
+	ldr r3, [r2]
+	mov r2, #0
+	cmp r3, #42
+	moveq r2, #1
+	cmp r2, #1
 	beq .LU135
 	b .LU136
 .LU135:
@@ -1161,22 +1144,23 @@ main:
 	ldr r2, [sp, #40]
 	add r2, r2, #8
 	ldr r2, [r2]
-	movw r3, #13
-	str r3, [r2]
-	movw r3, #0
+	mov r3, r2
+	movw r2, #13
+	str r2, [r3]
+	movw r2, #0
+	ldr r3, [sp, #40]
+	add r3, r3, #8
+	ldr r3, [r3]
+	add r3, r3, #4
+	str r2, [r3]
 	ldr r2, [sp, #40]
 	add r2, r2, #8
 	ldr r2, [r2]
-	add r2, r2, #4
-	str r3, [r2]
-	ldr r2, [sp, #40]
-	add r2, r2, #8
 	ldr r2, [r2]
-	ldr r3, [r2]
-	mov r2, #0
-	cmp r3, #13
-	moveq r2, #1
-	cmp r2, #1
+	mov r3, #0
+	cmp r2, #13
+	moveq r3, #1
+	cmp r3, #1
 	beq .LU141
 	b .LU142
 .LU141:
@@ -1223,12 +1207,12 @@ main:
 	bl printf
 	b .LU146
 .LU146:
-	ldr r1, [sp, #40]
+	ldr r2, [sp, #40]
 	ldr r3, [sp, #40]
-	mov r2, #0
-	cmp r1, r3
-	moveq r2, #1
-	cmp r2, #1
+	mov r1, #0
+	cmp r2, r3
+	moveq r1, #1
+	cmp r1, #1
 	beq .LU147
 	b .LU148
 .LU147:
@@ -1244,14 +1228,14 @@ main:
 	bl printf
 	b .LU149
 .LU149:
-	ldr r1, [sp, #40]
 	ldr r2, [sp, #40]
-	add r2, r2, #8
-	ldr r2, [r2]
-	mov r3, #0
-	cmp r1, r2
-	movne r3, #1
-	cmp r3, #1
+	ldr r3, [sp, #40]
+	add r3, r3, #8
+	ldr r3, [r3]
+	mov r1, #0
+	cmp r2, r3
+	movne r1, #1
+	cmp r1, #1
 	beq .LU150
 	b .LU151
 .LU150:
@@ -1283,11 +1267,11 @@ main:
 	str r3, [r2]
 	movw r2, #:lower16:gi1
 	movt r2, #:upper16:gi1
-	ldr r3, [r2]
-	mov r2, #0
-	cmp r3, #7
-	moveq r2, #1
-	cmp r2, #1
+	ldr r2, [r2]
+	mov r3, #0
+	cmp r2, #7
+	moveq r3, #1
+	cmp r3, #1
 	beq .LU153
 	b .LU154
 .LU153:
@@ -1343,15 +1327,14 @@ main:
 	movw r2, #:lower16:gs1
 	movt r2, #:upper16:gs1
 	ldr r2, [r2]
-	mov r3, r2
-	movw r2, #34
-	str r2, [r3]
-	movw r3, #0
-	movw r2, #:lower16:gs1
-	movt r2, #:upper16:gs1
-	ldr r2, [r2]
-	add r2, r2, #4
+	movw r3, #34
 	str r3, [r2]
+	movw r2, #0
+	movw r3, #:lower16:gs1
+	movt r3, #:upper16:gs1
+	ldr r3, [r3]
+	add r3, r3, #4
+	str r2, [r3]
 	movw r2, #:lower16:gs1
 	movt r2, #:upper16:gs1
 	ldr r2, [r2]
@@ -1409,12 +1392,11 @@ main:
 	movw r0, #12
 	bl malloc
 	mov r2, r0
-	mov r3, r2
-	movw r2, #:lower16:gs1
-	movt r2, #:upper16:gs1
-	ldr r2, [r2]
-	add r2, r2, #8
-	str r3, [r2]
+	movw r3, #:lower16:gs1
+	movt r3, #:upper16:gs1
+	ldr r3, [r3]
+	add r3, r3, #8
+	str r2, [r3]
 	movw r2, #:lower16:gs1
 	movt r2, #:upper16:gs1
 	ldr r2, [r2]
@@ -1596,12 +1578,12 @@ main:
 	bl returnstruct
 	mov r2, r0
 	str r2, [sp, #44]
-	ldr r2, [sp, #40]
+	ldr r1, [sp, #40]
 	ldr r3, [sp, #44]
-	mov r1, #0
-	cmp r2, r3
-	moveq r1, #1
-	cmp r1, #1
+	mov r2, #0
+	cmp r1, r3
+	moveq r2, #1
+	cmp r2, #1
 	beq .LU177
 	b .LU178
 .LU177:
