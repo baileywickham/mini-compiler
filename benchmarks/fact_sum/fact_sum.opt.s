@@ -3,20 +3,6 @@
 
 	.text
 	.align 2
-	.global sum
-sum:
-.LU1:
-	push {fp, lr}
-	add fp, sp, #4
-	mov r2, r0
-	mov r3, r1
-	add r2, r2, r3
-	b .LU0
-.LU0:
-	mov r0, r2
-	pop {fp, pc}
-	.size sum, .-sum
-	.align 2
 	.global fact
 fact:
 .LU3:
@@ -75,8 +61,8 @@ main:
 	push {fp, lr}
 	add fp, sp, #4
 	push {r4, r5}
-	movw r2, #1
-	cmp r2, #1
+	movw r3, #1
+	cmp r3, #1
 	beq .LU12
 	b .LU13
 .LU12:
@@ -85,28 +71,31 @@ main:
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw r2, #:lower16:.read_scratch
-	movt r2, #:upper16:.read_scratch
-	ldr r4, [r2]
+	movw r3, #:lower16:.read_scratch
+	movt r3, #:upper16:.read_scratch
+	ldr r4, [r3]
 	movw r1, #:lower16:.read_scratch
 	movt r1, #:upper16:.read_scratch
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw r2, #:lower16:.read_scratch
-	movt r2, #:upper16:.read_scratch
-	ldr r5, [r2]
+	movw r3, #:lower16:.read_scratch
+	movt r3, #:upper16:.read_scratch
+	ldr r5, [r3]
 	mov r0, r4
 	bl fact
 	mov r4, r0
 	mov r0, r5
 	bl fact
-	mov r2, r0
-	mov r1, r2
-	mov r0, r4
-	bl sum
-	mov r2, r0
-	mov r1, r2
+	mov r3, r0
+	b .inline0_LU1
+.inline0_LU1:
+	add r3, r4, r3
+	b .inline0_LU0
+.inline0_LU0:
+	b .next0
+.next0:
+	mov r1, r3
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
@@ -115,15 +104,15 @@ main:
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	movw r2, #:lower16:.read_scratch
-	movt r2, #:upper16:.read_scratch
-	ldr r4, [r2]
-	movw r3, #:lower16:-1
-	movt r3, #:upper16:-1
-	mov r2, #0
-	cmp r4, r3
-	movne r2, #1
-	cmp r2, #1
+	movw r3, #:lower16:.read_scratch
+	movt r3, #:upper16:.read_scratch
+	ldr r1, [r3]
+	movw r0, #:lower16:-1
+	movt r0, #:upper16:-1
+	mov r3, #0
+	cmp r1, r0
+	movne r3, #1
+	cmp r3, #1
 	beq .LU12
 	b .LU13
 .LU13:

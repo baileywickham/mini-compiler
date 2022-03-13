@@ -145,20 +145,6 @@ get:
 	pop {fp, pc}
 	.size get, .-get
 	.align 2
-	.global pop
-pop:
-.LU20:
-	push {fp, lr}
-	add fp, sp, #4
-	mov r3, r0
-	add r3, r3, #4
-	ldr r3, [r3]
-	b .LU19
-.LU19:
-	mov r0, r3
-	pop {fp, pc}
-	.size pop, .-pop
-	.align 2
 	.global printList
 printList:
 .LU22:

@@ -3,7 +3,7 @@
 (provide allocate-registers spill-temps)
 
 (require graph racket/hash)
-(require "ast/arm.rkt" "util.rkt" "live-analysis.rkt" #;"graph-visualized.rkt")
+(require "ast/arm.rkt" "util.rkt" "live-analysis.rkt" #;"graph-visualized.rkt" "graph.rkt")
 
 (define-values (use-regs spill-temps) (split-at-right callee-saved-regs 2))
 (define num-regs (+ (length callee-saved-regs) (length arg-regs)))
@@ -33,7 +33,7 @@
           (combinations (set-union live-after reg-writes) 2)))
 
 ;;
-(define (color-graph g)
+#;(define (color-graph g)
   (coloring/greedy g))
 
 ;;
