@@ -12,11 +12,11 @@ computeFib:
 	sub sp, sp, #8
 	mov r2, r0
 	str r2, [sp, #0]
-	ldr r2, [sp, #0]
-	mov r3, #0
-	cmp r2, #0
-	moveq r3, #1
-	cmp r3, #1
+	ldr r0, [sp, #0]
+	mov r2, #0
+	cmp r0, #0
+	moveq r2, #1
+	cmp r2, #1
 	beq .LU2
 	b .LU3
 .LU2:
@@ -24,9 +24,9 @@ computeFib:
 	str r2, [sp, #4]
 	b .LU0
 .LU3:
-	ldr r3, [sp, #0]
+	ldr r0, [sp, #0]
 	mov r2, #0
-	cmp r3, #2
+	cmp r0, #2
 	movle r2, #1
 	cmp r2, #1
 	beq .LU5

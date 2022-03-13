@@ -28,25 +28,25 @@ getRands:
 	ldr r2, [sp, #24]
 	str r3, [r2]
 	ldr r2, [sp, #24]
-	add r3, r2, #4
-	movw r2, #0
-	str r2, [r3]
+	add r2, r2, #4
+	movw r3, #0
+	str r3, [r2]
 	ldr r2, [sp, #4]
 	sub r2, r2, #1
 	str r2, [sp, #4]
 	ldr r2, [sp, #12]
 	str r2, [sp, #16]
-	ldr r2, [sp, #4]
-	mov r3, #0
-	cmp r2, #0
-	movgt r3, #1
-	cmp r3, #1
+	ldr r3, [sp, #4]
+	mov r2, #0
+	cmp r3, #0
+	movgt r2, #1
+	cmp r2, #1
 	beq .LU2
 	b .LU3
 .LU2:
-	ldr r3, [sp, #16]
 	ldr r2, [sp, #16]
-	mul r2, r3, r2
+	ldr r3, [sp, #16]
+	mul r2, r2, r3
 	ldr r3, [sp, #0]
 	mov r1, r3
 	mov r0, r2
@@ -192,18 +192,18 @@ approxSqrt:
 	str r2, [sp, #16]
 	movw r2, #0
 	str r2, [sp, #12]
-	ldr r0, [sp, #12]
-	ldr r2, [sp, #0]
+	ldr r2, [sp, #12]
+	ldr r0, [sp, #0]
 	mov r3, #0
-	cmp r0, r2
+	cmp r2, r0
 	movlt r3, #1
 	cmp r3, #1
 	beq .LU12
 	b .LU13
 .LU12:
-	ldr r2, [sp, #8]
 	ldr r3, [sp, #8]
-	mul r2, r2, r3
+	ldr r2, [sp, #8]
+	mul r2, r3, r2
 	str r2, [sp, #12]
 	ldr r2, [sp, #8]
 	str r2, [sp, #16]
@@ -287,10 +287,10 @@ range:
 	movw r2, #1
 	str r2, [sp, #12]
 	ldr r2, [sp, #0]
-	mov r0, #0
+	mov r3, #0
 	cmp r2, #0
-	movne r0, #1
-	cmp r0, #1
+	movne r3, #1
+	cmp r3, #1
 	beq .LU20
 	b .LU21
 .LU20:
@@ -310,12 +310,12 @@ range:
 	b .LU24
 .LU23:
 	ldr r2, [sp, #0]
-	ldr r0, [r2]
+	ldr r1, [r2]
 	ldr r2, [sp, #4]
-	mov r1, #0
-	cmp r0, r2
-	movlt r1, #1
-	cmp r1, #1
+	mov r3, #0
+	cmp r1, r2
+	movlt r3, #1
+	cmp r3, #1
 	beq .LU25
 	b .LU26
 .LU25:
@@ -325,12 +325,12 @@ range:
 	b .LU27
 .LU26:
 	ldr r2, [sp, #0]
-	ldr r0, [r2]
-	ldr r2, [sp, #8]
-	mov r1, #0
-	cmp r0, r2
-	movgt r1, #1
-	cmp r1, #1
+	ldr r2, [r2]
+	ldr r1, [sp, #8]
+	mov r3, #0
+	cmp r2, r1
+	movgt r3, #1
+	cmp r3, #1
 	beq .LU28
 	b .LU29
 .LU28:
@@ -348,10 +348,10 @@ range:
 	ldr r2, [r2]
 	str r2, [sp, #0]
 	ldr r2, [sp, #0]
-	mov r0, #0
+	mov r3, #0
 	cmp r2, #0
-	movne r0, #1
-	cmp r0, #1
+	movne r3, #1
+	cmp r3, #1
 	beq .LU20
 	b .LU21
 .LU21:
@@ -386,8 +386,8 @@ main:
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
 	ldr r2, [sp, #4]
-	ldr r0, [sp, #8]
-	mov r1, r0
+	ldr r3, [sp, #8]
+	mov r1, r3
 	mov r0, r2
 	bl getRands
 	mov r2, r0

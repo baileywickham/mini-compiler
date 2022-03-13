@@ -224,83 +224,86 @@ range:
 	add fp, sp, #4
 	push {r4, r5, r6}
 	mov r4, r0
-	movw r2, #1
-	mov r3, #0
+	mov r5, #0
 	cmp r4, #0
-	movne r3, #1
-	movw r1, #0
-	movw r0, #0
-	mov r5, r2
-	mov r6, r4
+	movne r5, #1
 	movw r2, #0
+	movw r6, #0
+	movw r1, #1
+	mov r0, r4
 	movw r4, #0
-	cmp r3, #1
+	movw r3, #0
+	cmp r5, #1
 	beq .LU21
 	b .LU22
 .LU21:
-	mov r1, r6
-	mov r0, r5
-	mov r3, r0
-	cmp r3, #1
+	mov r2, r3
+	mov r3, r1
+	mov r1, r3
+	cmp r1, #1
 	beq .LU23
 	b .LU24
 .LU23:
-	mov r4, r1
-	ldr r2, [r4]
-	mov r4, r1
+	mov r4, r0
 	ldr r4, [r4]
-	movw r3, #0
+	mov r2, r0
+	ldr r1, [r2]
+	mov r2, r0
+	mov r0, r1
+	movw r1, #0
 	b .LU25
 .LU24:
-	mov r3, r1
-	ldr r3, [r3]
+	mov r1, r0
+	ldr r1, [r1]
 	mov r5, #0
-	cmp r3, r2
+	cmp r1, r4
 	movlt r5, #1
 	cmp r5, #1
 	beq .LU26
 	b .LU27
 .LU26:
-	mov r2, r1
-	ldr r2, [r2]
-	mov r3, r0
+	mov r4, r0
+	ldr r4, [r4]
+	mov r1, r3
 	b .LU28
 .LU27:
-	mov r3, r1
-	ldr r5, [r3]
-	mov r3, #0
-	cmp r5, r4
-	movgt r3, #1
-	cmp r3, #1
+	mov r1, r0
+	ldr r5, [r1]
+	mov r1, #0
+	cmp r5, r2
+	movgt r1, #1
+	cmp r1, #1
 	beq .LU29
 	b .LU30
 .LU29:
-	mov r4, r1
-	ldr r4, [r4]
-	mov r3, r0
+	mov r2, r0
+	ldr r2, [r2]
+	mov r1, r3
 	b .LU31
 .LU30:
-	mov r3, r0
+	mov r1, r3
 	b .LU31
 .LU31:
 	b .LU28
 .LU28:
+	mov r3, r2
+	mov r2, r0
+	mov r0, r3
 	b .LU25
 .LU25:
-	mov r5, r3
-	add r1, r1, #4
-	ldr r6, [r1]
-	mov r3, #0
-	cmp r6, #0
-	movne r3, #1
-	mov r1, r2
-	mov r0, r4
-	cmp r3, #1
+	mov r3, r0
+	add r2, r2, #4
+	ldr r0, [r2]
+	mov r5, #0
+	cmp r0, #0
+	movne r5, #1
+	mov r2, r4
+	mov r6, r3
+	cmp r5, #1
 	beq .LU21
 	b .LU22
 .LU22:
-	mov r4, r0
-	mov r2, r1
+	mov r4, r6
 	mov r1, r2
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT

@@ -112,7 +112,7 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	movw r3, #1
+	movw r3, #0
 	b .LU4
 .LU4:
 	mov r0, r3

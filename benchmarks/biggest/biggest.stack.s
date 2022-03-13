@@ -17,13 +17,13 @@ getIntList:
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	ldr r1, [sp, #8]
-	movw r2, #0
-	sub r3, r2, #1
-	mov r2, #0
-	cmp r1, r3
-	moveq r2, #1
-	cmp r2, #1
+	ldr r2, [sp, #8]
+	movw r3, #0
+	sub r0, r3, #1
+	mov r3, #0
+	cmp r2, r0
+	moveq r3, #1
+	cmp r3, #1
 	beq .LU2
 	b .LU3
 .LU2:
@@ -31,9 +31,9 @@ getIntList:
 	ldr r2, [sp, #4]
 	str r3, [r2]
 	ldr r2, [sp, #4]
-	add r2, r2, #4
-	movw r3, #0
-	str r3, [r2]
+	add r3, r2, #4
+	movw r2, #0
+	str r2, [r3]
 	ldr r2, [sp, #4]
 	str r2, [sp, #0]
 	b .LU0

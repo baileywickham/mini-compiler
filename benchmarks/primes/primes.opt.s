@@ -63,30 +63,28 @@ prime:
 .LU7:
 	mov r0, r4
 	bl isqrt
-	mov r3, r0
+	mov r1, r0
 	movw r2, #2
-	mov r1, #0
-	cmp r2, r3
-	movle r1, #1
-	mov r0, r4
+	mov r0, #0
+	cmp r2, r1
+	movle r0, #1
 	movw r2, #2
-	cmp r1, #1
+	cmp r0, #1
 	beq .LU9
 	b .LU10
 .LU9:
-	mov r4, r3
-	mov r5, r2
-	mov r6, r0
-	mov r1, r5
-	mov r0, r6
+	mov r5, r1
+	mov r6, r2
+	mov r1, r6
+	mov r0, r4
 	bl __aeabi_idiv
 	mov r2, r0
-	mul r2, r2, r5
-	sub r1, r6, r2
-	mov r2, #0
-	cmp r1, #0
-	moveq r2, #1
-	cmp r2, #1
+	mul r2, r2, r6
+	sub r2, r4, r2
+	mov r0, #0
+	cmp r2, #0
+	moveq r0, #1
+	cmp r0, #1
 	beq .LU11
 	b .LU12
 .LU11:
@@ -95,13 +93,12 @@ prime:
 .LU12:
 	b .LU13
 .LU13:
-	add r2, r5, #1
-	mov r1, #0
-	cmp r2, r4
-	movle r1, #1
-	mov r0, r6
-	mov r3, r4
-	cmp r1, #1
+	add r2, r6, #1
+	mov r0, #0
+	cmp r2, r5
+	movle r0, #1
+	mov r1, r5
+	cmp r0, #1
 	beq .LU9
 	b .LU10
 .LU10:

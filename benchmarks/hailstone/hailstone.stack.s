@@ -40,62 +40,61 @@ hailstone:
 	push {fp, lr}
 	add fp, sp, #4
 	sub sp, sp, #4
-	mov r2, r0
-	str r2, [sp, #0]
-	movw r2, #1
-	cmp r2, #1
+	mov r3, r0
+	str r3, [sp, #0]
+	movw r3, #1
+	cmp r3, #1
 	beq .LU4
 	b .LU5
 .LU4:
-	ldr r2, [sp, #0]
-	mov r1, r2
+	ldr r3, [sp, #0]
+	mov r1, r3
 	movw r0, #:lower16:.PRINT_FMT
 	movt r0, #:upper16:.PRINT_FMT
 	bl printf
-	ldr r2, [sp, #0]
+	ldr r3, [sp, #0]
 	movw r1, #2
-	mov r0, r2
+	mov r0, r3
 	bl mod
-	mov r2, r0
 	mov r3, #0
-	cmp r2, #1
+	cmp r0, #1
 	moveq r3, #1
 	cmp r3, #1
 	beq .LU6
 	b .LU7
 .LU6:
-	ldr r2, [sp, #0]
+	ldr r0, [sp, #0]
 	movw r3, #3
-	mul r2, r3, r2
-	add r2, r2, #1
-	str r2, [sp, #0]
+	mul r3, r3, r0
+	add r3, r3, #1
+	str r3, [sp, #0]
 	b .LU8
 .LU7:
-	ldr r2, [sp, #0]
+	ldr r3, [sp, #0]
 	movw r1, #2
-	mov r0, r2
+	mov r0, r3
 	bl __aeabi_idiv
-	mov r2, r0
-	str r2, [sp, #0]
+	mov r3, r0
+	str r3, [sp, #0]
 	b .LU8
 .LU8:
-	ldr r2, [sp, #0]
+	ldr r0, [sp, #0]
 	mov r3, #0
-	cmp r2, #1
+	cmp r0, #1
 	movle r3, #1
 	cmp r3, #1
 	beq .LU9
 	b .LU10
 .LU9:
-	ldr r2, [sp, #0]
-	mov r1, r2
+	ldr r3, [sp, #0]
+	mov r1, r3
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	b .LU2
 .LU10:
-	movw r2, #1
-	cmp r2, #1
+	movw r3, #1
+	cmp r3, #1
 	beq .LU4
 	b .LU5
 .LU5:
