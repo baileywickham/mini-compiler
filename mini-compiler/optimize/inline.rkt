@@ -12,11 +12,10 @@
        (IdLL 'free #t)
        (IdLL 'malloc #t)))
 
-(struct InlineFun (blocks) #:transparent)
+(struct InlineFun (blocks next-id) #:transparent)
 
 (define+ (inline (LLVM ty decs funs))
   (define inlineable (get-inlineable funs))
-  (pretty-display (hash-keys inlineable))
   (define inline-draft ((draft-inline* inlineable) funs))
   (define clean (cleanup-cfg inline-draft))
   (LLVM ty decs clean))
@@ -69,7 +68,6 @@
     
     (define+ (draft/fun (FunLL id params ret-ty body))
       (define first-pass (map draft/block body))
-      (pretty-display ret-table)
       (FunLL id params ret-ty (map draft/block first-pass)))
 
     (define+ (draft/block (Block id stmts))
@@ -77,15 +75,16 @@
 
     (define (draft/stmt stmt block-id)
       (define new-stmt (subst-vars stmt get-var))
+ 
       (match new-stmt
-        [(CallLL _ id args _)
-         (if (inlineable-id? id)
-             (make-inline args (hash-ref inlineable id) #f ret-table block-id)
-             new-stmt)]
-        [(AssignLL target (CallLL _ id args _))
-         (if (inlineable-id? id)
-             (make-inline args (hash-ref inlineable id) target ret-table block-id)
-             new-stmt)]
+        [(CallLL _ (? inlineable-id? id) args _)         
+         (define next-id (make-label 'next))
+         (hash-set! ret-table (IdLL block-id #f) (IdLL next-id #f))
+         (make-inline args (hash-ref inlineable id) #f ret-table next-id)]
+        [(AssignLL target (CallLL _ (? inlineable-id? id) args _))
+         (define next-id (make-label 'next))
+         (hash-set! ret-table (IdLL block-id #f) (IdLL next-id #f))
+         (make-inline args (hash-ref inlineable id) target ret-table next-id)]
         [_ new-stmt]))
     
     (define (get-var var [br? #f])
@@ -100,14 +99,13 @@
 
   draft/funs)
 
-(define+ (make-inline args (FunLL id params _ body) target ret-table block-id)
-  (define new-args (make-immutable-hash (cons
-                                         (cons (IdLL (Block-id (first body)) #f) (IdLL block-id #f)) (map cons (map car params) (map car args)))))
+(define+ (make-inline args (FunLL id params _ body) target ret-table next-id)
+  (define new-args (make-immutable-hash (map cons (map car params) (map car args))))
   (define inline-prefix (make-label 'inline))
-  (hash-set! ret-table (IdLL block-id #f) (IdLL (format "~a_~a" inline-prefix (Block-id (last body))) #f))
-  (InlineFun ((inline-body* new-args inline-prefix target ret-table) body)))
+  ;(hash-set! ret-table (IdLL block-id #f) (IdLL (format "~a_~a" inline-prefix (Block-id (last body))) #f))
+  (InlineFun ((inline-body* new-args inline-prefix target ret-table next-id) body) next-id))
 
-(define (inline-body* new-args inline-prefix target ret-table)
+(define (inline-body* new-args inline-prefix target ret-table next-id)
   (define (inline-body blocks)
     (map inline/block blocks))
 
@@ -117,10 +115,10 @@
   
   (define (inline/stmt s)
     (match s
-      [(ReturnLL ty arg) (hash-set! ret-table target (inline/arg arg)) #f]
+      [(ReturnLL ty arg) (hash-set! ret-table target (inline/arg arg)) (BrLL (IdLL next-id #f))]
       [_ (subst-vars s inline/arg)]))
 
-    (define (inline/arg arg [br? #f])
+  (define (inline/arg arg [br? #f])
     (match arg
       [(IdLL _ #f) (hash-ref new-args arg (prefix-id arg))]
       [_ arg]))
@@ -147,8 +145,9 @@
 
 (define (cleanup-cfg/stmts stmts)
   (match stmts
-    [(cons (InlineFun (cons (Block id stmts) blocks)) rst)
-     (values stmts (append-blocks blocks rst))]
+    [(cons (InlineFun fun-blocks next-id) rst)
+     (values (list (BrLL (IdLL (Block-id (first fun-blocks)) #f)))
+             (append fun-blocks (list (Block next-id rst))))]
     [(cons stmt rst)
      (let-values ([(new-rst new-blocks) (cleanup-cfg/stmts rst)])
        (values (cons stmt new-rst) new-blocks))]
