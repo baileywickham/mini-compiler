@@ -228,7 +228,7 @@
       [(PhiLL id _ args)
        (let ([phi-id (IdLL (make-label '_phi) #f)])
          (for ([arg args])
-           (match-let ([(cons block-id (cons id _)) arg])
+           (match-let ([(cons (IdLL block-id _) (cons id _)) arg])
              (add-phi-move! block-id (make-mov phi-id id #hash()))))
 
          (make-mov id phi-id #hash()))]

@@ -43,8 +43,8 @@
     (match s
       [(AssignLL result src) (AssignLL (proc result) (subst-vars src proc))]
       [(BinaryLL op ty op1 op2) (BinaryLL op ty (proc op1) (proc op2))]
-      [(BrLL label) (BrLL (proc label))]
-      [(BrCondLL cond iftrue iffalse) (BrCondLL (proc cond) (proc iftrue) (proc iffalse))]
+      [(BrLL label) (BrLL (proc label #t))]
+      [(BrCondLL cond iftrue iffalse) (BrCondLL (proc cond) (proc iftrue #t) (proc iffalse #t))]
       [(StoreLL ty val ptr) (StoreLL ty (proc val) (proc ptr))]
       [(LoadLL ty ptr) (LoadLL ty (proc ptr))]
       [(ReturnLL ty arg) (ReturnLL ty (proc arg))]
@@ -54,4 +54,5 @@
       [(PhiLL id ty args)
        (PhiLL (proc id) ty
               (map (λ+ ((cons label (cons id ty)))
-                       (cons (proc label) (cons (proc id) ty))) args))]))
+                       (cons (proc label) (cons (proc id) ty))) args))]
+      [_ s]))

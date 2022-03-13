@@ -87,7 +87,7 @@ declare i32 @scanf(i8*, ...)
     [(PhiLL id ty args)
      (format "~a = phi ~a ~a" (format-id id) (format-ty ty)
              (string-join (map (λ+ ((cons label (cons id _)))
-                                   (format "[~a, %~a]" (format-arg id) label)) args) ", "))]))
+                                   (format "[~a, ~a]" (format-arg id) (format-id label))) args) ", "))]))
 
 ;;
 (define (format-args args)
@@ -109,7 +109,8 @@ declare i32 @scanf(i8*, ...)
     [(? integer?) arg]
     [(? boolean?) (if arg "true" "false")]
     [(? IdLL?) (format-id arg)]
-    [(StringConstLL id) (hash-ref format-strings id)]))
+    [(StringConstLL id) (hash-ref format-strings id)]
+    [(? void?) "VOID"]))
 
 ;;
 (define+ (format-id (IdLL id global?))

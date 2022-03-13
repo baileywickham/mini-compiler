@@ -11,5 +11,5 @@
       (~> llvm
           constant-prop
           remove-unused
-          #;inline)
+          inline)
       llvm))

@@ -298,8 +298,8 @@
                     (Block id (append (map unpack-phi phis) (reverse stmts)))) cfg)))
 
 ;;
-(define+ (unpack-phi (Phi id ty args _ _))
-  (PhiLL id ty args))
+(define+ (unpack-phi (Phi id ty (list (cons labels ids) ...) _ _))
+  (PhiLL id ty (map cons (map % labels) ids)))
 
 
 ;; Macro that given a set of IDs that labels are needed for binds the labels to freshly

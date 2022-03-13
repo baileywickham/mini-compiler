@@ -68,26 +68,30 @@
     (define ret-table (make-hash))
     
     (define+ (draft/fun (FunLL id params ret-ty body))
-      (FunLL id params ret-ty (map draft/block body)))
+      (define first-pass (map draft/block body))
+      (pretty-display ret-table)
+      (FunLL id params ret-ty (map draft/block first-pass)))
 
     (define+ (draft/block (Block id stmts))
-      (Block id (map draft/stmt stmts)))
+      (Block id (map (lambda (stmt) (draft/stmt stmt id)) stmts)))
 
-    (define (draft/stmt stmt)
+    (define (draft/stmt stmt block-id)
       (define new-stmt (subst-vars stmt get-var))
       (match new-stmt
         [(CallLL _ id args _)
          (if (inlineable-id? id)
-             (make-inline args (hash-ref inlineable id) #f ret-table)
+             (make-inline args (hash-ref inlineable id) #f ret-table block-id)
              new-stmt)]
         [(AssignLL target (CallLL _ id args _))
          (if (inlineable-id? id)
-             (make-inline args (hash-ref inlineable id) target ret-table)
+             (make-inline args (hash-ref inlineable id) target ret-table block-id)
              new-stmt)]
         [_ new-stmt]))
     
-    (define (get-var var)
-      (hash-ref ret-table var var))
+    (define (get-var var [br? #f])
+      (if (or br? (not (IdLL? var)))
+          var
+          (hash-ref ret-table var var)))
 
     draft/fun)
 
@@ -96,9 +100,11 @@
 
   draft/funs)
 
-(define+ (make-inline args (FunLL id params _ body) target ret-table)
-  (define new-args (make-immutable-hash (map cons (map car params) (map car args))))
+(define+ (make-inline args (FunLL id params _ body) target ret-table block-id)
+  (define new-args (make-immutable-hash (cons
+                                         (cons (IdLL (Block-id (first body)) #f) (IdLL block-id #f)) (map cons (map car params) (map car args)))))
   (define inline-prefix (make-label 'inline))
+  (hash-set! ret-table (IdLL block-id #f) (IdLL (format "~a_~a" inline-prefix (Block-id (last body))) #f))
   (InlineFun ((inline-body* new-args inline-prefix target ret-table) body)))
 
 (define (inline-body* new-args inline-prefix target ret-table)
@@ -113,11 +119,11 @@
     (match s
       [(ReturnLL ty arg) (hash-set! ret-table target (inline/arg arg)) #f]
       [_ (subst-vars s inline/arg)]))
-  
-  (define (inline/arg arg)
-    (if (IdLL? arg)
-        (hash-ref new-args arg (prefix-id arg))
-        arg))
+
+    (define (inline/arg arg [br? #f])
+    (match arg
+      [(IdLL _ #f) (hash-ref new-args arg (prefix-id arg))]
+      [_ arg]))
 
   (define (prefix-id id)
     (match id

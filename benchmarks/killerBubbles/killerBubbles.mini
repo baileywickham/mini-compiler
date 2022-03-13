@@ -18,15 +18,15 @@ fun deathSort(struct Node head) void
    int swap;
    struct Node currNode;
    swapped = 1;
-   
+
    while (swapped == 1)
    {
-   
+
       swapped = 0;
       currNode = head;
-   
+
       while (currNode.next != head)
-      {         
+      {
          if (compare(currNode, currNode.next) > 0)
          {
             swap = currNode.val;
@@ -34,7 +34,7 @@ fun deathSort(struct Node head) void
             currNode.next.val = swap;
             swapped = 1;
          }
-         
+
          currNode = currNode.next;
       }
    }
@@ -46,10 +46,10 @@ fun printEVILList(struct Node head) void
    struct Node toFree;
 
    currNode = head.next;
-   
+
    print head.val endl;
    delete head;
-   
+
    while (currNode != head)
    {
       toFree = currNode;
@@ -67,26 +67,26 @@ fun main() int
    struct Node previous;
 
    swapped = 666;
-   
+
    numNodes = read;
-   
+
    if (numNodes <= 0)
    {
       # Must have at least 1 node
       print -1 endl;
       return -1;
    }
-   
+
    numNodes = numNodes * 1000;
    counter = numNodes;
-      
+
    head = new Node;
    head.val = counter;
    head.prev = head;
    head.next = head;
    counter = counter - 1;
    previous = head;
-   
+
    while(counter > 0)
    {
       currNode = new Node;
@@ -94,14 +94,14 @@ fun main() int
       currNode.prev = previous;
       currNode.next = head;
       previous.next = currNode;
-      
+
       previous = currNode;
-      
+
       counter = counter - 1;
    }
-   
+
    deathSort(head);
    printEVILList(head);
-   
+
    return 0;
 }
