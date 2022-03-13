@@ -28,4 +28,26 @@ def parseFilename(n):
     m = re.match(r'[.][.]/benchmarks/(.*)/[^.]*[.](.*)[.]out', n)
     return m.groups()
 
+
+def parseFilenameCount(n):
+    m = re.match(r'[.][.]/benchmarks/(.*)/[^.]*[.](.*)[.](.*)', n)
+    return m.groups()
+
+
+def processLines():
+    data = []
+    with open('lines.raw.csv', 'r') as f:
+        r = csv.reader(f)
+        for line in r:
+            name = line[0].strip()
+            count = line[1].strip()
+            name, options, lang = parseFilenameCount(name)
+            data.append((name, options, lang, count))
+    with open('lines.final.csv', 'w+', newline='') as f:
+        w = csv.writer(f)
+        w.writerows([('Benchmark', 'Compilation', 'Format', 'Lines')] + data)
+
+
+
 main()
+processLines()
