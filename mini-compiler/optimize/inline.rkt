@@ -126,7 +126,7 @@
   (define (prefix-id id)
     (match id
       [(IdLL id global?) (IdLL (format "~a_~a" inline-prefix id) global?)]
-      [(? symbol?) (format "~a_~a" inline-prefix id)]))
+      [(or (? symbol?) (? string?)) (format "~a_~a" inline-prefix id)]))
 
   inline-body)
 

@@ -8,8 +8,18 @@
 
 (define (optimize-llvm llvm optimize?)
   (if optimize?
-      (~> llvm
-          constant-prop
-          remove-unused
-          inline)
+      (run-optimize llvm)
       llvm))
+
+(define (pass llvm)
+  (~> llvm
+      constant-prop
+      remove-unused
+      inline))
+
+(define (run-optimize llvm)
+  (displayln "pass")
+  (define opt (pass llvm))
+  (if (equal? llvm opt)
+      llvm
+      (run-optimize opt)))

@@ -6,55 +6,6 @@
 
 	.text
 	.align 2
-<<<<<<< HEAD
-=======
-	.global constantFolding
-constantFolding:
-.LU1:
-	push {fp, lr}
-	add fp, sp, #4
-	b .LU0
-.LU0:
-	movw r0, #226
-	pop {fp, pc}
-	.size constantFolding, .-constantFolding
-	.align 2
-	.global constantPropagation
-constantPropagation:
-.LU3:
-	push {fp, lr}
-	add fp, sp, #4
-	b .LU2
-.LU2:
-	movw r0, #:lower16:-25457889
-	movt r0, #:upper16:-25457889
-	pop {fp, pc}
-	.size constantPropagation, .-constantPropagation
-	.align 2
-	.global deadCodeElimination
-deadCodeElimination:
-.LU5:
-	push {fp, lr}
-	add fp, sp, #4
-	movw r3, #11
-	movw r0, #:lower16:global1
-	movt r0, #:upper16:global1
-	str r3, [r0]
-	movw r3, #5
-	movw r0, #:lower16:global1
-	movt r0, #:upper16:global1
-	str r3, [r0]
-	movw r3, #9
-	movw r0, #:lower16:global1
-	movt r0, #:upper16:global1
-	str r3, [r0]
-	b .LU4
-.LU4:
-	movw r0, #38
-	pop {fp, pc}
-	.size deadCodeElimination, .-deadCodeElimination
-	.align 2
->>>>>>> 04d3ca7b535ad303563af4a24bd28fe6c72eeaad
 	.global sum
 sum:
 .LU7:
@@ -88,20 +39,6 @@ sum:
 	pop {fp, pc}
 	.size sum, .-sum
 	.align 2
-<<<<<<< HEAD
-=======
-	.global doesntModifyGlobals
-doesntModifyGlobals:
-.LU11:
-	push {fp, lr}
-	add fp, sp, #4
-	b .LU10
-.LU10:
-	movw r0, #3
-	pop {fp, pc}
-	.size doesntModifyGlobals, .-doesntModifyGlobals
-	.align 2
->>>>>>> 04d3ca7b535ad303563af4a24bd28fe6c72eeaad
 	.global interProceduralOptimization
 interProceduralOptimization:
 .LU13:
@@ -111,31 +48,23 @@ interProceduralOptimization:
 	movw r3, #:lower16:global1
 	movt r3, #:upper16:global1
 	str r2, [r3]
-<<<<<<< HEAD
 	movw r2, #0
 	movw r3, #:lower16:global2
 	movt r3, #:upper16:global2
 	str r2, [r3]
-=======
-	movw r3, #0
-	movw r2, #:lower16:global2
-	movt r2, #:upper16:global2
-	str r3, [r2]
->>>>>>> 04d3ca7b535ad303563af4a24bd28fe6c72eeaad
 	movw r3, #0
 	movw r2, #:lower16:global3
 	movt r2, #:upper16:global3
 	str r3, [r2]
 	movw r0, #100
 	bl sum
-	mov r3, r0
 	movw r2, #:lower16:global1
 	movt r2, #:upper16:global1
 	ldr r2, [r2]
-	mov r1, #0
+	mov r3, #0
 	cmp r2, #1
-	moveq r1, #1
-	cmp r1, #1
+	moveq r3, #1
+	cmp r3, #1
 	beq .LU14
 	b .LU15
 .LU14:
@@ -146,11 +75,11 @@ interProceduralOptimization:
 .LU15:
 	movw r2, #:lower16:global2
 	movt r2, #:upper16:global2
-	ldr r2, [r2]
-	mov r1, #0
-	cmp r2, #2
-	moveq r1, #1
-	cmp r1, #1
+	ldr r3, [r2]
+	mov r2, #0
+	cmp r3, #2
+	moveq r2, #1
+	cmp r2, #1
 	beq .LU17
 	b .LU18
 .LU17:
@@ -159,15 +88,15 @@ interProceduralOptimization:
 	mov r2, r0
 	b .LU19
 .LU18:
-	mov r2, r3
+	mov r2, r0
 	b .LU19
 .LU19:
-	mov r3, r2
+	mov r0, r2
 	movw r2, #:lower16:global3
 	movt r2, #:upper16:global3
-	ldr r1, [r2]
+	ldr r3, [r2]
 	mov r2, #0
-	cmp r1, #3
+	cmp r3, #3
 	moveq r2, #1
 	cmp r2, #1
 	beq .LU20
@@ -178,7 +107,7 @@ interProceduralOptimization:
 	mov r2, r0
 	b .LU22
 .LU21:
-	mov r2, r3
+	mov r2, r0
 	b .LU22
 .LU22:
 	b .LU16
@@ -189,111 +118,6 @@ interProceduralOptimization:
 	pop {fp, pc}
 	.size interProceduralOptimization, .-interProceduralOptimization
 	.align 2
-<<<<<<< HEAD
-=======
-	.global commonSubexpressionElimination
-commonSubexpressionElimination:
-.LU24:
-	push {fp, lr}
-	add fp, sp, #4
-	b .LU23
-.LU23:
-	movw r0, #:lower16:-48796
-	movt r0, #:upper16:-48796
-	pop {fp, pc}
-	.size commonSubexpressionElimination, .-commonSubexpressionElimination
-	.align 2
-	.global hoisting
-hoisting:
-.LU26:
-	push {fp, lr}
-	add fp, sp, #4
-	push {r4, r5, r6}
-	movw r3, #2
-	movw r4, #1
-	movw r1, #2
-	movw r2, #3
-	movw r0, #4
-	movw r5, #0
-	movw r6, #1
-	cmp r6, #1
-	beq .LU27
-	b .LU28
-.LU27:
-	mov r3, r5
-	add r5, r3, #1
-	movw r3, #:lower16:1000000
-	movt r3, #:upper16:1000000
-	mov r6, #0
-	cmp r5, r3
-	movlt r6, #1
-	mov r3, r1
-	cmp r6, #1
-	beq .LU27
-	b .LU28
-.LU28:
-	mov r2, r3
-	b .LU25
-.LU25:
-	mov r0, r2
-	pop {r4, r5, r6}
-	pop {fp, pc}
-	.size hoisting, .-hoisting
-	.align 2
-	.global doubleIf
-doubleIf:
-.LU30:
-	push {fp, lr}
-	add fp, sp, #4
-	movw r2, #1
-	cmp r2, #1
-	beq .LU31
-	b .LU32
-.LU31:
-	movw r2, #1
-	cmp r2, #1
-	beq .LU34
-	b .LU35
-.LU34:
-	b .LU36
-.LU35:
-	b .LU36
-.LU36:
-	movw r2, #50
-	b .LU33
-.LU32:
-	movw r2, #0
-	b .LU33
-.LU33:
-	b .LU29
-.LU29:
-	mov r0, r2
-	pop {fp, pc}
-	.size doubleIf, .-doubleIf
-	.align 2
-	.global integerDivide
-integerDivide:
-.LU38:
-	push {fp, lr}
-	add fp, sp, #4
-	b .LU37
-.LU37:
-	movw r0, #736
-	pop {fp, pc}
-	.size integerDivide, .-integerDivide
-	.align 2
-	.global association
-association:
-.LU40:
-	push {fp, lr}
-	add fp, sp, #4
-	b .LU39
-.LU39:
-	movw r0, #10
-	pop {fp, pc}
-	.size association, .-association
-	.align 2
->>>>>>> 04d3ca7b535ad303563af4a24bd28fe6c72eeaad
 	.global tailRecursionHelper
 tailRecursionHelper:
 .LU42:
@@ -338,152 +162,6 @@ tailRecursion:
 	pop {fp, pc}
 	.size tailRecursion, .-tailRecursion
 	.align 2
-<<<<<<< HEAD
-=======
-	.global unswitching
-unswitching:
-.LU49:
-	push {fp, lr}
-	add fp, sp, #4
-	movw r2, #1
-	movw r3, #2
-	movw r1, #1
-	movw r0, #1
-	cmp r0, #1
-	beq .LU50
-	b .LU51
-.LU50:
-	mov r0, r1
-	mov r2, #0
-	cmp r3, #2
-	moveq r2, #1
-	cmp r2, #1
-	beq .LU52
-	b .LU53
-.LU52:
-	add r0, r0, #1
-	b .LU54
-.LU53:
-	add r0, r0, #2
-	b .LU54
-.LU54:
-	mov r1, r0
-	movw r2, #:lower16:1000000
-	movt r2, #:upper16:1000000
-	mov r0, #0
-	cmp r1, r2
-	movlt r0, #1
-	mov r2, r1
-	cmp r0, #1
-	beq .LU50
-	b .LU51
-.LU51:
-	mov r3, r2
-	b .LU48
-.LU48:
-	mov r0, r3
-	pop {fp, pc}
-	.size unswitching, .-unswitching
-	.align 2
-	.global randomCalculation
-randomCalculation:
-.LU56:
-	push {fp, lr}
-	add fp, sp, #4
-	push {r4, r5}
-	mov r4, r0
-	movw r0, #0
-	mov r2, #0
-	cmp r0, r4
-	movlt r2, #1
-	movw r1, #0
-	movw r3, #0
-	movw r0, #0
-	cmp r2, #1
-	beq .LU57
-	b .LU58
-.LU57:
-	mov r2, r0
-	mov r0, r3
-	add r5, r0, #19
-	movw r0, #2
-	mul r2, r2, r0
-	movw r1, #2
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	movw r0, #3
-	mul r2, r0, r2
-	movw r1, #3
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	movw r0, #4
-	mul r2, r2, r0
-	movw r1, #4
-	mov r0, r2
-	bl __aeabi_idiv
-	mov r2, r0
-	add r0, r2, #1
-	mov r2, #0
-	cmp r0, r4
-	movlt r2, #1
-	mov r1, r5
-	mov r3, r5
-	cmp r2, #1
-	beq .LU57
-	b .LU58
-.LU58:
-	mov r2, r1
-	b .LU55
-.LU55:
-	mov r0, r2
-	pop {r4, r5}
-	pop {fp, pc}
-	.size randomCalculation, .-randomCalculation
-	.align 2
-	.global iterativeFibonacci
-iterativeFibonacci:
-.LU60:
-	push {fp, lr}
-	add fp, sp, #4
-	push {r4, r5}
-	mov r3, r0
-	movw r2, #0
-	mov r0, #0
-	cmp r2, r3
-	movlt r0, #1
-	movw r5, #1
-	movw r2, #1
-	movw r1, #:lower16:-1
-	movt r1, #:upper16:-1
-	movw r4, #0
-	cmp r0, #1
-	beq .LU61
-	b .LU62
-.LU61:
-	mov r0, r4
-	mov r4, r1
-	mov r1, r2
-	add r2, r1, r4
-	add r4, r0, #1
-	mov r0, #0
-	cmp r4, r3
-	movlt r0, #1
-	mov r5, r2
-	cmp r0, #1
-	beq .LU61
-	b .LU62
-.LU62:
-	mov r2, r5
-	b .LU59
-.LU59:
-	mov r0, r2
-	pop {r4, r5}
-	pop {fp, pc}
-	.size iterativeFibonacci, .-iterativeFibonacci
-	.align 2
->>>>>>> 04d3ca7b535ad303563af4a24bd28fe6c72eeaad
 	.global recursiveFibonacci
 recursiveFibonacci:
 .LU64:
@@ -526,169 +204,130 @@ main:
 .LU69:
 	push {fp, lr}
 	add fp, sp, #4
-	push {r4, r5, r6, r7, r8, r9, r10, r11}
-	sub sp, sp, #56
+	push {r4, r5, r6, r7, r8}
 	movw r1, #:lower16:.read_scratch
 	movt r1, #:upper16:.read_scratch
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-<<<<<<< HEAD
-	movw r4, #:lower16:.read_scratch
-	movt r4, #:upper16:.read_scratch
-	ldr r4, [r4]
-	movw r7, #1
-	mov r6, #0
-	cmp r7, r4
-	movlt r6, #1
-	mov r7, r4
-	movw r4, #1
-	cmp r6, #1
-	beq .LU70
-	b .LU71
-.LU70:
-	mov r10, r4
-	str r10, [sp, #48]
-	mov r9, r7
-	movw r4, #1
-	movw r10, #1
-	str r10, [sp, #44]
-	movw r10, #:lower16:-1
-	str r10, [sp, #32]
-	movt r10, #:upper16:-1
-	str r10, [sp, #32]
-	movw r10, #0
-	str r10, [sp, #28]
-	mov r10, r5
-	str r10, [sp, #36]
-	movw r10, #0
-	str r10, [sp, #16]
-	movw r10, #0
-	str r10, [sp, #40]
-	movw r10, #0
-	str r10, [sp, #24]
-	mov r10, r9
-	str r10, [sp, #52]
-	movw r6, #1
-	movw r5, #2
-	movw r10, #1
-	str r10, [sp, #0]
-	movw r10, #2
-	str r10, [sp, #8]
-	movw r10, #1
-	str r10, [sp, #12]
-	movw r7, #2
-	movw r10, #3
-	str r10, [sp, #4]
-	movw r8, #4
-	movw r10, #0
-	str r10, [sp, #20]
-	b .inline0_LU0
-.inline0_LU0:
-	movw r1, #226
-=======
 	movw r2, #:lower16:.read_scratch
 	movt r2, #:upper16:.read_scratch
-	ldr r1, [r2]
-	movw r3, #1
-	mov r2, #0
-	cmp r3, r1
-	movlt r2, #1
-	movw r3, #1
-	cmp r2, #1
+	ldr r2, [r2]
+	movw r1, #1
+	mov r3, #0
+	cmp r1, r2
+	movlt r3, #1
+	mov r1, r2
+	movw r2, #1
+	cmp r3, #1
 	beq .LU70
 	b .LU71
 .LU70:
-	mov r5, r3
-	mov r4, r1
-	bl constantFolding
-	mov r2, r0
-	mov r1, r2
->>>>>>> 04d3ca7b535ad303563af4a24bd28fe6c72eeaad
+	mov r7, r2
+	mov r8, r1
+	b .inline0_LU1
+.inline0_LU1:
+	b .inline0_LU0
+.inline0_LU0:
+	b .next0
+.next0:
+	movw r1, #226
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
+	b .inline1_LU3
+.inline1_LU3:
 	b .inline1_LU2
 .inline1_LU2:
+	b .next1
+.next1:
 	movw r1, #:lower16:-25457889
 	movt r1, #:upper16:-25457889
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	movw r1, #11
+	b .inline2_LU5
+.inline2_LU5:
+	movw r2, #11
+	movw r3, #:lower16:global1
+	movt r3, #:upper16:global1
+	str r2, [r3]
+	movw r2, #5
+	movw r3, #:lower16:global1
+	movt r3, #:upper16:global1
+	str r2, [r3]
+	movw r3, #9
 	movw r2, #:lower16:global1
 	movt r2, #:upper16:global1
-	str r1, [r2]
-	movw r2, #5
-	movw r1, #:lower16:global1
-	movt r1, #:upper16:global1
-	str r2, [r1]
-	movw r2, #9
-	movw r1, #:lower16:global1
-	movt r1, #:upper16:global1
-	str r2, [r1]
+	str r3, [r2]
 	b .inline2_LU4
 .inline2_LU4:
+	b .next2
+.next2:
 	movw r1, #38
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	bl interProceduralOptimization
-	mov r1, r0
+	mov r2, r0
+	mov r1, r2
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
+	b .inline3_LU24
+.inline3_LU24:
 	b .inline3_LU23
 .inline3_LU23:
+	b .next3
+.next3:
 	movw r1, #:lower16:-48796
 	movt r1, #:upper16:-48796
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	movw r1, #1
-	cmp r1, #1
+	b .inline4_LU26
+.inline4_LU26:
+	movw r3, #2
+	movw r5, #1
+	movw r4, #2
+	movw r2, #3
+	movw r1, #4
+	movw r6, #0
+	movw r0, #1
+	cmp r0, #1
 	beq .inline4_LU27
 	b .inline4_LU28
 .inline4_LU27:
-	ldr r10, [sp, #20]
-	mov r1, r10
-	ldr r10, [sp, #4]
-	str r10, [sp, #4]
-	ldr r10, [sp, #12]
-	mov r3, r10
-	add r2, r1, #1
-	movw r0, #:lower16:1000000
-	movt r0, #:upper16:1000000
-	mov r1, #0
-	cmp r2, r0
-	movlt r1, #1
-	mov r10, r7
-	str r10, [sp, #8]
-	mov r10, r3
-	str r10, [sp, #12]
-	ldr r10, [sp, #4]
-	str r10, [sp, #4]
-	mov r10, r2
-	str r10, [sp, #20]
-	cmp r1, #1
+	mov r3, r6
+	add r6, r3, #1
+	movw r3, #:lower16:1000000
+	movt r3, #:upper16:1000000
+	mov r0, #0
+	cmp r6, r3
+	movlt r0, #1
+	mov r3, r4
+	cmp r0, #1
 	beq .inline4_LU27
 	b .inline4_LU28
 .inline4_LU28:
-	ldr r10, [sp, #8]
-	mov r7, r10
+	mov r2, r3
 	b .inline4_LU25
 .inline4_LU25:
-	mov r1, r7
+	b .next4
+.next4:
+	mov r1, r2
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	movw r7, #1
-	cmp r7, #1
+	b .inline5_LU30
+.inline5_LU30:
+	movw r2, #1
+	cmp r2, #1
 	beq .inline5_LU31
 	b .inline5_LU32
 .inline5_LU31:
-	movw r7, #1
-	cmp r7, #1
+	movw r2, #1
+	cmp r2, #1
 	beq .inline5_LU34
 	b .inline5_LU35
 .inline5_LU34:
@@ -696,211 +335,209 @@ main:
 .inline5_LU35:
 	b .inline5_LU36
 .inline5_LU36:
-	movw r7, #50
+	movw r2, #50
 	b .inline5_LU33
 .inline5_LU32:
-	movw r7, #0
+	movw r2, #0
 	b .inline5_LU33
 .inline5_LU33:
 	b .inline5_LU29
 .inline5_LU29:
-	mov r1, r7
+	b .next5
+.next5:
+	mov r1, r2
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
+	b .inline6_LU38
+.inline6_LU38:
 	b .inline6_LU37
 .inline6_LU37:
+	b .next6
+.next6:
 	movw r1, #736
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
+	b .inline7_LU40
+.inline7_LU40:
 	b .inline7_LU39
 .inline7_LU39:
+	b .next7
+.next7:
 	movw r1, #10
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	movw r1, #1000
-	mov r0, r9
+	mov r0, r8
 	bl __aeabi_idiv
-	mov r7, r0
-	mov r0, r7
+	mov r2, r0
+	mov r0, r2
 	bl tailRecursion
-	mov r7, r0
-	mov r1, r7
+	mov r2, r0
+	mov r1, r2
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	movw r7, #1
-	cmp r7, #1
+	b .inline8_LU49
+.inline8_LU49:
+	movw r3, #1
+	movw r0, #2
+	movw r2, #1
+	movw r1, #1
+	cmp r1, #1
 	beq .inline8_LU50
 	b .inline8_LU51
 .inline8_LU50:
-	ldr r10, [sp, #0]
-	mov r6, r10
-	mov r7, #0
-	cmp r5, #2
-	moveq r7, #1
-	cmp r7, #1
+	mov r1, r0
+	mov r3, #0
+	cmp r1, #2
+	moveq r3, #1
+	cmp r3, #1
 	beq .inline8_LU52
 	b .inline8_LU53
 .inline8_LU52:
-	add r6, r6, #1
+	add r2, r2, #1
+	mov r3, r1
 	b .inline8_LU54
 .inline8_LU53:
-	add r6, r6, #2
+	add r2, r2, #2
+	mov r3, r1
 	b .inline8_LU54
 .inline8_LU54:
-	mov r8, r6
-	movw r6, #:lower16:1000000
-	movt r6, #:upper16:1000000
-	mov r7, #0
-	cmp r8, r6
-	movlt r7, #1
-	mov r6, r8
-	mov r10, r8
-	str r10, [sp, #0]
-	cmp r7, #1
+	mov r0, r3
+	movw r3, #:lower16:1000000
+	movt r3, #:upper16:1000000
+	mov r1, #0
+	cmp r2, r3
+	movlt r1, #1
+	mov r3, r2
+	cmp r1, #1
 	beq .inline8_LU50
 	b .inline8_LU51
 .inline8_LU51:
-	mov r5, r6
+	mov r2, r3
 	b .inline8_LU48
 .inline8_LU48:
-	mov r1, r5
+	b .next8
+.next8:
+	mov r1, r2
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	movw r5, #0
-	mov r6, #0
-	cmp r5, r9
-	movlt r6, #1
-	cmp r6, #1
+	b .inline9_LU56
+.inline9_LU56:
+	movw r2, #0
+	mov r1, #0
+	cmp r2, r8
+	movlt r1, #1
+	movw r3, #0
+	movw r0, #0
+	movw r2, #0
+	mov r4, r8
+	cmp r1, #1
 	beq .inline9_LU57
 	b .inline9_LU58
 .inline9_LU57:
-	ldr r10, [sp, #52]
-	mov r5, r10
-	ldr r10, [sp, #24]
-	mov r7, r10
-	ldr r10, [sp, #40]
-	mov r6, r10
-	add r6, r6, #19
-	movw r8, #2
-	mul r7, r7, r8
+	mov r5, r4
+	mov r3, r0
+	add r4, r3, #19
+	movw r3, #2
+	mul r2, r2, r3
 	movw r1, #2
-	mov r0, r7
+	mov r0, r2
 	bl __aeabi_idiv
-	mov r7, r0
-	movw r8, #3
-	mul r7, r8, r7
+	mov r2, r0
+	movw r3, #3
+	mul r2, r3, r2
 	movw r1, #3
-	mov r0, r7
+	mov r0, r2
 	bl __aeabi_idiv
-	mov r7, r0
-	movw r8, #4
-	mul r7, r7, r8
+	mov r2, r0
+	movw r3, #4
+	mul r2, r2, r3
 	movw r1, #4
-	mov r0, r7
+	mov r0, r2
 	bl __aeabi_idiv
-	mov r7, r0
-	add r8, r7, #1
-	mov r7, #0
-	cmp r8, r5
-	movlt r7, #1
-	mov r10, r6
-	str r10, [sp, #16]
-	mov r10, r6
-	str r10, [sp, #40]
-	mov r10, r8
-	str r10, [sp, #24]
-	mov r10, r5
-	str r10, [sp, #52]
-	cmp r7, #1
+	mov r2, r0
+	add r2, r2, #1
+	mov r1, #0
+	cmp r2, r5
+	movlt r1, #1
+	mov r3, r4
+	mov r0, r4
+	mov r4, r5
+	cmp r1, #1
 	beq .inline9_LU57
 	b .inline9_LU58
 .inline9_LU58:
-	ldr r10, [sp, #16]
-	mov r5, r10
+	mov r2, r3
 	b .inline9_LU55
 .inline9_LU55:
-	mov r1, r5
+	b .next9
+.next9:
+	mov r1, r2
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	movw r1, #5
-	mov r0, r9
+	mov r0, r8
 	bl __aeabi_idiv
-	mov r5, r0
-	movw r6, #0
-	mov r7, #0
-	cmp r6, r5
-	movlt r7, #1
-	cmp r7, #1
+	mov r3, r0
+	b .inline10_LU60
+.inline10_LU60:
+	movw r2, #0
+	mov r1, #0
+	cmp r2, r3
+	movlt r1, #1
+	movw r4, #1
+	movw r5, #1
+	movw r0, #:lower16:-1
+	movt r0, #:upper16:-1
+	movw r2, #0
+	cmp r1, #1
 	beq .inline10_LU61
 	b .inline10_LU62
 .inline10_LU61:
-	ldr r10, [sp, #36]
-	mov r7, r10
-	ldr r10, [sp, #28]
-	mov r4, r10
-	ldr r10, [sp, #32]
-	mov r6, r10
-	ldr r10, [sp, #44]
-	mov r1, r10
-	add r10, r1, r6
-	str r10, [sp, #0]
-	add r8, r4, #1
-	mov r6, #0
-	cmp r8, r7
-	movlt r6, #1
-	ldr r10, [sp, #0]
-	mov r4, r10
-	ldr r10, [sp, #0]
-	str r10, [sp, #44]
-	mov r10, r1
-	str r10, [sp, #32]
-	mov r10, r8
-	str r10, [sp, #28]
-	mov r10, r7
-	str r10, [sp, #36]
-	cmp r6, #1
+	mov r1, r0
+	mov r0, r5
+	add r5, r0, r1
+	add r2, r2, #1
+	mov r1, #0
+	cmp r2, r3
+	movlt r1, #1
+	mov r4, r5
+	cmp r1, #1
 	beq .inline10_LU61
 	b .inline10_LU62
 .inline10_LU62:
+	mov r2, r4
 	b .inline10_LU59
 .inline10_LU59:
-	mov r1, r4
+	b .next10
+.next10:
+	mov r1, r2
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	movw r1, #1000
-	mov r0, r9
+	mov r0, r8
 	bl __aeabi_idiv
-	mov r4, r0
-	mov r0, r4
+	mov r2, r0
+	mov r0, r2
 	bl recursiveFibonacci
-	mov r4, r0
-	mov r1, r4
+	mov r2, r0
+	mov r1, r2
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-<<<<<<< HEAD
-	ldr r10, [sp, #48]
-	add r4, r10, #1
-	mov r6, #0
-	cmp r4, r9
-	movlt r6, #1
-	mov r7, r9
-	cmp r6, #1
-=======
-	add r3, r5, #1
-	mov r2, #0
-	cmp r3, r4
-	movlt r2, #1
-	mov r1, r4
-	cmp r2, #1
->>>>>>> 04d3ca7b535ad303563af4a24bd28fe6c72eeaad
+	add r2, r7, #1
+	mov r3, #0
+	cmp r2, r8
+	movlt r3, #1
+	mov r1, r8
+	cmp r3, #1
 	beq .LU70
 	b .LU71
 .LU71:
@@ -911,8 +548,7 @@ main:
 	b .LU68
 .LU68:
 	movw r0, #0
-	add sp, sp, #56
-	pop {r4, r5, r6, r7, r8, r9, r10, r11}
+	pop {r4, r5, r6, r7, r8}
 	pop {fp, pc}
 	.size main, .-main
 	.section	.rodata

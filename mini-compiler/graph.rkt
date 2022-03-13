@@ -2,6 +2,7 @@
 
 (require graph
          data/heap)
+(provide color-graph build-graph)
 
 (define (color-graph graph)
   (define num-colors 0)
@@ -41,3 +42,6 @@
          (deg-set! v (sub1 (deg v)))
          (heap-add! H v))
        (loop (cons min-v res))])))
+
+(define (build-graph g)
+  (unweighted-graph/undirected g))
