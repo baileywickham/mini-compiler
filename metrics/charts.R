@@ -1,15 +1,30 @@
 library(tikzDevice) # load the tikzDevice package
 library(ggplot2) # load the ggplot2 package
 library(RColorBrewer)
+library(xtable)
 
 #data(mtcars) # load the dataset
 
 setwd('C:/Users/alexm/Documents/431/CSC431/metrics')
-times = read.csv(file = "time.py.csv", quote =" '")
+
+times = read.csv(file = "time.py.csv", quote ="'")
 
 times$Compilation <- factor(times$Compilation,
                             levels = c('stack.s', 'reg.s', 'opt.s', 'c.o0', 'c.o3'),
                             labels = c("Stack", "Registers",  "Optimizations", "clang -O0", "clang -O3"))
+
+instructions = read.csv(file = "lines.final.csv", quote =" '")
+
+instructions$Format <- factor(instructions$Format,
+                            levels = c('ll', 's'),
+                            labels = c("LLVM IR", "ARM Assembly"))
+
+instructions$Compilation <- factor(instructions$Compilation,
+                            levels = c('stack', 'reg', 'opt'),
+                            labels = c("Stack", "Registers",  "Optimizations"))
+
+
+
 
 texEscape <- function(s) {
   return(gsub('_', '\\\\_', s))
@@ -37,13 +52,22 @@ statsForBenchmark <- function(name) {
   print(plot)
   dev.off()
 
-  rawTable = aggregate(benchmarkTimes$Seconds,
+  rawTable <- aggregate(benchmarkTimes$Seconds,
                        list(benchmarkTimes$Compilation), FUN = summary)
   print(rawTable)
   summaryTable = rawTable[[2]]
   row.names(summaryTable) <- rawTable[[1]]
   print(xtable(summaryTable, type = "latex"),
         file = paste("charts/", name, "Table.tex" , sep = ''))
+  
+  
+  rawInstTable <- reshape(instructions[instructions$Benchmark == name, -1],
+                          idvar="Compilation", timevar = "Format", direction = 'wide')
+  names(rawInstTable) <- c("Compilation", "LLVM IR", "ARM Assembly")
+  row.names(rawInstTable) <- rawInstTable$Compilation
+  instTable <- rawInstTable[order(rawInstTable$Compilation), c(2,3)]
+  print(xtable(instTable, type = "latex"),
+        file = paste("charts/", name, "InstTable.tex" , sep = ''))
 
 }
 
