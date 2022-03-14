@@ -24,8 +24,6 @@ concatLists:
 	mov r1, r4
 	b .LU0
 .LU3:
-	b .LU4
-.LU4:
 	add r1, r3, #4
 	ldr r1, [r1]
 	mov r5, #0
@@ -78,8 +76,6 @@ add:
 	str r5, [r1]
 	add r5, r0, #4
 	str r4, [r5]
-	b .LU7
-.LU7:
 	pop {r4, r5}
 	pop {fp, pc}
 	.size add, .-add
@@ -99,8 +95,6 @@ size:
 	movw r0, #0
 	b .LU9
 .LU12:
-	b .LU13
-.LU13:
 	add r0, r0, #4
 	ldr r0, [r0]
 	bl size
@@ -127,8 +121,6 @@ get:
 	ldr r1, [r1]
 	b .LU14
 .LU17:
-	b .LU18
-.LU18:
 	add r0, r0, #4
 	ldr r0, [r0]
 	sub r1, r1, #1
@@ -168,8 +160,6 @@ printList:
 .LU24:
 	b .LU25
 .LU25:
-	b .LU21
-.LU21:
 	pop {r4}
 	pop {fp, pc}
 	.size printList, .-printList
@@ -205,8 +195,6 @@ treeprint:
 .LU29:
 	b .LU30
 .LU30:
-	b .LU26
-.LU26:
 	pop {r4}
 	pop {fp, pc}
 	.size treeprint, .-treeprint
@@ -234,8 +222,6 @@ freeList:
 .LU34:
 	b .LU35
 .LU35:
-	b .LU31
-.LU31:
 	pop {r4}
 	pop {fp, pc}
 	.size freeList, .-freeList
@@ -268,8 +254,6 @@ freeTree:
 .LU39:
 	b .LU40
 .LU40:
-	b .LU36
-.LU36:
 	pop {r4}
 	pop {fp, pc}
 	.size freeTree, .-freeTree
@@ -318,8 +302,6 @@ postOrder:
 	mov r4, r0
 	b .LU41
 .LU44:
-	b .LU45
-.LU45:
 	movw r4, #0
 	b .LU41
 .LU41:
@@ -356,8 +338,6 @@ treeadd:
 	str r1, [r5]
 	b .LU46
 .LU49:
-	b .LU50
-.LU50:
 	mov r1, r4
 	ldr r2, [r1]
 	mov r1, #0
@@ -414,8 +394,6 @@ quickSort:
 .LU56:
 	b .LU54
 .LU57:
-	b .LU58
-.LU58:
 	movw r1, #0
 	mov r0, r4
 	bl get
@@ -573,8 +551,6 @@ quickSortMain:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .LU64
-.LU64:
 	movw r0, #0
 	pop {r4}
 	pop {fp, pc}
@@ -612,8 +588,6 @@ treesearch:
 	movw r4, #1
 	b .LU66
 .LU72:
-	b .LU73
-.LU73:
 	add r1, r5, #4
 	ldr r2, [r1]
 	mov r1, r4
@@ -630,8 +604,6 @@ treesearch:
 	movw r4, #1
 	b .LU66
 .LU75:
-	b .LU76
-.LU76:
 	add r5, r5, #8
 	ldr r5, [r5]
 	mov r1, r4
@@ -651,8 +623,6 @@ treesearch:
 	movw r4, #0
 	b .LU66
 .LU69:
-	b .LU70
-.LU70:
 	movw r4, #0
 	b .LU66
 .LU66:
@@ -745,8 +715,6 @@ bintreesearch:
 	movw r4, #1
 	b .LU85
 .LU91:
-	b .LU92
-.LU92:
 	mov r1, r5
 	ldr r2, [r1]
 	mov r1, #0
@@ -772,8 +740,6 @@ bintreesearch:
 	mov r4, r0
 	b .LU85
 .LU88:
-	b .LU89
-.LU89:
 	movw r4, #0
 	b .LU85
 .LU85:
@@ -825,8 +791,6 @@ buildTree:
 	b .LU99
 .LU99:
 	mov r4, r2
-	b .LU96
-.LU96:
 	mov r0, r4
 	pop {r4, r5, r6}
 	pop {fp, pc}
@@ -1045,8 +1009,6 @@ treeMain:
 	bl printf
 	mov r0, r4
 	bl freeTree
-	b .LU100
-.LU100:
 	pop {r4, r5}
 	pop {fp, pc}
 	.size treeMain, .-treeMain
@@ -1068,8 +1030,6 @@ myCopy:
 	movw r4, #0
 	b .LU102
 .LU105:
-	b .LU106
-.LU106:
 	mov r5, r4
 	ldr r5, [r5]
 	mov r1, r5
@@ -1152,8 +1112,6 @@ main:
 	bl freeList
 	mov r0, r4
 	bl freeList
-	b .LU107
-.LU107:
 	movw r0, #0
 	pop {r4, r5, r6, r7}
 	pop {fp, pc}

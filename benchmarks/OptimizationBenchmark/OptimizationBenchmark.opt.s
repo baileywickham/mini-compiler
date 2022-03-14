@@ -32,8 +32,6 @@ sum:
 	beq .LU8
 	b .LU9
 .LU9:
-	b .LU6
-.LU6:
 	pop {fp, pc}
 	.size sum, .-sum
 	.align 2
@@ -108,8 +106,6 @@ interProceduralOptimization:
 .LU22:
 	b .LU16
 .LU16:
-	b .LU12
-.LU12:
 	mov r0, r1
 	pop {fp, pc}
 	.size interProceduralOptimization, .-interProceduralOptimization
@@ -149,8 +145,6 @@ tailRecursion:
 	mov r0, r2
 	bl tailRecursionHelper
 	mov r1, r0
-	b .LU46
-.LU46:
 	mov r0, r1
 	pop {fp, pc}
 	.size tailRecursion, .-tailRecursion
@@ -215,29 +209,15 @@ main:
 	b .LU71
 .LU70:
 	mov r5, r6
-	b .inline0_LU1
-.inline0_LU1:
-	b .inline0_LU0
-.inline0_LU0:
-	b .next0
-.next0:
 	movw r1, #226
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .inline1_LU3
-.inline1_LU3:
-	b .inline1_LU2
-.inline1_LU2:
-	b .next1
-.next1:
 	movw r1, #:lower16:-25457889
 	movt r1, #:upper16:-25457889
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .inline2_LU5
-.inline2_LU5:
 	movw r7, #11
 	movw r6, #:lower16:global1
 	movt r6, #:upper16:global1
@@ -250,10 +230,6 @@ main:
 	movw r7, #:lower16:global1
 	movt r7, #:upper16:global1
 	str r6, [r7]
-	b .inline2_LU4
-.inline2_LU4:
-	b .next2
-.next2:
 	movw r1, #38
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
@@ -264,19 +240,11 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .inline3_LU24
-.inline3_LU24:
-	b .inline3_LU23
-.inline3_LU23:
-	b .next3
-.next3:
 	movw r1, #:lower16:-48796
 	movt r1, #:upper16:-48796
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .inline4_LU26
-.inline4_LU26:
 	movw r6, #2
 	movw r7, #1
 	movw r0, #2
@@ -300,16 +268,10 @@ main:
 	beq .inline4_LU27
 	b .inline4_LU28
 .inline4_LU28:
-	b .inline4_LU25
-.inline4_LU25:
-	b .next4
-.next4:
 	mov r1, r6
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .inline5_LU30
-.inline5_LU30:
 	movw r6, #1
 	cmp r6, #1
 	beq .inline5_LU31
@@ -330,30 +292,14 @@ main:
 	movw r6, #0
 	b .inline5_LU33
 .inline5_LU33:
-	b .inline5_LU29
-.inline5_LU29:
-	b .next5
-.next5:
 	mov r1, r6
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .inline6_LU38
-.inline6_LU38:
-	b .inline6_LU37
-.inline6_LU37:
-	b .next6
-.next6:
 	movw r1, #736
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .inline7_LU40
-.inline7_LU40:
-	b .inline7_LU39
-.inline7_LU39:
-	b .next7
-.next7:
 	movw r1, #10
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
@@ -369,8 +315,6 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .inline8_LU49
-.inline8_LU49:
 	movw r6, #1
 	movw r7, #2
 	movw r2, #1
@@ -408,16 +352,10 @@ main:
 	beq .inline8_LU50
 	b .inline8_LU51
 .inline8_LU51:
-	b .inline8_LU48
-.inline8_LU48:
-	b .next8
-.next8:
 	mov r1, r6
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .inline9_LU56
-.inline9_LU56:
 	movw r7, #0
 	mov r6, #0
 	cmp r7, r4
@@ -463,10 +401,6 @@ main:
 	b .inline9_LU58
 .inline9_LU58:
 	mov r6, r1
-	b .inline9_LU55
-.inline9_LU55:
-	b .next9
-.next9:
 	mov r1, r6
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
@@ -474,8 +408,6 @@ main:
 	movw r1, #5
 	mov r0, r4
 	bl __aeabi_idiv
-	b .inline10_LU60
-.inline10_LU60:
 	movw r6, #0
 	mov r1, #0
 	cmp r6, r0
@@ -506,10 +438,6 @@ main:
 	b .inline10_LU62
 .inline10_LU62:
 	mov r6, r7
-	b .inline10_LU59
-.inline10_LU59:
-	b .next10
-.next10:
 	mov r1, r6
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
@@ -537,8 +465,6 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .LU68
-.LU68:
 	movw r0, #0
 	pop {r4, r5, r6, r7, r8}
 	pop {fp, pc}

@@ -33,8 +33,6 @@ recursiveDecimalSum:
 	beq .LU13
 	b .LU14
 .LU13:
-	b .inline0_LU5
-.inline0_LU5:
 	mov r7, #0
 	cmp r4, #0
 	movgt r7, #1
@@ -57,10 +55,6 @@ recursiveDecimalSum:
 	beq .inline0_LU6
 	b .inline0_LU7
 .inline0_LU7:
-	b .inline0_LU4
-.inline0_LU4:
-	b .next0
-.next0:
 	add r5, r5, r1
 	b .LU15
 .LU14:
@@ -78,8 +72,6 @@ recursiveDecimalSum:
 	mov r4, r0
 	b .LU8
 .LU11:
-	b .LU12
-.LU12:
 	mov r4, r5
 	b .LU8
 .LU8:
@@ -97,8 +89,6 @@ convertToDecimal:
 	movw r1, #0
 	bl recursiveDecimalSum
 	mov r2, r0
-	b .LU16
-.LU16:
 	mov r0, r2
 	pop {fp, pc}
 	.size convertToDecimal, .-convertToDecimal
@@ -131,8 +121,6 @@ main:
 .LU20:
 	mov r1, r4
 	mov r2, r3
-	b .inline1_LU1
-.inline1_LU1:
 	mov r0, #0
 	cmp r2, #0
 	movgt r0, #1
@@ -150,10 +138,6 @@ main:
 	beq .inline1_LU2
 	b .inline1_LU3
 .inline1_LU3:
-	b .inline1_LU0
-.inline1_LU0:
-	b .next1
-.next1:
 	sub r3, r2, #1
 	mov r0, #0
 	cmp r3, #0
@@ -168,8 +152,6 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .LU18
-.LU18:
 	movw r0, #0
 	pop {r4}
 	pop {fp, pc}

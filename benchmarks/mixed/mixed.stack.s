@@ -9,21 +9,19 @@ tailrecursive:
 	push {fp, lr}
 	add fp, sp, #4
 	sub sp, sp, #4
-	mov r2, r0
-	str r2, [sp, #0]
-	ldr r2, [sp, #0]
-	mov r3, #0
-	cmp r2, #0
-	movle r3, #1
-	cmp r3, #1
+	str r0, [sp, #0]
+	ldr r0, [sp, #0]
+	mov r1, #0
+	cmp r0, #0
+	movle r1, #1
+	cmp r1, #1
 	beq .LU2
 	b .LU3
 .LU2:
 	b .LU0
 .LU3:
-	ldr r2, [sp, #0]
-	sub r2, r2, #1
-	mov r0, r2
+	ldr r0, [sp, #0]
+	sub r0, r0, #1
 	bl tailrecursive
 	b .LU0
 .LU0:
@@ -37,18 +35,16 @@ add:
 	push {fp, lr}
 	add fp, sp, #4
 	sub sp, sp, #12
-	mov r3, r0
-	mov r0, r1
-	str r3, [sp, #0]
-	str r0, [sp, #4]
-	ldr r3, [sp, #0]
+	str r0, [sp, #0]
+	str r1, [sp, #4]
+	ldr r1, [sp, #0]
 	ldr r0, [sp, #4]
-	add r3, r3, r0
-	str r3, [sp, #8]
+	add r1, r1, r0
+	str r1, [sp, #8]
 	b .LU4
 .LU4:
-	ldr r3, [sp, #8]
-	mov r0, r3
+	ldr r1, [sp, #8]
+	mov r0, r1
 	add sp, sp, #12
 	pop {fp, pc}
 	.size add, .-add
@@ -59,119 +55,115 @@ domath:
 	push {fp, lr}
 	add fp, sp, #4
 	sub sp, sp, #16
-	mov r3, r0
-	str r3, [sp, #0]
+	mov r1, r0
+	str r1, [sp, #0]
 	movw r0, #12
 	bl malloc
-	mov r3, r0
-	str r3, [sp, #4]
+	mov r1, r0
+	str r1, [sp, #4]
 	movw r0, #4
 	bl malloc
-	mov r3, r0
-	mov r0, r3
-	ldr r3, [sp, #4]
-	add r3, r3, #8
-	str r0, [r3]
+	mov r1, r0
+	ldr r2, [sp, #4]
+	add r2, r2, #8
+	str r1, [r2]
 	movw r0, #12
 	bl malloc
-	mov r3, r0
-	str r3, [sp, #8]
+	mov r1, r0
+	str r1, [sp, #8]
 	movw r0, #4
 	bl malloc
-	mov r3, r0
-	mov r0, r3
-	ldr r3, [sp, #8]
-	add r3, r3, #8
-	str r0, [r3]
-	ldr r0, [sp, #0]
-	ldr r3, [sp, #4]
-	str r0, [r3]
-	ldr r3, [sp, #8]
-	mov r0, r3
-	movw r3, #3
-	str r3, [r0]
-	ldr r3, [sp, #4]
-	ldr r0, [r3]
-	ldr r3, [sp, #4]
-	add r3, r3, #8
-	ldr r3, [r3]
-	str r0, [r3]
-	ldr r3, [sp, #8]
-	ldr r0, [r3]
-	ldr r3, [sp, #8]
-	add r3, r3, #8
-	ldr r3, [r3]
-	str r0, [r3]
-	ldr r3, [sp, #0]
-	mov r0, #0
-	cmp r3, #0
-	movgt r0, #1
-	cmp r0, #1
+	mov r1, r0
+	ldr r2, [sp, #8]
+	add r2, r2, #8
+	str r1, [r2]
+	ldr r1, [sp, #0]
+	ldr r2, [sp, #4]
+	str r1, [r2]
+	ldr r1, [sp, #8]
+	mov r2, r1
+	movw r1, #3
+	str r1, [r2]
+	ldr r1, [sp, #4]
+	ldr r1, [r1]
+	ldr r2, [sp, #4]
+	add r2, r2, #8
+	ldr r2, [r2]
+	str r1, [r2]
+	ldr r1, [sp, #8]
+	ldr r1, [r1]
+	ldr r2, [sp, #8]
+	add r2, r2, #8
+	ldr r2, [r2]
+	str r1, [r2]
+	ldr r1, [sp, #0]
+	mov r2, #0
+	cmp r1, #0
+	movgt r2, #1
+	cmp r2, #1
 	beq .LU8
 	b .LU9
 .LU8:
-	ldr r3, [sp, #4]
-	ldr r0, [r3]
-	ldr r3, [sp, #8]
-	ldr r3, [r3]
-	mul r3, r0, r3
-	str r3, [sp, #12]
-	ldr r0, [sp, #12]
-	ldr r3, [sp, #4]
-	add r3, r3, #8
-	ldr r3, [r3]
-	ldr r3, [r3]
-	mul r3, r0, r3
-	ldr r0, [sp, #8]
-	ldr r0, [r0]
-	mov r1, r0
-	mov r0, r3
+	ldr r1, [sp, #4]
+	ldr r1, [r1]
+	ldr r2, [sp, #8]
+	ldr r2, [r2]
+	mul r1, r1, r2
+	str r1, [sp, #12]
+	ldr r1, [sp, #12]
+	ldr r2, [sp, #4]
+	add r2, r2, #8
+	ldr r2, [r2]
+	ldr r2, [r2]
+	mul r2, r1, r2
+	ldr r1, [sp, #8]
+	ldr r1, [r1]
+	mov r0, r2
 	bl __aeabi_idiv
-	mov r3, r0
-	str r3, [sp, #12]
-	ldr r3, [sp, #8]
-	add r3, r3, #8
-	ldr r3, [r3]
-	ldr r3, [r3]
-	ldr r0, [sp, #4]
-	ldr r0, [r0]
 	mov r1, r0
-	mov r0, r3
+	str r1, [sp, #12]
+	ldr r1, [sp, #8]
+	add r1, r1, #8
+	ldr r1, [r1]
+	ldr r2, [r1]
+	ldr r1, [sp, #4]
+	ldr r1, [r1]
+	mov r0, r2
 	bl add
-	mov r3, r0
-	str r3, [sp, #12]
-	ldr r3, [sp, #8]
-	ldr r0, [r3]
-	ldr r3, [sp, #4]
-	ldr r3, [r3]
-	sub r3, r0, r3
-	str r3, [sp, #12]
-	ldr r3, [sp, #0]
-	sub r3, r3, #1
-	str r3, [sp, #0]
-	ldr r3, [sp, #0]
-	mov r0, #0
-	cmp r3, #0
-	movgt r0, #1
-	cmp r0, #1
+	mov r1, r0
+	str r1, [sp, #12]
+	ldr r1, [sp, #8]
+	ldr r1, [r1]
+	ldr r2, [sp, #4]
+	ldr r2, [r2]
+	sub r1, r1, r2
+	str r1, [sp, #12]
+	ldr r1, [sp, #0]
+	sub r1, r1, #1
+	str r1, [sp, #0]
+	ldr r1, [sp, #0]
+	mov r2, #0
+	cmp r1, #0
+	movgt r2, #1
+	cmp r2, #1
 	beq .LU8
 	b .LU9
 .LU9:
-	ldr r3, [sp, #4]
-	add r3, r3, #8
-	ldr r3, [r3]
-	mov r0, r3
+	ldr r1, [sp, #4]
+	add r1, r1, #8
+	ldr r1, [r1]
+	mov r0, r1
 	bl free
-	ldr r3, [sp, #8]
-	add r3, r3, #8
-	ldr r3, [r3]
-	mov r0, r3
+	ldr r1, [sp, #8]
+	add r1, r1, #8
+	ldr r1, [r1]
+	mov r0, r1
 	bl free
-	ldr r3, [sp, #4]
-	mov r0, r3
+	ldr r1, [sp, #4]
+	mov r0, r1
 	bl free
-	ldr r3, [sp, #8]
-	mov r0, r3
+	ldr r1, [sp, #8]
+	mov r0, r1
 	bl free
 	b .LU6
 .LU6:
@@ -185,31 +177,28 @@ objinstantiation:
 	push {fp, lr}
 	add fp, sp, #4
 	sub sp, sp, #8
-	mov r2, r0
-	str r2, [sp, #0]
-	ldr r0, [sp, #0]
-	mov r2, #0
-	cmp r0, #0
-	movgt r2, #1
-	cmp r2, #1
+	str r0, [sp, #0]
+	ldr r1, [sp, #0]
+	mov r0, #0
+	cmp r1, #0
+	movgt r0, #1
+	cmp r0, #1
 	beq .LU12
 	b .LU13
 .LU12:
 	movw r0, #12
 	bl malloc
-	mov r2, r0
-	str r2, [sp, #4]
-	ldr r2, [sp, #4]
-	mov r0, r2
+	str r0, [sp, #4]
+	ldr r0, [sp, #4]
 	bl free
-	ldr r2, [sp, #0]
-	sub r2, r2, #1
-	str r2, [sp, #0]
 	ldr r0, [sp, #0]
-	mov r2, #0
-	cmp r0, #0
-	movgt r2, #1
-	cmp r2, #1
+	sub r0, r0, #1
+	str r0, [sp, #0]
+	ldr r1, [sp, #0]
+	mov r0, #0
+	cmp r1, #0
+	movgt r0, #1
+	cmp r0, #1
 	beq .LU12
 	b .LU13
 .LU13:
@@ -226,60 +215,58 @@ ackermann:
 	add fp, sp, #4
 	push {r4}
 	sub sp, sp, #12
-	mov r3, r0
-	mov r2, r1
-	str r3, [sp, #0]
-	str r2, [sp, #4]
-	ldr r3, [sp, #0]
-	mov r2, #0
-	cmp r3, #0
-	moveq r2, #1
-	cmp r2, #1
+	mov r2, r0
+	mov r4, r1
+	str r2, [sp, #0]
+	str r4, [sp, #4]
+	ldr r4, [sp, #0]
+	mov r1, #0
+	cmp r4, #0
+	moveq r1, #1
+	cmp r1, #1
 	beq .LU16
 	b .LU17
 .LU16:
-	ldr r3, [sp, #4]
-	add r3, r3, #1
-	str r3, [sp, #8]
+	ldr r4, [sp, #4]
+	add r4, r4, #1
+	str r4, [sp, #8]
 	b .LU14
 .LU17:
-	ldr r3, [sp, #4]
-	mov r2, #0
-	cmp r3, #0
-	moveq r2, #1
-	cmp r2, #1
+	ldr r4, [sp, #4]
+	mov r1, #0
+	cmp r4, #0
+	moveq r1, #1
+	cmp r1, #1
 	beq .LU18
 	b .LU19
 .LU18:
-	ldr r3, [sp, #0]
-	sub r3, r3, #1
+	ldr r4, [sp, #0]
+	sub r4, r4, #1
 	movw r1, #1
-	mov r0, r3
-	bl ackermann
-	mov r3, r0
-	str r3, [sp, #8]
-	b .LU14
-.LU19:
-	ldr r3, [sp, #0]
-	sub r4, r3, #1
-	ldr r3, [sp, #0]
-	ldr r2, [sp, #4]
-	sub r2, r2, #1
-	mov r1, r2
-	mov r0, r3
-	bl ackermann
-	mov r3, r0
-	mov r1, r3
 	mov r0, r4
 	bl ackermann
-	mov r3, r0
-	str r3, [sp, #8]
+	mov r4, r0
+	str r4, [sp, #8]
+	b .LU14
+.LU19:
+	ldr r4, [sp, #0]
+	sub r4, r4, #1
+	ldr r2, [sp, #0]
+	ldr r1, [sp, #4]
+	sub r1, r1, #1
+	mov r0, r2
+	bl ackermann
+	mov r1, r0
+	mov r0, r4
+	bl ackermann
+	mov r4, r0
+	str r4, [sp, #8]
 	b .LU14
 .LU20:
 	b .LU14
 .LU14:
-	ldr r3, [sp, #8]
-	mov r0, r3
+	ldr r4, [sp, #8]
+	mov r0, r4
 	add sp, sp, #12
 	pop {r4}
 	pop {fp, pc}
@@ -311,46 +298,40 @@ main:
 	movw r0, #:lower16:.READ_FMT
 	movt r0, #:upper16:.READ_FMT
 	bl scanf
-	ldr r2, [sp, #4]
-	mov r0, r2
+	ldr r1, [sp, #4]
+	mov r0, r1
 	bl tailrecursive
-	ldr r2, [sp, #4]
-	mov r1, r2
+	ldr r1, [sp, #4]
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	ldr r2, [sp, #8]
-	mov r0, r2
+	ldr r1, [sp, #8]
+	mov r0, r1
 	bl domath
-	ldr r2, [sp, #8]
-	mov r1, r2
+	ldr r1, [sp, #8]
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	ldr r2, [sp, #12]
-	mov r0, r2
+	ldr r1, [sp, #12]
+	mov r0, r1
 	bl objinstantiation
-	ldr r2, [sp, #12]
-	mov r1, r2
+	ldr r1, [sp, #12]
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	ldr r2, [sp, #16]
-	ldr r0, [sp, #20]
-	mov r1, r0
-	mov r0, r2
+	ldr r0, [sp, #16]
+	ldr r1, [sp, #20]
 	bl ackermann
-	mov r2, r0
-	mov r1, r2
+	mov r1, r0
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	movw r2, #0
-	str r2, [sp, #0]
+	movw r1, #0
+	str r1, [sp, #0]
 	b .LU21
 .LU21:
-	ldr r2, [sp, #0]
-	mov r0, r2
+	ldr r1, [sp, #0]
+	mov r0, r1
 	add sp, sp, #24
 	pop {fp, pc}
 	.size main, .-main

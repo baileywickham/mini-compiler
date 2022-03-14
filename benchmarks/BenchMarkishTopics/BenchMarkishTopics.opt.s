@@ -19,8 +19,6 @@ length:
 	movw r0, #0
 	b .LU0
 .LU3:
-	b .LU4
-.LU4:
 	add r0, r0, #4
 	ldr r0, [r0]
 	bl length
@@ -67,8 +65,6 @@ main:
 	movw r5, #:lower16:intList
 	movt r5, #:upper16:intList
 	ldr r5, [r5]
-	b .inline0_LU6
-.inline0_LU6:
 	mov r1, #0
 	cmp r6, #0
 	moveq r1, #1
@@ -87,8 +83,6 @@ main:
 	mov r5, r6
 	b .inline0_LU5
 .inline0_LU8:
-	b .inline0_LU9
-.inline0_LU9:
 	movw r0, #8
 	bl malloc
 	mov r1, r0
@@ -99,8 +93,6 @@ main:
 	mov r5, r1
 	b .inline0_LU5
 .inline0_LU5:
-	b .next0
-.next0:
 	mov r6, r5
 	ldr r6, [r6]
 	mov r1, r6
@@ -160,8 +152,6 @@ main:
 	movw r0, #:lower16:.PRINT_FMT
 	movt r0, #:upper16:.PRINT_FMT
 	bl printf
-	b .inline1_LU11
-.inline1_LU11:
 	mov r6, #0
 	cmp r5, #0
 	moveq r6, #1
@@ -172,8 +162,6 @@ main:
 	movw r5, #0
 	b .inline1_LU10
 .inline1_LU13:
-	b .inline1_LU14
-.inline1_LU14:
 	add r6, r5, #4
 	ldr r6, [r6]
 	mov r0, r5
@@ -181,8 +169,6 @@ main:
 	mov r5, r6
 	b .inline1_LU10
 .inline1_LU10:
-	b .next1
-.next1:
 	mov r0, r5
 	bl length
 	mov r1, r0
@@ -201,8 +187,6 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .LU15
-.LU15:
 	movw r0, #0
 	pop {r4, r5, r6}
 	pop {fp, pc}

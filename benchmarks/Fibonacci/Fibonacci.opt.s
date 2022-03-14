@@ -66,8 +66,6 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .LU8
-.LU8:
 	movw r0, #0
 	pop {fp, pc}
 	.size main, .-main

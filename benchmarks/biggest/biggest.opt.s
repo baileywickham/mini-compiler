@@ -57,8 +57,6 @@ main:
 	push {r4}
 	bl getIntList
 	mov r2, r0
-	b .inline1_LU11
-.inline1_LU11:
 	mov r1, r2
 	ldr r3, [r1]
 	add r1, r2, #4
@@ -76,8 +74,6 @@ main:
 	mov r2, r4
 	mov r0, r1
 	ldr r3, [r0]
-	b .inline1_inline0_LU6
-.inline1_inline0_LU6:
 	mov r0, #0
 	cmp r2, r3
 	movgt r0, #1
@@ -91,8 +87,6 @@ main:
 	b .inline1_inline0_LU5
 .inline1_inline0_LU5:
 	mov r0, r2
-	b .inline1_next0
-.inline1_next0:
 	add r1, r1, #4
 	ldr r2, [r1]
 	add r1, r2, #4
@@ -106,15 +100,9 @@ main:
 	beq .inline1_LU12
 	b .inline1_LU13
 .inline1_LU13:
-	b .inline1_LU10
-.inline1_LU10:
-	b .next1
-.next1:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .LU14
-.LU14:
 	movw r0, #0
 	pop {r4}
 	pop {fp, pc}

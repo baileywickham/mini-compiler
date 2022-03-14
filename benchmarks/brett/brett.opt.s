@@ -42,8 +42,6 @@ printgroup:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .LU0
-.LU0:
 	pop {r4}
 	pop {fp, pc}
 	.size printgroup, .-printgroup
@@ -1082,8 +1080,6 @@ main:
 	add r2, r4, #4
 	movw r3, #1
 	str r3, [r2]
-	b .inline0_LU5
-.inline0_LU5:
 	movw r2, #1
 	cmp r2, #1
 	beq .inline0_LU6
@@ -1137,16 +1133,10 @@ main:
 	bl printf
 	b .inline0_LU14
 .inline0_LU14:
-	b .inline0_LU4
-.inline0_LU4:
-	b .next0
-.next0:
 	movw r1, #2
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .inline1_LU16
-.inline1_LU16:
 	movw r4, #1
 	cmp r4, #1
 	beq .inline1_LU17
@@ -1248,20 +1238,10 @@ main:
 	bl printf
 	b .inline1_LU28
 .inline1_LU28:
-	b .inline1_LU15
-.inline1_LU15:
-	b .next1
-.next1:
 	movw r1, #3
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .inline2_LU30
-.inline2_LU30:
-	b .inline2_LU29
-.inline2_LU29:
-	b .next2
-.next2:
 	movw r4, #1
 	cmp r4, #1
 	beq .LU174
@@ -1283,12 +1263,6 @@ main:
 	bl printf
 	b .LU176
 .LU176:
-	b .inline3_LU32
-.inline3_LU32:
-	b .inline3_LU31
-.inline3_LU31:
-	b .next3
-.next3:
 	movw r4, #1
 	cmp r4, #1
 	beq .LU177
@@ -1309,12 +1283,6 @@ main:
 	movw r0, #12
 	bl malloc
 	mov r4, r0
-	b .inline4_LU34
-.inline4_LU34:
-	b .inline4_LU33
-.inline4_LU33:
-	b .next4
-.next4:
 	mov r2, #0
 	cmp r4, r4
 	moveq r2, #1
@@ -1336,8 +1304,6 @@ main:
 .LU182:
 	movw r0, #10
 	bl printgroup
-	b .LU35
-.LU35:
 	movw r0, #0
 	pop {r4, r5, r6}
 	pop {fp, pc}

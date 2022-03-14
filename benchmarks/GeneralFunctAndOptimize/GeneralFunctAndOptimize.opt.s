@@ -22,8 +22,6 @@ multBy4xTimes:
 	ldr r4, [r4]
 	b .LU0
 .LU3:
-	b .LU4
-.LU4:
 	mov r2, r4
 	ldr r0, [r2]
 	movw r2, #4
@@ -120,8 +118,6 @@ main:
 	movw r1, #2
 	mov r0, r4
 	bl multBy4xTimes
-	b .inline0_LU6
-.inline0_LU6:
 	mov r1, r4
 	ldr r2, [r1]
 	movw r1, #2
@@ -146,10 +142,6 @@ main:
 	mov r1, r0
 	mov r2, r4
 	str r1, [r2]
-	b .inline0_LU5
-.inline0_LU5:
-	b .next0
-.next0:
 	movw r1, #:lower16:interval
 	movt r1, #:upper16:interval
 	ldr r1, [r1]
@@ -213,8 +205,6 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .LU7
-.LU7:
 	movw r0, #0
 	pop {r4, r5, r6, r7, r8}
 	pop {fp, pc}

@@ -124,8 +124,6 @@ placePiece:
 .LU13:
 	b .LU10
 .LU10:
-	b .LU6
-.LU6:
 	pop {fp, pc}
 	.size placePiece, .-placePiece
 	.align 2
@@ -138,8 +136,6 @@ main:
 	movw r0, #36
 	bl malloc
 	mov r4, r0
-	b .inline0_LU1
-.inline0_LU1:
 	mov r6, r4
 	movw r5, #0
 	str r5, [r6]
@@ -167,10 +163,6 @@ main:
 	add r6, r4, #32
 	movw r5, #0
 	str r5, [r6]
-	b .inline0_LU0
-.inline0_LU0:
-	b .next0
-.next0:
 	movw r2, #:lower16:-1
 	movt r2, #:upper16:-1
 	mov r3, r4
@@ -183,8 +175,6 @@ main:
 .LU147:
 	mov r6, r5
 	mov r5, r3
-	b .inline1_LU3
-.inline1_LU3:
 	mov r2, r5
 	ldr r2, [r2]
 	mov r1, r2
@@ -239,10 +229,6 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .inline1_LU2
-.inline1_LU2:
-	b .next1
-.next1:
 	mov r2, #0
 	cmp r6, #0
 	moveq r2, #1
@@ -286,8 +272,6 @@ main:
 .LU151:
 	mov r6, r5
 	mov r5, r2
-	b .inline2_LU36
-.inline2_LU36:
 	mov r2, r5
 	ldr r2, [r2]
 	mov r3, #0
@@ -318,8 +302,6 @@ main:
 	movw r2, #0
 	b .inline2_LU35
 .inline2_LU44:
-	b .inline2_LU45
-.inline2_LU45:
 	mov r2, r5
 	b .inline2_LU42
 .inline2_LU41:
@@ -361,8 +343,6 @@ main:
 	movw r2, #1
 	b .inline2_LU35
 .inline2_LU53:
-	b .inline2_LU54
-.inline2_LU54:
 	b .inline2_LU51
 .inline2_LU50:
 	b .inline2_LU51
@@ -401,8 +381,6 @@ main:
 	movw r2, #0
 	b .inline2_LU35
 .inline2_LU62:
-	b .inline2_LU63
-.inline2_LU63:
 	b .inline2_LU60
 .inline2_LU59:
 	b .inline2_LU60
@@ -441,8 +419,6 @@ main:
 	movw r2, #1
 	b .inline2_LU35
 .inline2_LU71:
-	b .inline2_LU72
-.inline2_LU72:
 	b .inline2_LU69
 .inline2_LU68:
 	b .inline2_LU69
@@ -481,8 +457,6 @@ main:
 	movw r2, #0
 	b .inline2_LU35
 .inline2_LU80:
-	b .inline2_LU81
-.inline2_LU81:
 	b .inline2_LU78
 .inline2_LU77:
 	b .inline2_LU78
@@ -521,8 +495,6 @@ main:
 	movw r2, #1
 	b .inline2_LU35
 .inline2_LU89:
-	b .inline2_LU90
-.inline2_LU90:
 	b .inline2_LU87
 .inline2_LU86:
 	b .inline2_LU87
@@ -561,8 +533,6 @@ main:
 	movw r2, #0
 	b .inline2_LU35
 .inline2_LU98:
-	b .inline2_LU99
-.inline2_LU99:
 	b .inline2_LU96
 .inline2_LU95:
 	b .inline2_LU96
@@ -601,8 +571,6 @@ main:
 	movw r2, #1
 	b .inline2_LU35
 .inline2_LU107:
-	b .inline2_LU108
-.inline2_LU108:
 	b .inline2_LU105
 .inline2_LU104:
 	b .inline2_LU105
@@ -641,8 +609,6 @@ main:
 	movw r2, #0
 	b .inline2_LU35
 .inline2_LU116:
-	b .inline2_LU117
-.inline2_LU117:
 	b .inline2_LU114
 .inline2_LU113:
 	b .inline2_LU114
@@ -681,8 +647,6 @@ main:
 	movw r2, #1
 	b .inline2_LU35
 .inline2_LU125:
-	b .inline2_LU126
-.inline2_LU126:
 	b .inline2_LU123
 .inline2_LU122:
 	b .inline2_LU123
@@ -721,8 +685,6 @@ main:
 	movw r2, #0
 	b .inline2_LU35
 .inline2_LU134:
-	b .inline2_LU135
-.inline2_LU135:
 	b .inline2_LU132
 .inline2_LU131:
 	b .inline2_LU132
@@ -761,8 +723,6 @@ main:
 	movw r2, #1
 	b .inline2_LU35
 .inline2_LU143:
-	b .inline2_LU144
-.inline2_LU144:
 	b .inline2_LU141
 .inline2_LU140:
 	b .inline2_LU141
@@ -775,8 +735,6 @@ main:
 	movt r2, #:upper16:-1
 	b .inline2_LU35
 .inline2_LU35:
-	b .next2
-.next2:
 	add r6, r6, #1
 	mov r3, #0
 	cmp r2, #0
@@ -798,8 +756,6 @@ main:
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
-	b .LU145
-.LU145:
 	movw r0, #0
 	pop {r4, r5, r6}
 	pop {fp, pc}

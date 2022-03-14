@@ -10,25 +10,21 @@ mod:
 	add fp, sp, #4
 	push {r4}
 	sub sp, sp, #12
-	mov r2, r0
-	mov r3, r1
-	str r2, [sp, #0]
-	str r3, [sp, #4]
+	mov r4, r0
+	str r4, [sp, #0]
+	str r1, [sp, #4]
 	ldr r4, [sp, #0]
-	ldr r2, [sp, #0]
-	ldr r3, [sp, #4]
-	mov r1, r3
-	mov r0, r2
+	ldr r0, [sp, #0]
+	ldr r1, [sp, #4]
 	bl __aeabi_idiv
-	mov r3, r0
-	ldr r2, [sp, #4]
-	mul r2, r3, r2
-	sub r2, r4, r2
-	str r2, [sp, #8]
+	ldr r1, [sp, #4]
+	mul r1, r0, r1
+	sub r4, r4, r1
+	str r4, [sp, #8]
 	b .LU0
 .LU0:
-	ldr r2, [sp, #8]
-	mov r0, r2
+	ldr r4, [sp, #8]
+	mov r0, r4
 	add sp, sp, #12
 	pop {r4}
 	pop {fp, pc}
@@ -40,61 +36,60 @@ hailstone:
 	push {fp, lr}
 	add fp, sp, #4
 	sub sp, sp, #4
-	mov r3, r0
-	str r3, [sp, #0]
-	movw r3, #1
-	cmp r3, #1
+	mov r1, r0
+	str r1, [sp, #0]
+	movw r1, #1
+	cmp r1, #1
 	beq .LU4
 	b .LU5
 .LU4:
-	ldr r3, [sp, #0]
-	mov r1, r3
+	ldr r1, [sp, #0]
 	movw r0, #:lower16:.PRINT_FMT
 	movt r0, #:upper16:.PRINT_FMT
 	bl printf
-	ldr r3, [sp, #0]
+	ldr r2, [sp, #0]
 	movw r1, #2
-	mov r0, r3
+	mov r0, r2
 	bl mod
-	mov r3, #0
-	cmp r0, #1
-	moveq r3, #1
-	cmp r3, #1
+	mov r2, r0
+	mov r1, #0
+	cmp r2, #1
+	moveq r1, #1
+	cmp r1, #1
 	beq .LU6
 	b .LU7
 .LU6:
-	ldr r0, [sp, #0]
-	movw r3, #3
-	mul r3, r3, r0
-	add r3, r3, #1
-	str r3, [sp, #0]
+	ldr r2, [sp, #0]
+	movw r1, #3
+	mul r1, r1, r2
+	add r1, r1, #1
+	str r1, [sp, #0]
 	b .LU8
 .LU7:
-	ldr r3, [sp, #0]
+	ldr r2, [sp, #0]
 	movw r1, #2
-	mov r0, r3
+	mov r0, r2
 	bl __aeabi_idiv
-	mov r3, r0
-	str r3, [sp, #0]
+	mov r1, r0
+	str r1, [sp, #0]
 	b .LU8
 .LU8:
-	ldr r0, [sp, #0]
-	mov r3, #0
-	cmp r0, #1
-	movle r3, #1
-	cmp r3, #1
+	ldr r2, [sp, #0]
+	mov r1, #0
+	cmp r2, #1
+	movle r1, #1
+	cmp r1, #1
 	beq .LU9
 	b .LU10
 .LU9:
-	ldr r3, [sp, #0]
-	mov r1, r3
+	ldr r1, [sp, #0]
 	movw r0, #:lower16:.PRINTLN_FMT
 	movt r0, #:upper16:.PRINTLN_FMT
 	bl printf
 	b .LU2
 .LU10:
-	movw r3, #1
-	cmp r3, #1
+	movw r1, #1
+	cmp r1, #1
 	beq .LU4
 	b .LU5
 .LU5:
