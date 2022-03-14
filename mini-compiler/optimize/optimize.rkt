@@ -1,22 +1,26 @@
 #lang racket
 
+(provide optimize-llvm)
+
 (require "unused.rkt"
          "constant-prop.rkt"
          "inline.rkt"
          threading)
-(provide optimize-llvm)
 
+;;
 (define (optimize-llvm llvm optimize?)
   (if optimize?
       (run-optimize llvm)
       llvm))
 
+;;
 (define (pass llvm)
   (~> llvm
       constant-prop
       remove-unused
       inline))
 
+;;
 (define (run-optimize llvm)
   (displayln "pass")
   (define opt (pass llvm))

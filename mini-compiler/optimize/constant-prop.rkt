@@ -19,12 +19,15 @@
         'xor xor
         'ne   (negate equal?)))
 
+;;
 (define+ (constant-prop (LLVM tys decs funs))
   (LLVM tys decs (map prop/fun funs)))
 
+;;
 (define+ (prop/fun (FunLL id params ret-ty body))
   (FunLL id params ret-ty (prop/body body)))
 
+;;
 (define (prop/body blocks)
   (define vals (initial-vals blocks))
   (define worklist
@@ -33,14 +36,18 @@
   (define final-values (update-vals worklist vals (get-uses blocks)))
   ((subst-vals* vals) blocks))
 
+;;
 (define (subst-vals* vals)
 
+  ;;
   (define (subst-vals/blocks blocks)
     (map subst-vals/block blocks))
-  
+
+  ;;
   (define+ (subst-vals/block (Block id stmts))
     (Block id (map subst-vals/stmt stmts)))
 
+  ;;
   (define (subst-vals/stmt stmt)
     (match stmt
       [(AssignLL target src) (AssignLL target (subst-vals/stmt src))]
@@ -55,14 +62,15 @@
       [(BrCondLL c iftrue iffalse) (BrCondLL (get-val c) iftrue iffalse)]
       [(ReturnLL ty val) (ReturnLL ty (get-val val))]
       [_ stmt]))
-  
+
+  ;;
   (define (get-val arg)
     (let ([v (hash-ref vals arg arg)])
       (if (const? v) v arg)))
-  
-  subst-vals/blocks)
-    
 
+  subst-vals/blocks)
+
+;;
 (define (update-vals worklist vals use-graph)
   (match worklist
     ['() vals]
@@ -70,10 +78,12 @@
      (let ([new-work (update-vals/reg r vals use-graph)])
        (update-vals (set-union remaining-work new-work) vals use-graph))]))
 
+;;
 (define (update-vals/reg r vals use-graph)
   (define ops (hash-ref use-graph r '()))
   (filter-map (λ (op) (update-vals/op op vals)) ops))
 
+;;
 (define (update-vals/op op vals)
   (match (stmt-writes op)
     ['() #f]
@@ -86,11 +96,13 @@
           (hash-set! vals m m-eval)
           (if (equal? m-eval m-val) #f m))])]))
 
+;;
 (define (evaluate op vals)
   (match op
     [(AssignLL _ src) (evaluate/src src vals)]
     [(? PhiLL?) 'L]))
 
+;;
 (define (evaluate/src src vals)
   (match src
     [(BinaryLL op _ op1 op2)
@@ -107,28 +119,36 @@
            new-val 'T))]
     [(? GetEltLL?) 'T]))
 
+;;
 (define (get-uses blocks)
   (make-immutable-hash* (get-all uses/stmt blocks)))
 
+;;
 (define (uses/stmt stmt)
   (map (λ (var) (cons var stmt)) (filter ssa-reg? (stmt-reads stmt))))
-                
+
+;;
 (define (initial-vals blocks)
   (make-hash (get-all initial-vals/stmt blocks)))
 
+;;
 (define (initial-vals/stmt stmt)
   (match stmt
     [(PhiLL id _ _) (list (cons id (evaluate stmt #hash())))]
     [(AssignLL id _) (list (cons id (evaluate stmt #hash())))]
-    [_ '()]))    
+    [_ '()]))
 
+;;
 (define (make-immutable-hash* assocs)
   (make-immutable-hash (map make-hash-entry (group-by car assocs))))
 
+;;
 (define (make-hash-entry lst)
   (cons (car (first lst)) (map cdr lst)))
 
+;;
 (define (get-op op)
   (hash-ref op-procs op))
 
+;;
 (define const? (disjoin integer? boolean?))
