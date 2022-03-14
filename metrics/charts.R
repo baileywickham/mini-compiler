@@ -33,7 +33,7 @@ texEscape <- function(s) {
 statsForBenchmark <- function(name) {
   benchmarkTimes <- times[times$Benchmark == name,]
 
-  tikz(file = paste('charts/', name, '.tex', sep = ''), width = 6, height = 5)
+  tikz(file = paste('charts/', name, '.tex', sep = ''), width = 6, height = 5.5)
 
   plot = ggplot(benchmarkTimes, aes(x = Compilation, y = Seconds, color = Compilation)) +
     theme(legend.position = "none") +
