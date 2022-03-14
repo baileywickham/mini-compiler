@@ -5,6 +5,7 @@
 (require "unused.rkt"
          "constant-prop.rkt"
          "inline.rkt"
+         "cfg-cleanup.rkt"
          threading)
 
 ;;
@@ -18,7 +19,8 @@
   (~> llvm
       constant-prop
       remove-unused
-      inline))
+      inline
+      simplify-cfg))
 
 ;;
 (define (run-optimize llvm)
