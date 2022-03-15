@@ -3,8 +3,6 @@
 *.o
 *.compiled
 
-
-
 BenchMarkishTopics/BenchMarkishTopics
 CompatibilityTest/compat
 Fibonacci/Fibonacci
