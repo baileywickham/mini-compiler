@@ -1,7 +1,9 @@
 import csv
 import re
+import pathlib
 
-def main():
+#------------------------------------------------------------
+def processTimes():
     data = []
     with open('time.bash.csv', 'r') as f:
         r = csv.reader(f)
@@ -17,6 +19,7 @@ def main():
         w = csv.writer(f)
         w.writerows([('Benchmark', 'Compilation', 'Seconds')] + data)
 
+
 def parseTime(t):
     m = re.match(r'(.*)m(.*)s', t)
     if m:
@@ -24,16 +27,13 @@ def parseTime(t):
     else:
         print(f'ERROR {t}')
 
+
 def parseFilename(n):
     m = re.match(r'[.][.]/benchmarks/(.*)/[^.]*[.](.*)[.]out', n)
     return m.groups()
 
 
-def parseFilenameCount(n):
-    m = re.match(r'[.][.]/benchmarks/(.*)/[^.]*[.](.*)[.](.*)', n)
-    return m.groups()
-
-
+#------------------------------------------------------------
 def processLines():
     data = []
     with open('lines.raw.csv', 'r') as f:
@@ -48,6 +48,19 @@ def processLines():
         w.writerows([('Benchmark', 'Compilation', 'Format', 'Lines')] + data)
 
 
+def parseFilenameCount(n):
+    m = re.match(r'[.][.]/benchmarks/(.*)/[^.]*[.](.*)[.](.*)', n)
+    return m.groups()
 
-main()
+
+#------------------------------------------------------------
+def makeChartsDir():
+    p = pathlib.Path("charts/")
+    p.mkdir(parents=True, exist_ok=True)
+
+
+#------------------------------------------------------------
+
+makeChartsDir()
+processTimes()
 processLines()

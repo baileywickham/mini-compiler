@@ -17,6 +17,7 @@ def cleanup_table(benchmark):
             '[ht]', '[h!]'
         ))
 
+
 def cleanup_inst_table(benchmark):
     table_path = f'charts/{benchmark}InstTable.tex'
     with open(table_path, 'r') as in_file:
@@ -36,6 +37,7 @@ def cleanup_inst_table(benchmark):
 
 def tex_escape(s: str):
     return s.replace('_', "\\_")
+
 
 def main():
     with open('time.py.csv', 'r') as in_file:
@@ -58,5 +60,6 @@ def main():
     \\input{{charts/{benchmark}Table}}
 """
                 , file=out_file)
+
 
 main()
