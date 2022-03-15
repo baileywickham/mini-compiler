@@ -3,7 +3,7 @@ import re
 
 def main():
     data = []
-    with open('time-longer.bash.csv', 'r') as f:
+    with open('time.bash.csv', 'r') as f:
         r = csv.reader(f)
         for line in r:
             name = line[0].strip()
