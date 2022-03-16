@@ -14,7 +14,8 @@
          "optimize/optimize.rkt")
 
 ;; Main
-(define (compile path stack? llvm? optimize? debug? [outpath #f])
+(define (compile path #:stack? [stack? #f] #:llvm? [llvm? #f] #:optimize? [optimize? #f]
+                 #:debug? [debug? #f] #:outpath [outpath #f] #:assemble? [assemble? #f])
   (define mini (parse (java-parse path)))
   (define typed-mini (type-check mini))
   (define llvm-ir
@@ -23,15 +24,18 @@
         (optimize-llvm (register-llvm typed-mini) optimize?)))
   (when debug?
     (displayln (format-llvm llvm-ir)))
-  (define (write-file content ext)
-    (let ([new-path (or outpath (path-replace-extension path ext))])
-      (when debug? (display content))
-      (with-output-to-file new-path (λ () (display content)) #:exists 'replace)))
+
+  (define final-outpath (or outpath (path-replace-extension path (if llvm? ".ll" ".s"))))
+  
+  (define (write-file content)
+    (when debug? (display content))
+    (with-output-to-file final-outpath (λ () (display content)) #:exists 'replace))
 
   (if llvm?
-        (write-file (format-llvm llvm-ir) ".ll")
-        (write-file (format-arm (translate-arm llvm-ir)) ".s"))
-  (assemble path llvm?)
+      (write-file (format-llvm llvm-ir))
+      (write-file (format-arm (translate-arm llvm-ir))))
+  (when assemble?
+    (assemble final-outpath llvm?))
   (void))
 
 ;; Calls the Java MiniCompiler parser and reads the generated JSON into hash tables
@@ -47,19 +51,16 @@
   (unless (and parse-ok (zero? (string-length error-message))) (error error-message))
   (read-json in))
 
-(define (assemble path llvm?)
-  (define out-path (if llvm?
-                       (path-replace-extension path ".ll")
-                       (path-replace-extension path ".s")))             
+(define (assemble out-path llvm?)             
   (if llvm?
       (system (format "clang ~a -o ~a" out-path
-                      (path-replace-extension path "")))
-      (let [(.o (path-replace-extension path ".o"))]
+                      (path-replace-extension out-path "")))
+      (let [(.o (path-replace-extension out-path ".o"))]
         (system (format "arm-linux-gnueabi-as -o ~a ~a"
                         .o
                         out-path))
         (system (format "arm-linux-gnueabi-gcc -o ~a ~a"
-                        (path-replace-extension path ".compiled")
+                        (path-replace-extension out-path ".compiled")
                         .o)))))
         
 ;; Command line argument parser
@@ -68,6 +69,7 @@
   (define llvm? (make-parameter #f))
   (define debug? (make-parameter #f))
   (define optimize? (make-parameter #f))
+  (define assemble? (make-parameter #t))
 
   (define mini-file
     (command-line
@@ -77,7 +79,9 @@
      [("--llvm") "Compile with LLVM output" (llvm? #t)]
      [("--debug") "Compile with debugging on" (debug? #t)]
      [("--optimize") "Compile with optimizations on" (optimize? #t)]
+     [("--skip-assemble") "Skip assembly step" (assemble? #f)]
      #:args (filename) filename))
 
-  (compile (string->path mini-file) (stack?) (llvm?) (optimize?) (debug?)))
+  (compile (string->path mini-file) #:stack?(stack?) #:llvm?(llvm?) #:optimize?(optimize?) #:debug?(debug?)
+           #:assemble?(assemble?)))
 

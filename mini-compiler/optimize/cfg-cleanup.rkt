@@ -18,17 +18,14 @@
   (define block-content
     (make-immutable-hash
      (map (λ (block) (cons (Block-id block) block)) blocks)))
-  ;(pretty-display (get-edges (car cfg)))
-  ;(define dead (get-dead-blocks blocks cfg))
   (define merges (get-merges blocks cfg))
 
-  (pretty-display merges)
   (apply-merges blocks merges block-content))
 
 (define+ (get-dead-blocks blocks (cons succs preds))
   (filter-map (λ+ ((Block id _)) (if (empty? (get-neighbors preds id)) id #f)) (rest blocks)))
 
-(define+ (get-merges blocks (cons succs preds)) 
+(define+ (get-merges blocks (cons succs preds))
   (filter-map
    (λ+ ((Block id _))
        (let ([preds (get-neighbors preds id)])
@@ -77,7 +74,7 @@
     (if (hash-has-key? new-ends label)
         (rewrite-phis/label (hash-ref new-ends label))
         label))
-  
+
   rewrite-phis/blocks)
 
 ;;
@@ -101,4 +98,4 @@
     [(list a b) (list b a)]
     [_ v]))
 
-  
+

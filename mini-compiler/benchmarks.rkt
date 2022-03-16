@@ -28,7 +28,7 @@
     (delete-file llvm-file)
     (delete-file executable))
 
-  (compile mini-file stack? llvm? #t #f)
+  (compile mini-file #:stack? stack? #:llvm? llvm? #:optimize? #t #:assemble? #t)
 
   (when (and error? (not (file-exists? executable)))
     (error "compilation failed"))
@@ -46,13 +46,13 @@
 
 (define (compile-single-benchmark benchmark-content)
   (define mini-file (findf (λ (file) (has-extension? file ".mini")) benchmark-content))
-  (compile mini-file #t #f #f #f (path-replace-extension mini-file ".stack.s"))
-  (compile mini-file #f #f #f #f (path-replace-extension mini-file ".reg.s"))
-  (compile mini-file #f #f #t #f (path-replace-extension mini-file ".opt.s"))
+  (compile mini-file #:stack? #t #:outpath (path-replace-extension mini-file ".stack.s"))
+  (compile mini-file #:outpath (path-replace-extension mini-file ".reg.s"))
+  (compile mini-file #:optimize? #t #:outpath (path-replace-extension mini-file ".opt.s"))
 
-  (compile mini-file #t #t #f #f (path-replace-extension mini-file ".stack.ll"))
-  (compile mini-file #f #t #f #f (path-replace-extension mini-file ".reg.ll"))
-  (compile mini-file #f #t #t #f (path-replace-extension mini-file ".opt.ll"))
+  (compile mini-file #:llvm? #t #:stack? #t #:outpath (path-replace-extension mini-file ".stack.ll"))
+  (compile mini-file #:llvm? #t #:outpath (path-replace-extension mini-file ".reg.ll"))
+  (compile mini-file #:llvm? #t #:optimize? #t #:outpath (path-replace-extension mini-file ".opt.ll"))
   (void))
 
 

@@ -24,7 +24,6 @@
 
 ;;
 (define (run-optimize llvm)
-  (displayln "pass")
   (define opt (pass llvm))
   (if (equal? llvm opt)
       llvm
