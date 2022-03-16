@@ -9,9 +9,9 @@
 (define comp-ops (set 'sle 'sgt 'sge 'slt 'eq 'ne))
 
 (define format-strings
-  #hash((read    . "getelementptr inbounds ([5 x i8], [5 x i8]* @.read,    i32 0, i32 0)")
-        (println . "getelementptr inbounds ([6 x i8], [6 x i8]* @.println, i32 0, i32 0)")
-        (print   . "getelementptr inbounds ([6 x i8], [6 x i8]* @.print,   i32 0, i32 0)")))
+  #hash((read    . "getelementptr inbounds ([4 x i8], [4 x i8]* @.read,    i32 0, i32 0)")
+        (println . "getelementptr inbounds ([5 x i8], [5 x i8]* @.println, i32 0, i32 0)")
+        (print   . "getelementptr inbounds ([5 x i8], [5 x i8]* @.print,   i32 0, i32 0)")))
 
 (define boiler-plate
   "target triple=\"i686\"
@@ -20,9 +20,9 @@ declare i8* @malloc(i32)
 declare void @free(i8*)
 declare i32 @printf(i8*, ...)
 declare i32 @scanf(i8*, ...)
-@.println = private unnamed_addr constant [6 x i8] c\"%ld\\0A\\00\\00\", align 1
-@.print = private unnamed_addr constant [6 x i8] c\"%ld \\00\\00\", align 1
-@.read = private unnamed_addr constant [5 x i8] c\"%ld\\00\\00\", align 1
+@.println = private unnamed_addr constant [5 x i8] c\"%d\\0A\\00\\00\", align 1
+@.print = private unnamed_addr constant [5 x i8] c\"%d \\00\\00\", align 1
+@.read = private unnamed_addr constant [4 x i8] c\"%d\\00\\00\", align 1
 ")
 
 ;;
@@ -107,7 +107,7 @@ declare i32 @scanf(i8*, ...)
   (match arg
     ['null "null"]
     [(? integer?) arg]
-    [(? boolean?) (if arg "true" "false")]
+    [(? boolean?) (if arg "1" "0")]
     [(? IdLL?) (format-id arg)]
     [(StringConstLL id) (hash-ref format-strings id)]
     [(? void?) "VOID"]))
