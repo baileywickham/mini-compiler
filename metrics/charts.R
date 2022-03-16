@@ -1,9 +1,8 @@
-library(tikzDevice) # load the tikzDevice package
-library(ggplot2) # load the ggplot2 package
+library(tikzDevice)
+library(ggplot2)
 library(RColorBrewer)
 library(xtable)
 
-#data(mtcars) # load the dataset
 
 setwd('C:/Users/alexm/Documents/431/CSC431/metrics')
 
@@ -25,10 +24,10 @@ instructions$Compilation <- factor(instructions$Compilation,
 
 
 
-
 texEscape <- function(s) {
   return(gsub('_', '\\\\_', s))
 }
+
 
 statsForBenchmark <- function(name) {
   benchmarkTimes <- times[times$Benchmark == name,]
@@ -55,12 +54,12 @@ statsForBenchmark <- function(name) {
   rawTable <- aggregate(benchmarkTimes$Seconds,
                        list(benchmarkTimes$Compilation), FUN = summary)
   print(rawTable)
-  summaryTable = rawTable[[2]]
+  summaryTable <- rawTable[[2]]
   row.names(summaryTable) <- rawTable[[1]]
   print(xtable(summaryTable, type = "latex"),
         file = paste("charts/", name, "Table.tex" , sep = ''))
-  
-  
+
+
   rawInstTable <- reshape(instructions[instructions$Benchmark == name, -1],
                           idvar="Compilation", timevar = "Format", direction = 'wide')
   names(rawInstTable) <- c("Compilation", "LLVM IR", "ARM Assembly")
@@ -68,8 +67,8 @@ statsForBenchmark <- function(name) {
   instTable <- rawInstTable[order(rawInstTable$Compilation), c(2,3)]
   print(xtable(instTable, type = "latex"),
         file = paste("charts/", name, "InstTable.tex" , sep = ''))
-
 }
+
 
 benchmarks <- unique(times$Benchmark)
 for (benchmark in benchmarks) {

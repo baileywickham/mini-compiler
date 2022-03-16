@@ -12,10 +12,11 @@ def cleanup_table(benchmark):
             'p{0.2\\textwidth}p{0.1\\textwidth}p{0.1\\textwidth}p{0.1\\textwidth}p{0.1\\textwidth}p{0.1\\textwidth}p{0.1\\textwidth}'
         ).replace(
             '\\end{table}',
-            f'\caption{{{tex_escape(benchmark)} runtime summary statistic based on 10 runs each}}\n\\end{{table}}'
+            f'\caption{{{tex_escape(benchmark)} runtime (in seconds) summary statistic based on 10 runs each}}\n\\end{{table}}'
         ).replace(
             '[ht]', '[h!]'
         ))
+
 
 def cleanup_inst_table(benchmark):
     table_path = f'charts/{benchmark}InstTable.tex'
@@ -37,6 +38,7 @@ def cleanup_inst_table(benchmark):
 def tex_escape(s: str):
     return s.replace('_', "\\_")
 
+
 def main():
     with open('time.py.csv', 'r') as in_file:
         reader = csv.reader(in_file)
@@ -53,10 +55,11 @@ def main():
     \\begin{{figure}}[h]
 	    \\centering
 		\\input{{charts/{benchmark}}}
-        \\caption{{{tex_escape(benchmark)} runtimes measured on 32-bit ARM Raspberry pies}}
+        \\caption{{{tex_escape(benchmark)} runtimes measured on 32bit ARM Raspberry Pis}}
 	\\end{{figure}}
     \\input{{charts/{benchmark}Table}}
 """
                 , file=out_file)
+
 
 main()

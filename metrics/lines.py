@@ -17,7 +17,6 @@ def main():
         w.writerows(data)
 
 
-
 def count_inst(path):
     count = 0
     with open(path, 'r') as f:
@@ -25,10 +24,6 @@ def count_inst(path):
             if re.match(r'\t[^.].*', line):
                 count += 1
     return count
-
-
-
-
 
 
 main()
